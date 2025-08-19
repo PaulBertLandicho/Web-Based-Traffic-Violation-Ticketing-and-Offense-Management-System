@@ -1,0 +1,32 @@
+/* Ensure the modal and overlay behave responsively */
+.modal.show {
+    display: block;
+    overflow-y: auto;
+    top: 0;
+    z-index: 9999 !important;
+    position: fixed !important;
+    padding-right: 0 !important;
+}
+
+.modal-dialog {
+    max-width: 100%;
+    margin: 1.75rem auto;
+}
+
+@media (max-width: 768px) {
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+
+    .modal-ticket-content {
+        font-size: 14px;
+    }
+
+    .ticket table {
+        font-size: 12px;
+    }
+
+    .modal-header h4 {
+        font-size: 16px;
+    }
+}

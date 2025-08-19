@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class TrafficEnforcer extends Model
+{
+    protected $table = 'traffic_enforcers';
+
+    protected $primaryKey = 'enforcer_id';
+
+    public $timestamps = false;
+
+    protected $fillable = [
+        'enforcer_id',
+        'enforcer_name',
+        'enforcer_email',
+        'enforcer_password',
+        'assigned_area',
+        'registered_at',
+        'code',
+        'is_locked',
+        'role_id'
+    ];
+}
