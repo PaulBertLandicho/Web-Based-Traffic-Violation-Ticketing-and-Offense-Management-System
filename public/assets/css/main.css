@@ -171,6 +171,7 @@ body {
 
 .topnav-link {
     float: left;
+    margin-left: 5px;
     text-align: center;
     padding: 21px 10px;
     text-decoration: none;

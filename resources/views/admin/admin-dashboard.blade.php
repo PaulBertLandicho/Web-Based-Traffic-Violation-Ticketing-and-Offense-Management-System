@@ -79,7 +79,7 @@
                 });
 
 
-                // <!-- Issued Fine Count ================================== -->
+                // <!-- Number of Issued Fine Count ================================== -->
                 let issuedFineChart;
 
                 function loadIssuedFineChart(month = '', year = '') {
@@ -216,7 +216,7 @@
                 });
 
 
-                // <!-- Number of Issued Drivers ================================== -->
+                // <!-- Number of Issued Drivers and Number of Traffic Enforcer ================================== -->
                 drivers = '<?php echo $issuedDriversCount ?>'
                 enforcers = '<?php echo $enforcersCount ?>'
                 new Chart(document.getElementById("DriverAndEnforcersCount"), {
@@ -244,7 +244,7 @@
                 });
 
 
-                // <!-- Number of Violations ================================== -->
+                // <!-- Number of Violations Per Barangay ================================== -->
                 let violationChart;
 
                 function fetchBarangayViolations() {
@@ -310,6 +310,7 @@
                 document.getElementById('filterYear').addEventListener('change', fetchBarangayViolations);
 
                 fetchBarangayViolations();
+
 
                 // <!-- Total Fine Amount ================================== -->
                 let jan = '{{ $janTotal }}';

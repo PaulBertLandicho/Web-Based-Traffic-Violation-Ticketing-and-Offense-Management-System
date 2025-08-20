@@ -73,17 +73,6 @@
     </tr>
 </table>
 
-<div class="row mt-4">
-    <div class="col text-center">
-        <hr style="width: 150px; margin: 0 auto;">
-        <small>Driver Signature</small>
-    </div>
-    <div class="col text-center">
-        <hr style="width: 150px; margin: 0 auto;">
-        <small>Officer Signature</small>
-    </div>
-</div>
-
 <p class="text-center mt-4" style="font-size: 12px;">
     This citation is not an admission of guilt. Please settle within 7 days to avoid additional penalties.
 </p>
