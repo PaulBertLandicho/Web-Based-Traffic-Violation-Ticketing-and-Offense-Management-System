@@ -354,9 +354,9 @@ class EnforcerController extends Controller
                 ->getReference('traffic_enforcers/' . $enforcerId)
                 ->remove();
 
-            return response()->json(['success' => '🗑️ Driver deleted successfully']);
+            return response()->json(['success' => 'Driver deleted successfully']);
         } else {
-            return response()->json(['error' => '❌ Driver not found.']);
+            return response()->json(['error' => 'Driver not found.']);
         }
     }
 

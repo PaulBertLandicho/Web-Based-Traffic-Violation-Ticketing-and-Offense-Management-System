@@ -16,8 +16,9 @@
 
         <div class="card mt-4 mb-5">
             <div class="card-header">
-                <i class="fas fa-table mr-1"></i> Driver List Table
+                <i class="fas fa-table mr-1"></i> Manage Driver's
             </div>
+
             <div class="card-body">
                 <div class="table-responsive" id="employee_table">
                     <table class="table table-bordered" id="dataTable">

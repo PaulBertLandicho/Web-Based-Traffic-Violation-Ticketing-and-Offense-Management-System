@@ -119,9 +119,9 @@ class ViolationController extends Controller
                 ->getReference('traffic_violations/' . $violationId)
                 ->remove();
 
-            return response()->json(['success' => '🗑️ Violation deleted successfully']);
+            return response()->json(['success' => 'Violation deleted successfully']);
         } else {
-            return response()->json(['error' => '❌ Violation not found.']);
+            return response()->json(['error' => 'Violation not found.']);
         }
     }
 }

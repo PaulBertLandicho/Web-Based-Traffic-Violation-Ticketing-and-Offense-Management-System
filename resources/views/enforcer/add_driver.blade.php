@@ -10,7 +10,7 @@
 <div class="dashwrapper animated fadeIn">
     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
         <div class="container-fluid pt-4">
-            <h1 class="mt-3">Retrieve Driver info</h1>
+            <h1 class="mt-3">Driver information</h1>
             <ol class="breadcrumb mb-4">
                 <li class="breadcrumb-item"><a href="{{ route('enforcer.enforcer-dashboard') }}">Dashboard</a></li>
                 <li class="breadcrumb-item active">Retrieve Driver info</li>
@@ -41,7 +41,7 @@
                         @csrf
                         <div class="form-row">
                             <div class="form-group col-md-6">
-                                <label for="license_id">License ID</label>
+                                <label for="license_id_input">License ID</label>
                                 <input type="text"
                                     class="form-control"
                                     id="license_id_input"
@@ -55,7 +55,7 @@
 
                             <div class="form-group col-md-6">
                                 <label for="license_type">License Type</label>
-                                <select name="licensetype" class="form-control">
+                                <select name="licensetype" class="form-control" id="license_type">
                                     <option value="">Select</option>
                                     <option value="Professional Licenses">Professional Licenses</option>
                                     <option value="Non-Professional Licenses">Non-Professional Licenses</option>

@@ -29,6 +29,7 @@
             <!-- Dashboard main content end here ========================================-->
 
             <script src="{{ asset('assets/js/PrintChartReport.js') }}"></script>
+            <script src="{{ asset('assets/js/DashboardAnimation.js') }}"></script>
             <script type="text/javascript" language="javascript" src="{{ asset('assets/vendors/bootstrap/bootstrap.min.js') }}"></script>
 
 

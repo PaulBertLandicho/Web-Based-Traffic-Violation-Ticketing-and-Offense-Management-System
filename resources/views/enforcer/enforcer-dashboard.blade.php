@@ -89,9 +89,6 @@
     <!-- Dashboard main content end here ========================================-->
 
     <script type="text/javascript" language="javascript" src="{{ asset('assets/vendors/bootstrap/bootstrap.min.js') }}"></script>
-
-
-    <!-- Include Chart.js (make sure this is loaded before any Chart code) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
@@ -124,8 +121,8 @@
     </script>
 
 
-    <!-- Then, include your Chart.js initialization code that uses these variables -->
     <script>
+        // <!-- Reported Fine Count ================================== -->
         const jan = '{{ $janCount ?? 0 }}';
         const feb = '{{ $febCount ?? 0 }}';
         const mar = '{{ $marchCount ?? 0 }}';
@@ -175,9 +172,9 @@
                 }
             }
         });
-    </script>
 
-    <script>
+
+        // <!-- Reported Fine Amount ================================== -->
         let January = '{{ $janTotal ?? 0 }}';
         let February = '{{ $febTotal ?? 0 }}';
         let march = '{{ $marchTotal ?? 0 }}';

@@ -47,7 +47,7 @@
 <body onload="loadingIcon()" class="overlay-scrollbar">
     <!-- Loading Spinner -->
     <div id="loading">
-        <table align="center">
+        <table style="margin: 0 auto;">
             <tr>
                 <td>
                     <div class="loadingio-spinner-dual-ball-ezjdz35ph7h">
@@ -73,11 +73,11 @@
                 }, 1000);
             }
 
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/serviceworker.js')
-                    .then(() => console.log("Service Worker Registered"))
-                    .catch((error) => console.error("Service Worker Registration Failed", error));
-            }
+            // if ('serviceWorker' in navigator) {
+            //     navigator.serviceWorker.register('/serviceworker.js')
+            //         .then(() => console.log("Service Worker Registered"))
+            //         .catch((error) => console.error("Service Worker Registration Failed", error));
+            // }
         </script>
 </body>
 

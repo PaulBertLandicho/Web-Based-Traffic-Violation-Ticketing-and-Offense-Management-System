@@ -24,7 +24,7 @@
 
              </div>
              <div class="mycard-content">
-                 <canvas id="reportedFineAmount" height="350"></canvas>
+                 <canvas id="reportedFineAmount" height="300"></canvas>
              </div>
          </div>
      </div>

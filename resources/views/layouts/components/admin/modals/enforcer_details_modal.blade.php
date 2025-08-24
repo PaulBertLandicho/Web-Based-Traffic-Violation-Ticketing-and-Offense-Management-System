@@ -3,7 +3,7 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
-                <h4 class="modal-title"><i class="fas fa-user"></i> Driver Details Record</h4>
+                <h4 class="modal-title"><i class="fas fa-user"></i> Traffic Enforcer Details Record</h4>
                 <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
             </div>
             <div class="modal-body" id="enforcer_detail"></div>
@@ -19,7 +19,7 @@
             @csrf
             <div class="modal-content">
                 <div class="modal-header bg-success">
-                    <h4 class="modal-title text-white"><i class="fas fa-pen"></i> Edit Driver Details</h4>
+                    <h4 class="modal-title text-white"><i class="fas fa-pen"></i> Edit Traffic Enforcer Details</h4>
                     <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">

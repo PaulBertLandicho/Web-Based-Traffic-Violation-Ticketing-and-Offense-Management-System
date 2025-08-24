@@ -545,6 +545,17 @@ select.form-control-sm {
     overflow-x: auto;
 }
 
+.chart-animate canvas {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 0.8s ease-out;
+}
+
+.chart-animate.visible canvas {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 /*Dashboard content tables------------------------*/
 
 table {

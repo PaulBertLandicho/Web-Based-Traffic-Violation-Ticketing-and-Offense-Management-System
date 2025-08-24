@@ -1,5 +1,5 @@
 <div class="col-md-6">
-    <div class="mycard">
+    <div class="mycard chart-animate">
         <div class="mycard-header">
             <h3 class="mycard-heading-charts">Pending Fine and Paid Fine Amount</h3>
         </div>
@@ -16,7 +16,7 @@
     </div>
 </div>
 <div class="col-md-6">
-    <div class="mycard">
+    <div class="mycard chart-animate">
         <div class="mycard-header">
             <h3 class="mycard-heading-charts">Total Issued Driver Count and Traffic Enforcer Count</h3>
         </div>
@@ -35,7 +35,7 @@
 </div>
 <div class="row p-2">
     <div class="col-md-6">
-        <div class="mycard">
+        <div class="mycard chart-animate">
             <div class="mycard-header">
                 <h3 class="mycard-heading-charts">Vehicle Classification</h3>
             </div>
@@ -54,7 +54,7 @@
         </div>
     </div>
     <div class="col-md-6">
-        <div class="mycard">
+        <div class="mycard chart-animate">
             <div class="mycard-header">
                 <h3 class="mycard-heading-charts">
                     Violation Type
@@ -80,7 +80,7 @@
 
 <div class="row p-2">
     <div class="col-md-12">
-        <div class="mycard">
+        <div class="mycard chart-animate">
             <div class="mycard-header d-flex justify-content-between align-items-center flex-wrap">
                 <h3 class="mycard-heading-charts mb-2 mb-md-0">
                     Number of Issued Fine
@@ -110,7 +110,7 @@
 
 <div class="row p-2">
     <div class="col-md-12">
-        <div class="mycard">
+        <div class="mycard chart-animate">
             <div class="mycard-header d-flex justify-content-between align-items-center flex-wrap">
                 <h3 class="mycard-heading-charts mb-2 mb-md-0">
                     Total Fine Amount
@@ -140,7 +140,7 @@
 
 <div class="row p-2">
     <div class="col-md-12">
-        <div class="mycard">
+        <div class="mycard chart-animate">
             <div class="mycard-header d-flex justify-content-between align-items-center flex-wrap">
                 <h3 class="mycard-heading-charts mb-2 mb-md-0">
                     Number of Violations per Barangay
@@ -163,7 +163,7 @@
                 </div>
             </div>
             <div class="mycard-content">
-                <canvas id="violationsPerBarangayChart" height="350"></canvas>
+                <canvas id="violationsPerBarangayChart" height="300"></canvas>
             </div>
         </div>
     </div>

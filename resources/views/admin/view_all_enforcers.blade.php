@@ -11,17 +11,17 @@
         <h1 class="mt-4">View All Traffic Enforcers</h1>
         <ol class="breadcrumb mb-4">
             <li class="breadcrumb-item"><a href="">Dashboard</a></li>
-            <li class="breadcrumb-item active">View All Traffic Enforcers</li>
+            <li class="breadcrumb-item active">Manage All Traffic Enforcers</li>
         </ol>
 
         <!-- Lock All Button -->
-        <button id="toggleAllBtn" class="btn btn-primary mb-3" data-status="unlock">
+        <button id="toggleAllBtn" class="btn btn-primary" data-status="unlock">
             <i class="fas fa-lock"></i> Lock All Officers
         </button>
 
-        <div class="card mt-5 mb-4">
+        <div class="card mt-2 mb-4">
             <div class="card-header">
-                <i class="fas fa-table mr-1"></i> You can sort data here
+                <i class="fas fa-table mr-1"></i> Manage Traffic Enforcers
             </div>
             <div class="card-body">
                 <div class="table-responsive" id="employee_table">
@@ -31,11 +31,10 @@
                                 <th>Action</th>
                                 <th>Enforcer ID</th>
                                 <th>Name</th>
-                                <th>Email</th>
                                 <th>Assigned Area</th>
-                                <th>Status</th>
                                 <th>Total Fines Issued</th>
                                 <th>Total Amount Collected</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -50,23 +49,22 @@
                                         data-id="{{ $enforcer->enforcer_id }}"
                                         data-status="{{ $enforcer->is_locked ? 'locked' : 'unlocked' }}">
                                         <i class="fas {{ $enforcer->is_locked ? 'fa-lock' : 'fa-lock-open' }}"></i>
-                                        {{ $enforcer->is_locked ? ' Unlock' : ' Lock' }}
+                                        {{ $enforcer->is_locked ? ' ' : ' ' }}
                                     </button>
                                 </td>
                                 <td>{{ $enforcer->enforcer_id }}</td>
                                 <td>{{ $enforcer->enforcer_name }}</td>
-                                <td>{{ $enforcer->enforcer_email }}</td>
                                 <td>{{ $enforcer->assigned_area }}</td>
-                                <td>
-                                    <span class="badge {{ $enforcer->is_locked ? 'bg-danger' : 'bg-success' }}">
-                                        {{ $enforcer->is_locked ? 'Locked' : 'Unlocked' }}
-                                    </span>
-                                </td>
                                 @php
                                 $stats = $fineStats[$enforcer->enforcer_id] ?? null;
                                 @endphp
                                 <td>{{ $stats ? $stats->reported_fine_count : 0 }}</td>
                                 <td>₱{{ $stats ? number_format($stats->reported_fine_amount, 2) : '0.00' }}</td>
+                                <td>
+                                    <span class="badge {{ $enforcer->is_locked ? 'bg-danger' : 'bg-success' }}">
+                                        {{ $enforcer->is_locked ? 'Locked' : 'Unlocked' }}
+                                    </span>
+                                </td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -249,13 +247,13 @@
                         const isLocked = button.data('status') === 'locked';
                         if (isLocked) {
                             button.removeClass('btn-danger').addClass('btn-warning')
-                                .html('<i class="fas fa-lock-open"></i> Lock')
+                                .html('<i class="fas fa-lock-open"></i> ')
                                 .data('status', 'unlocked');
                             button.closest('tr').find('td:nth-child(6) span')
                                 .removeClass('bg-danger').addClass('bg-success').text('Unlocked');
                         } else {
                             button.removeClass('btn-warning').addClass('btn-danger')
-                                .html('<i class="fas fa-lock"></i> Unlock')
+                                .html('<i class="fas fa-lock"></i> ')
                                 .data('status', 'locked');
                             button.closest('tr').find('td:nth-child(6) span')
                                 .removeClass('bg-success').addClass('bg-danger').text('Locked');
@@ -286,11 +284,11 @@
                         if (isLocked) {
                             button.html('<i class="fas fa-lock"></i> Lock All Officers')
                                 .data('status', 'unlock')
-                                .removeClass('btn-warning').addClass('btn-primary');
+                                .removeClass('btn-warning').addClass('btn-danger');
                         } else {
                             button.html('<i class="fas fa-lock-open"></i> Unlock All Officers')
                                 .data('status', 'lock')
-                                .removeClass('btn-primary').addClass('btn-warning');
+                                .removeClass('btn-danger').addClass('btn-warning');
                         }
                         rows.each(function() {
                             const statusCell = $(this).find('td:nth-child(6) span');
@@ -298,12 +296,12 @@
                             if (isLocked) {
                                 statusCell.removeClass('bg-success').addClass('bg-danger').text('Locked');
                                 toggleBtn.removeClass('btn-warning').addClass('btn-danger')
-                                    .html('<i class="fas fa-lock"></i> Unlock')
+                                    .html('<i class="fas fa-lock"></i> ')
                                     .data('status', 'locked');
                             } else {
                                 statusCell.removeClass('bg-danger').addClass('bg-success').text('Unlocked');
                                 toggleBtn.removeClass('btn-danger').addClass('btn-warning')
-                                    .html('<i class="fas fa-lock-open"></i> Lock')
+                                    .html('<i class="fas fa-lock-open"></i> ')
                                     .data('status', 'unlocked');
                             }
                         });
