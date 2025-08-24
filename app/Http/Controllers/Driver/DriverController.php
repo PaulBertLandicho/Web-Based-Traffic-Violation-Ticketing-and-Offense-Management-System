@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers\Driver;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 use App\Services\FirebaseService;
 use Barryvdh\DomPDF\Facade\Pdf;
-
+use Illuminate\Http\Request;
 
 class DriverController extends Controller
 {
@@ -42,13 +41,13 @@ class DriverController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        // ☎️ Format contact number
+        //  Format contact number
         $contact = $request->contactno;
         if (!str_starts_with($contact, '+63')) {
             $contact = '+63' . ltrim($contact, '0');
         }
 
-        // 🗃 Save to MySQL
+        //  Save to MySQL
         DB::table('driver_list')->insert([
             'license_id' => $request->licenseid,
             'driver_name' => $request->drivername,
@@ -62,7 +61,7 @@ class DriverController extends Controller
             'status' => 'verified'
         ]);
 
-        // ✅ Use correct variable for Firebase ID
+        //  Use correct variable for Firebase ID
         $licenseId = $request->licenseid;
         // Sync to Firebase Realtime Database
         try {
@@ -84,7 +83,7 @@ class DriverController extends Controller
         }
 
         return redirect()->route('fine.create', ['license_id' => $request->licenseid])
-            ->with('success', '✅ Driver added successfully! Now you can issue a fine.');
+            ->with('success', 'Driver added successfully! Now you can issue a fine.');
     }
 
     public function view()
@@ -152,7 +151,7 @@ class DriverController extends Controller
     {
         $licenseId = $request->input('did');
 
-        // ✅ Check if driver has any associated fine tickets
+        // Check if driver has any associated fine tickets
         $hasFines = DB::table('issued_fine_tickets')
             ->where('license_id', $licenseId)
             ->exists();
@@ -163,11 +162,11 @@ class DriverController extends Controller
             ], 400);
         }
 
-        // ✅ Proceed to delete from database
+        //  Proceed to delete from database
         $deleted = DB::table('driver_list')->where('license_id', $licenseId)->delete();
 
         if ($deleted) {
-            // ✅ Remove from Firebase only if DB deletion succeeded
+            // Remove from Firebase only if DB deletion succeeded
             $this->firebase->getDatabase()
                 ->getReference('driver_list/' . $licenseId)
                 ->remove();

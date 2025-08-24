@@ -116,13 +116,11 @@ Route::post('/admin/violation/update', [ViolationController::class, 'update']);
 Route::post('/admin/violation/delete', [ViolationController::class, 'delete']);
 
 Route::post('/enforcer/check-lock', [EnforcerController::class, 'checkLock'])->name('enforcer.check-lock');
-
 Route::post('/ajax/past-fines-search', [FineTicketController::class, 'ajaxSearchPastFines'])->name('fines.ajax-search');
 
 // Enforcer Change password
 Route::get('/enforcer-profile', [EnforcerController::class, 'edit'])->name('enforcer.profile');
 Route::post('/enforcer/profile/update-password', [EnforcerController::class, 'updatePassword'])->name('enforcer.profile.updatePassword');
-
 
 // Traffic Enforcer Forgot Password Routes
 Route::get('/enforcer-forgot-password', [EnforcerForgotPasswordController::class, 'showForgotForm'])->name('enforcer.forgot.form');

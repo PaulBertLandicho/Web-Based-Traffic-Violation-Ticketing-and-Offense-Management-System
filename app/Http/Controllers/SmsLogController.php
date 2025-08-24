@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Vonage\Client;
 use Vonage\Client\Credentials\Basic;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 use Vonage\SMS\Message\SMS;
+use Vonage\Client;
 
 class SmsLogController extends Controller
 {

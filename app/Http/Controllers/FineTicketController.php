@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\DB;
 use App\Services\FirebaseService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class FineTicketController extends Controller
@@ -56,8 +56,7 @@ class FineTicketController extends Controller
             'total_amount' => 'required|numeric|min:0'
         ]);
 
-        // ✅ Count previous pending offenses for this driver
-        // ✅ Count only pending offenses for this driver
+        //  Count only pending offenses previous pending offenses for this driver
         $previousOffenses = DB::table('issued_fine_tickets')
             ->where('license_id', $request->license_id)
             ->where('status', 'pending')
@@ -65,7 +64,7 @@ class FineTicketController extends Controller
 
         $offenseNumber = $previousOffenses + 1; // Current offense count
 
-        // ✅ Apply offense-based penalty
+        //  Apply offense-based penalty
         $amount = $request->total_amount;
         switch ($offenseNumber) {
             case 2:
@@ -81,7 +80,7 @@ class FineTicketController extends Controller
                 break;
         }
 
-        // ✅ Store vehicle if not exists
+        //  Store vehicle if not exists
         $existingVehicle = DB::table('vehicles')->where('vehicle_no', $request->vehicle_no)->first();
         if (!$existingVehicle) {
             DB::table('vehicles')->insert([
@@ -94,7 +93,7 @@ class FineTicketController extends Controller
         }
         $secureToken = Str::random(32);
 
-        // ✅ Insert fine record
+        //  Insert fine record
         $ref_no = DB::table('issued_fine_tickets')->insertGetId([
             'enforcer_id' => Session::get('enforcer_id'),
             'license_id' => $request->license_id,
@@ -113,7 +112,7 @@ class FineTicketController extends Controller
             'created_at' => now()
         ]);
 
-        // ✅ Store to Firebase
+        //  Store to Firebase
         $this->firebase->getDatabase()
             ->getReference('issued_fine_tickets/' . $ref_no)
             ->set([
@@ -132,7 +131,7 @@ class FineTicketController extends Controller
                 'paid_date' => now()->toDateTimeString(),
             ]);
 
-        // ✅ Persist ticket modal state in session (NOT flash)
+        //  Persist ticket modal state in session (NOT flash)
         session([
             'show_ticket' => true,
             'ref_no' => $ref_no,
@@ -151,7 +150,7 @@ class FineTicketController extends Controller
             'total_amount' => $request->total_amount,
         ]);
 
-        // ✅ Redirect without flash (so modal stays visible)
+        //  Redirect without flash (so modal stays visible)
         return redirect()->route('fine.create', $request->license_id);
     }
 
@@ -202,17 +201,17 @@ class FineTicketController extends Controller
                 ->get();
         }
 
-        // ✅ Get total fine amount for current Traffic Enforcer
+        //  Get total fine amount for current Traffic Enforcer
         $fineAmount = DB::table('issued_fine_tickets')
             ->where('enforcer_id', Session::get('enforcer_id'))
             ->sum('total_amount');
 
-        // ✅ Get total fine count for current Traffic Enforcer
+        //  Get total fine count for current Traffic Enforcer
         $fineCount = DB::table('issued_fine_tickets')
             ->where('enforcer_id', Session::get('enforcer_id'))
             ->count();
 
-        // ✅ Get assigned area from session
+        //  Get assigned area from session
         $assignedArea = Session::get('assigned_area');
 
         return view('enforcer.enforcer-dashboard', compact('results', 'fineAmount', 'fineCount', 'assignedArea'));

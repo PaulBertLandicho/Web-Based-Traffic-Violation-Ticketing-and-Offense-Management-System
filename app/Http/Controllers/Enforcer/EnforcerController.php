@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Enforcer;
 
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Validator;
-use App\Models\TrafficEnforcer;
 use App\Services\FirebaseService;
+use App\Models\TrafficEnforcer;
+use Illuminate\Http\Request;
 
 class EnforcerController extends Controller
 {
@@ -108,7 +108,7 @@ class EnforcerController extends Controller
 
         for ($month = 1; $month <= 12; $month++) {
             $count = DB::table('issued_fine_tickets')
-                ->where('enforcer_id', session('enforcer_id')) // 👈 ADD THIS
+                ->where('enforcer_id', session('enforcer_id'))
                 ->whereYear('created_at', now()->year)
                 ->whereMonth('created_at', $month)
                 ->count('ref_no');
@@ -121,7 +121,7 @@ class EnforcerController extends Controller
 
         for ($month = 1; $month <= 12; $month++) {
             $total = DB::table('issued_fine_tickets')
-                ->where('enforcer_id', session('enforcer_id')) // 👈 ADD THIS
+                ->where('enforcer_id', session('enforcer_id'))
                 ->whereYear('created_at', now()->year)
                 ->whereMonth('created_at', $month)
                 ->sum('total_amount');
@@ -183,15 +183,15 @@ class EnforcerController extends Controller
                 ->withInput();
         }
 
-        // ✅ Get role_id once
+        //  Get role_id once
         $roleId = DB::table('roles')->where('role_name', 'traffic enforcer')->value('role_id');
 
-        // ✅ Ensure role_id is not null
+        //  Ensure role_id is not null
         if (!$roleId) {
             return redirect()->back()->with('error', 'Enforcer role not found. Please check roles table.');
         }
 
-        // ✅ Use correct variable for Firebase ID
+        //  Use correct variable for Firebase ID
         $enforcerId = $request->enforcerid;
 
         DB::table('traffic_enforcers')->insert([
@@ -206,7 +206,7 @@ class EnforcerController extends Controller
             'role_id' => $roleId,
         ]);
 
-        // ✅ Save to Firebase
+        //  Save to Firebase
         $this->firebase->getDatabase()
             ->getReference('traffic_enforcers/' . $enforcerId)
             ->set([
@@ -290,7 +290,7 @@ class EnforcerController extends Controller
 
     public function getEnforcerDetails(Request $request)
     {
-        $id = $request->id; // must match the AJAX key 'id'
+        $id = $request->id;
 
         $enforcer = DB::table('traffic_enforcers')
             ->where('enforcer_id', $id)
@@ -335,7 +335,7 @@ class EnforcerController extends Controller
             ->first();
 
         return response()->json([
-            'success' => '✅ Driver details updated successfully',
+            'success' => ' Driver details updated successfully',
             'enforcer' => $updatedEnforcer
         ]);
     }
@@ -389,7 +389,7 @@ class EnforcerController extends Controller
 
         return response()->json([
             'success' => true,
-            'status' => $newStatus,  // Return the new status (1 for locked, 0 for unlocked)
+            'status' => $newStatus,
             'message' => $message
         ]);
     }

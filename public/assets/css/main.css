@@ -626,6 +626,19 @@ table th {
     padding-bottom: -5rem;
 }
 
+.toggle-password {
+    position: absolute;
+    top: 70%;
+    right: 15px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #6c757d;
+}
+
+.toggle-password:hover {
+    color: #343a40;
+}
+
 /*=============================Custom boostrap classes========================*/
 .btn-info,
 .btn-warning,

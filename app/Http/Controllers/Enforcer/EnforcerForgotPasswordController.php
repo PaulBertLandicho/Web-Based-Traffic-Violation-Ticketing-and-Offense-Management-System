@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Enforcer;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use App\Models\TrafficEnforcer;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
+use App\Models\TrafficEnforcer;
+use Illuminate\Http\Request;
 
 class EnforcerForgotPasswordController extends Controller
 {

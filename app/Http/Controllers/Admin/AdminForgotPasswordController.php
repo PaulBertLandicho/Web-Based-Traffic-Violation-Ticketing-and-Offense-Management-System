@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\TrafficAdmin;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Http\Request;
+use App\Models\TrafficAdmin;
 
 class AdminForgotPasswordController extends Controller
 {
@@ -68,7 +67,6 @@ class AdminForgotPasswordController extends Controller
             return back()->withErrors(['code' => 'Invalid verification code!']);
         }
 
-        // Clear code and proceed
         $admin->code = null;
         $admin->save();
 

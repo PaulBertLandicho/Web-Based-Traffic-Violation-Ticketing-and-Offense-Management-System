@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Hash;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 use App\Models\IssuedFineTicket;
+use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
@@ -109,7 +109,6 @@ class AdminController extends Controller
             ->groupBy('month')->orderBy('month')->get();
 
         $totalFineMonths = $fineStats->pluck('month')->map(fn($m) => date('M', mktime(0, 0, 0, $m, 1)));
-        // $totalFineAmounts = $fineStats->pluck('total');
 
         $monthlyTotals = [
             'janTotal' => 0,
@@ -134,7 +133,7 @@ class AdminController extends Controller
             $monthlyTotals["{$monthName}Total"] = $total;
         }
 
-        // ✅ Extract individual month variables like $janTotal, $febTotal, etc.
+        // Extract individual month variables like $janTotal, $febTotal, etc.
         extract($monthlyTotals);
 
 
@@ -360,7 +359,7 @@ class AdminController extends Controller
             'admin_password' => Hash::make($request->newpassword),
         ]);
 
-        Session::flush(); // Log out after password change
+        Session::flush();
         return redirect('/admin-login')->with('success', 'Password changed. Please log in again.');
     }
 }
