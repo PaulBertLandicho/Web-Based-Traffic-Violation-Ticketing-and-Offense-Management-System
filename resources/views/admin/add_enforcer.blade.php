@@ -103,18 +103,11 @@
                                     @endforeach
                                 </select>
                             </div>
+                            <label for="registered_at"></label>
+                            <input type="date" class="form-control" id="registered_at" value="{{ now()->toDateString() }}" hidden>
+                            <button type="submit" class="btn btn-primary" name="add-tpo-submit">Add Traffic Enforcer</button>
                         </div>
-
-                        <div class="form-row">
-                            <div class="form-group col-md-6">
-                                <label for="registered_at">Registered Date</label>
-                                <input type="date" class="form-control" id="registered_at" value="{{ now()->toDateString() }}" disabled>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary" name="add-tpo-submit">Add Traffic Enforcer</button>
                     </form>
-
                 </div>
             </div>
         </div>

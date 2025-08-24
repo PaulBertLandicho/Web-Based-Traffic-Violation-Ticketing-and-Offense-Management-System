@@ -1,7 +1,7 @@
 @php
 $stats = [
-['label' => 'Enforcer Name', 'value' => $enforcerName, 'data-placement' => 'bottom', 'data-title' => 'Your Name', 'icon' => 'fas fa-user-tie', 'bg' => 'bg-warning'],
-['label' => 'Reported Fine Amount (₱)', 'value' => number_format($fineAmount, 2), 'data-placement' => 'bottom', 'data-title' => 'Reported fine amount by you', 'icon' => 'fas fa-coins', 'bg' => 'bg-secondary'],
+['label' => 'Enforcer Name', 'value' => $enforcerName, 'data-placement' => 'bottom', 'data-title' => 'Your Name', 'icon' => 'fas fa-user-tie', 'bg' => 'bg-secondary'],
+['label' => 'Reported Fine Amount (₱)', 'value' => number_format($fineAmount, 2), 'data-placement' => 'bottom', 'data-title' => 'Reported fine amount by you', 'icon' => 'fas fa-coins', 'bg' => 'bg-warning'],
 ['label' => 'Assigned Area', 'value' => $assignedArea, 'data-placement' => 'bottom', 'data-title' => 'Your Assigned Area', 'icon' => 'fas fa-road', 'bg' => 'bg-info'],
 ['label' => 'Reported Fine Count', 'value' => $fineCount, 'data-placement' => 'bottom', 'data-title' => 'Reported fine count by you', 'icon' => 'fas fa-flag-checkered', 'bg' => 'bg-primary'],
 ];
