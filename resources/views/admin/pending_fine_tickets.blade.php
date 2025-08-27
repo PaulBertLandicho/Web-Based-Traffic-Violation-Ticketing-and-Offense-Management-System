@@ -42,7 +42,7 @@
                                         <i class="fas fa-ticket-alt text-warning"></i> Tickets
                                     </button>
                                     <button class="btn btn-warning pay-btn" data-id="{{ $ticket->ref_no }}">
-                                        Pay Now <i class="fas fa-coins"></i>
+                                        Paid Now <i class="fas fa-coins"></i>
                                     </button>
                                 </td>
                                 <td>
@@ -182,7 +182,7 @@
                         text: 'This will update the ticket status to paid.',
                         icon: 'warning',
                         showCancelButton: true,
-                        confirmButtonText: 'Yes, Pay it!'
+                        confirmButtonText: 'Yes, Paid it!'
                     }).then((result) => {
                         if (result.isConfirmed) {
                             fetch('{{ route("admin.pendingTickets.pay") }}', {
@@ -352,7 +352,7 @@
                                 <i class="fas fa-ticket-alt text-warning"></i> Tickets
                             </button>
                             <button class="btn btn-warning pay-btn" data-id="${ticket.ref_no}">
-                                Pay Now <i class="fas fa-coins"></i>
+                                Paid Now <i class="fas fa-coins"></i>
                             </button>
                         </td>
                         <td>${ticket.ref_no}</td>
