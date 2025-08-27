@@ -372,6 +372,9 @@ a:focus {
     position: relative;
 }
 
+.leftsidebar-nav-item span {
+    margin-left: -8px;
+}
 .leftsidebar-nav-link:hover {
     background: var(--second-theam-color);
     color: #f1f1f1;

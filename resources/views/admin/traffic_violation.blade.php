@@ -41,7 +41,7 @@
                     <i class="fas fa-receipt"></i> Add a Provision Details
                 </div>
                 <div class="card-body" style="margin:0 2rem 1rem 2rem;">
-                    <form action="{{ route('violation.store') }}" method="POST">
+                    <form id="addViolationForm">
                         @csrf
                         <div class="form-row">
                             <div class="form-group col-md-6">
@@ -165,9 +165,7 @@
 
             let currentRow; // store the row being edited
 
-            // =========================
             // EDIT HANDLER
-            // =========================
             $(document).on('click', '.edit_data', function() {
                 const id = $(this).data('id');
                 currentRow = $(this).closest('tr');
@@ -189,9 +187,7 @@
                 });
             });
 
-            // =========================
             // UPDATE HANDLER (no reload)
-            // =========================
             $('#edit_form').submit(function(e) {
                 e.preventDefault();
 
@@ -203,7 +199,7 @@
                     const updatedAmount = $('#violation_amount').val();
 
                     table.row(currentRow).data([
-                        currentRow.find('td').eq(0).html(), // Action buttons unchanged
+                        currentRow.find('td').eq(0).html(),
                         $('#edit_violation_id').val(),
                         updatedType,
                         '₱' + updatedAmount
@@ -223,9 +219,7 @@
                 });
             });
 
-            // =========================
             // DELETE HANDLER (no reload)
-            // =========================
             $(document).on('click', '.delete_data', function() {
                 const id = $(this).data('id');
                 const rowToDelete = $(this).closest('tr');
@@ -254,6 +248,64 @@
                 });
             });
 
+        });
+
+        $(document).ready(function() {
+            $('#addViolationForm').on('submit', function(e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: "{{ route('violation.store') }}",
+                    method: "POST",
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Added!',
+                            text: res.success,
+                            toast: true,
+                            position: 'top-end',
+                            timer: 3000,
+                            showConfirmButton: false
+                        });
+
+                        // Append new violation to table
+                        $('#dataTable tbody').append(`
+                    <tr>
+                        <td>
+                            <button class="btn btn-success btn-xs edit_data" data-id="${response.violation.violation_id}">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button class="btn btn-danger btn-xs delete_data" data-id="${response.violation.violation_id}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                        <td>${response.violation.violation_id}</td>
+                        <td>${response.violation.violation_type}</td>
+                        <td>₱${response.violation.violation_amount}</td>
+                    </tr>
+                `);
+
+                        // Reset form
+                        $('#addViolationForm')[0].reset();
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 422) {
+                            let errors = xhr.responseJSON.errors;
+                            let errorMessage = '';
+                            $.each(errors, function(key, value) {
+                                errorMessage += value[0] + '<br>';
+                            });
+
+                            Swal.fire({
+                                title: 'Error!',
+                                html: errorMessage,
+                                icon: 'error'
+                            });
+                        }
+                    }
+                });
+            });
         });
     </script>
 

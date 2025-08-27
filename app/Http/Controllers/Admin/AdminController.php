@@ -189,6 +189,27 @@ class AdminController extends Controller
         ]);
     }
 
+    // inside AdminController.php
+    public function fetchSummary()
+    {
+        $pendingFineAmount = DB::table('issued_fine_tickets')->where('status', 'Pending')->sum('total_amount');
+        $paidFineAmount = DB::table('issued_fine_tickets')->where('status', 'Paid')->sum('total_amount');
+        $totalFineAmount = DB::table('issued_fine_tickets')->sum('total_amount');
+        $issuedDriversCount = DB::table('driver_list')->distinct('license_id')->count('license_id');
+        $enforcersCount = DB::table('traffic_enforcers')->count();
+        $provisionsCount = DB::table('traffic_violations')->count();
+
+        return response()->json([
+            'pendingFineAmount' => $pendingFineAmount,
+            'paidFineAmount' => $paidFineAmount,
+            'totalFineAmount' => $totalFineAmount,
+            'issuedDriversCount' => $issuedDriversCount,
+            'enforcersCount' => $enforcersCount,
+            'provisionsCount' => $provisionsCount,
+        ]);
+    }
+
+
     // // Show form to add new admin
     // public function create()
     // {

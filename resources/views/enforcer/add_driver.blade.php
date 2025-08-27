@@ -131,7 +131,7 @@
                                 </span>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-user-plus"></i> Add Driver</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-user-plus"></i> Proceed </button>
                     </form>
                 </div>
             </div>

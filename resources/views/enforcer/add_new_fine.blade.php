@@ -383,9 +383,9 @@
                         const div = document.createElement("div");
                         div.className = "alert alert-info d-flex justify-content-between align-items-center mb-2";
                         div.innerHTML = `
-            <span>${v.text} - ₱${v.amount.toFixed(2)}</span>
-            <button type="button" class="btn btn-danger btn-sm" onclick="removeViolation(${i})">X</button>
-        `;
+<span>${v.text} - ₱${v.amount.toFixed(2)}</span>
+<button type="button" class="btn btn-danger btn-sm" onclick="removeViolation(${i})">X</button>
+`;
                         list.appendChild(div);
                     });
 
@@ -411,62 +411,62 @@
                     const logoUrl = window.location.origin + "/assets/img/ICTPMO-logo.png";
 
                     const headerContent = `
-            <div style="text-align: center;">
-                <img src="${logoUrl}" style="width: 60px; height: 60px;">
-                <div style="font-size: 16px; font-weight: bold;">ICTPMO</div>
-                <div style="font-size: 14px;">Traffic Violation Citation Ticket</div>
-                <hr style="border-top: 1px dashed #000;">
-            </div>
-        `;
+<div style="text-align: center;">
+    <img src="${logoUrl}" style="width: 60px; height: 60px;">
+    <div style="font-size: 16px; font-weight: bold;">ICTPMO</div>
+    <div style="font-size: 14px;">Traffic Violation Citation Ticket</div>
+    <hr style="border-top: 1px dashed #000;">
+</div>
+`;
 
                     const footerContent = `
-            <hr style="border-top: 1px dashed #000;">
-            <div style="font-size: 11px; text-align: center;">
-                This citation is not an admission of guilt.<br>
-                Please retain this receipt for your records.
-            </div>
-            <br>
-            <div style="display: flex; justify-content: space-around; font-size: 12px;">
-                <div style="text-align: center;">
-                    _______________________<br>
-                    Driver Signature
-                </div>
-                <div style="text-align: center;">
-                    _______________________<br>
-                    Officer Signature
-                </div>
-            </div>
-        `;
+<hr style="border-top: 1px dashed #000;">
+<div style="font-size: 11px; text-align: center;">
+    This citation is not an admission of guilt.<br>
+    Please retain this receipt for your records.
+</div>
+<br>
+<div style="display: flex; justify-content: space-around; font-size: 12px;">
+    <div style="text-align: center;">
+        _______________________<br>
+        Driver Signature
+    </div>
+    <div style="text-align: center;">
+        _______________________<br>
+        Officer Signature
+    </div>
+</div>
+`;
 
                     const printWindow = window.open('', '', 'width=350,height=600'); // Small window for mobile print
 
                     printWindow.document.write('<html><head><title>Print Citation</title>');
                     printWindow.document.write(`
-                <style>
-                    @media print {
-                        @page { margin: 5mm; size: auto; }
-                        body {
-                            font-family: monospace, sans-serif;
-                            font-size: 12px;
-                            line-height: 1.4;
-                            margin: 0;
-                            padding: 0;
-                            width: 100%;
-                        }
-                        table {
-                            width: 100%;
-                            border-collapse: collapse;
-                        }
-                        td {
-                            padding: 3px 0;
-                            vertical-align: top;
-                        }
-                        hr {
-                            margin: 6px 0;
-                        }
-                    }
-                </style>
-    `);
+    <style>
+        @media print {
+            @page { margin: 5mm; size: auto; }
+            body {
+                font-family: monospace, sans-serif;
+                font-size: 12px;
+                line-height: 1.4;
+                margin: 0;
+                padding: 0;
+                width: 100%;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            td {
+                padding: 3px 0;
+                vertical-align: top;
+            }
+            hr {
+                margin: 6px 0;
+            }
+        }
+    </style>
+`);
                     printWindow.document.write('</head><body>');
                     printWindow.document.write(headerContent);
                     printWindow.document.write('<div style="padding: 5px;">' + fineContent + '</div>');

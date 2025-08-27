@@ -336,7 +336,49 @@
                 printWindow.print();
                 printWindow.close();
             }
-
             // End Printable Citation Ticket
+
+            function loadPendingTickets() {
+                $.ajax({
+                    url: "{{ route('admin.pendingTickets.fetch') }}",
+                    method: "GET",
+                    success: function(data) {
+                        let rows = "";
+                        data.forEach(ticket => {
+                            rows += `
+                    <tr>
+                        <td>
+                            <button class="btn btn-secondary view-btn" data-id="${ticket.ref_no}">
+                                <i class="fas fa-ticket-alt text-warning"></i> Tickets
+                            </button>
+                            <button class="btn btn-warning pay-btn" data-id="${ticket.ref_no}">
+                                Pay Now <i class="fas fa-coins"></i>
+                            </button>
+                        </td>
+                        <td>${ticket.ref_no}</td>
+                        <td>${ticket.enforcer_id}</td>
+                        <td>${ticket.license_id}</td>
+                        <td>${ticket.driver_name}</td>
+                        <td>${ticket.formatted_amount}</td>
+                        <td>
+                            ${ticket.isExpired 
+                                ? '<span class="badge badge-danger">Due Date</span>' 
+                                : '<span class="badge badge-warning">Pending</span>'
+                            }
+                        </td>
+                    </tr>
+                `;
+                        });
+
+                        $("#dataTable tbody").html(rows);
+                    }
+                });
+            }
+
+            // Initial load
+            loadPendingTickets();
+
+            // Refresh every 5 seconds
+            setInterval(loadPendingTickets, 5000);
         </script>
         @endsection

@@ -18,7 +18,11 @@
         <li class="topnav-item">
             <div class="mydropdown">
                 <p class="mt-3 mr-4">
-                    <a href="gov"><span class="btn btn-md btn-danger" data-toggle="modal" data-target="#userLogdin">Log In <i class="fas fa-sign-in-alt" style="font-size: 1rem;"></i></span></a>
+                    <a href="#" id="topbarLogin">
+                        <span class="btn btn-md btn-danger" data-toggle="modal" data-target="#userLogdin">
+                            Log In <i class="fas fa-sign-in-alt" style="font-size: 1rem;"></i>
+                        </span>
+                    </a>
                 </p>
             </div>
         </li>
@@ -141,4 +145,20 @@
 <script src="{{ asset('assets/vendors/jquery/jquery-3.5.1.js') }}"></script>
 <script src="{{ asset('assets/vendors/bootstrap/bootstrap.min.js') }}"></script>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const topbarLogin = document.getElementById("topbarLogin");
+
+        topbarLogin.addEventListener("click", function(event) {
+            event.preventDefault(); // Prevent default link behavior
+            if (window.innerWidth <= 768) {
+                // Mobile: go to Enforcer login
+                window.location.href = 'enforcer-login';
+            } else {
+                // Desktop: go to Admin login
+                window.location.href = 'admin-login';
+            }
+        });
+    });
+</script>
 @endsection

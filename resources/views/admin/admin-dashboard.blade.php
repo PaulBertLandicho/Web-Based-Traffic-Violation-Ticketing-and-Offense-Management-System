@@ -395,5 +395,30 @@
                         document.getElementById("loading").style.display = "none";
                     }, 1000);
                 }
+
+                function loadSummary() {
+                    fetch("{{ route('admin.fetch-summary') }}")
+                        .then(res => res.json())
+                        .then(data => {
+                            document.getElementById("totalFine").innerText = "₱" + parseFloat(data.totalFineAmount).toLocaleString(undefined, {
+                                minimumFractionDigits: 2
+                            });
+                            document.getElementById("pendingAmount").innerText = "₱" + parseFloat(data.pendingFineAmount).toLocaleString(undefined, {
+                                minimumFractionDigits: 2
+                            });
+                            document.getElementById("paidAmount").innerText = "₱" + parseFloat(data.paidFineAmount).toLocaleString(undefined, {
+                                minimumFractionDigits: 2
+                            });
+                            document.getElementById("provisionsCount").innerText = data.provisionsCount;
+                            document.getElementById("driversCount").innerText = data.issuedDriversCount;
+                            document.getElementById("enforcersCount").innerText = data.enforcersCount;
+                        });
+                }
+
+                // Load every 10 seconds
+                setInterval(loadSummary, 10000);
+
+                // Load immediately on page load
+                loadSummary();
             </script>
             @endsection

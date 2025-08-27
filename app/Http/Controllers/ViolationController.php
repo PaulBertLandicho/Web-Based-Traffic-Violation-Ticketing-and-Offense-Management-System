@@ -42,12 +42,14 @@ class ViolationController extends Controller
         ]);
 
         if ($validator->fails()) {
+            if ($request->ajax()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
         $violation_id = $request->violationid;
 
-        // Save to MySQL
         DB::table('traffic_violations')->insert([
             'violation_id' => $violation_id,
             'violation_type' => $request->violationtype,
@@ -55,7 +57,6 @@ class ViolationController extends Controller
             'created_at' => Carbon::now(),
         ]);
 
-        // Save to Firebase
         $this->firebase->getDatabase()
             ->getReference('traffic_violations/' . $violation_id)
             ->set([
@@ -65,8 +66,28 @@ class ViolationController extends Controller
                 'created_at' => Carbon::now()->toDateTimeString(),
             ]);
 
-        return redirect()->route('violation.create')->with('success', 'Violation and Driver Details Added Successfully!');
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Violation added successfully',
+                'violation' => [
+                    'violation_id' => $violation_id,
+                    'violation_type' => $request->violationtype,
+                    'violation_amount' => $request->violationamount,
+                ]
+            ]);
+        }
+
+        return response()->json([
+            'success' => '✅ Violation added successfully',
+            'violation' => [
+                'violation_id' => $violation_id,
+                'violation_type' => $request->violationtype,
+                'violation_amount' => $request->violationamount,
+            ]
+        ]);
     }
+
 
     public function getViolationDetails(Request $request)
     {

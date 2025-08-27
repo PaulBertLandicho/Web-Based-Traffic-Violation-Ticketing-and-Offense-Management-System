@@ -26,6 +26,9 @@ Route::get('/admin-dashboard', [AdminController::class, 'adminDashboard'])->name
 Route::post('/admin-store', [AdminController::class, 'store'])->name('admin.store');
 Route::get('/admin-logout', [AdminController::class, 'logout'])->name('admin.logout');
 
+Route::get('/admin/fetch-summary', [AdminController::class, 'fetchSummary'])
+    ->name('admin.fetch-summary');
+
 // View Drivers
 Route::get('/view_all_drivers', [DriverController::class, 'view'])->name('admin.view.drivers');
 Route::post('/admin/driver/details', [DriverController::class, 'getDriverDetails']);
@@ -46,6 +49,7 @@ Route::post('/enforcers/store', [EnforcerController::class, 'store'])->name('enf
 // Payment Status Routes
 Route::prefix('pending_fine_tickets')->name('admin.pendingTickets.')->group(function () {
     Route::get('/', [FineTicketController::class, 'pendingTickets'])->name('index');
+    Route::get('/fetch', [FineTicketController::class, 'fetchPendingTickets'])->name('fetch');
     Route::post('/details', [FineTicketController::class, 'ticketDetails'])->name('details');
     Route::post('/pay', [FineTicketController::class, 'payFine'])->name('pay');
 });

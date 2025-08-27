@@ -289,6 +289,24 @@ class FineTicketController extends Controller
         return view('admin.pending_fine_tickets', compact('pendingTickets'));
     }
 
+    public function fetchPendingTickets()
+    {
+        $now = now();
+
+        // Same logic as pendingTickets()
+        $pendingTickets = DB::table('issued_fine_tickets')
+            ->join('driver_list', 'issued_fine_tickets.license_id', '=', 'driver_list.license_id')
+            ->select('issued_fine_tickets.*', 'driver_list.driver_name')
+            ->where('issued_fine_tickets.status', 'pending')
+            ->get();
+
+        foreach ($pendingTickets as $ticket) {
+            $ticket->isExpired = $now->gt($ticket->expire_date);
+            $ticket->formatted_amount = '₱' . number_format($ticket->total_amount, 2);
+        }
+
+        return response()->json($pendingTickets);
+    }
 
     public function ticketDetails(Request $request)
     {
