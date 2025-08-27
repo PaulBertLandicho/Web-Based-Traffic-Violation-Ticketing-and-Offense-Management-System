@@ -40,7 +40,7 @@
                         <hr class="my-4">
                         <h6 style="text-align: center;">
                             <a href="enforcer-forgot-password"><i class="fas fa-unlock-alt"></i> Forgot Password?</a>
-                            <span class="ml-2"><a href="{{ url('/gov') }}"><i class="fas fa-home"></i> Home</a></span>
+                            <span class="ml-2"><a href="/"><i class="fas fa-home"></i> Home</a></span>
                         </h6>
                     </form>
                 </div>

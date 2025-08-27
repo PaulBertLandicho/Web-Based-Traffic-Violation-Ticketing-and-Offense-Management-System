@@ -179,7 +179,7 @@
 
                     Swal.fire({
                         title: 'Mark as Paid?',
-                        text: 'This will update the ticket status to paid.',
+                        text: 'When the driver is already paid.',
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonText: 'Yes, Paid it!'

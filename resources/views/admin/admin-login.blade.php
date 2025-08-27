@@ -37,7 +37,7 @@
                         </div>
                         <button class="btn btn-lg btn-block text-uppercase" type="submit">Log in</button>
                         <hr class="my-4">
-                        <h6 style="text-align: center; text-decoration: none;"><span><a href="admin-forgot-password"><i class="fas fa-unlock-alt"></i> Forget Password?</a></span> <span class="ml-2"><a href="gov"><i class="fas fa-home"></i> Home</a></span></h6>
+                        <h6 style="text-align: center; text-decoration: none;"><span><a href="admin-forgot-password"><i class="fas fa-unlock-alt"></i> Forget Password?</a></span> <span class="ml-2"><a href="/"><i class="fas fa-home"></i> Home</a></span></h6>
                     </form>
                 </div>
             </div>
