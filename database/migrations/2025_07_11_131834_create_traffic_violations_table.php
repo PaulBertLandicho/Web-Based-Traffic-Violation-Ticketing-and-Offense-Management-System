@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id('violation_id');
             $table->string('violation_type');      // e.g., "Speeding", "No Helmet", etc.
             $table->decimal('violation_amount', 10, 2); // e.g., 500.00
+            $table->boolean('is_archived')->default(0);
             $table->timestamps();
         });
     }

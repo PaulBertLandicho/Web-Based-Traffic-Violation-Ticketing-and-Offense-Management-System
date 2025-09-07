@@ -71,39 +71,58 @@
     <script src="{{ asset('assets/vendors/DataTables/buttons.html5.min.js') }}"></script>
     <script src="{{ asset('assets/vendors/DataTables/buttons.print.min.js') }}"></script>
     <script>
-        $('#dataTable').DataTable({
+        // ✅ Initialize DataTable
+        var table = $('#dataTable').DataTable({
             dom: 'Bfrtip',
             buttons: [{
                     extend: 'csv',
-                    className: 'btn btn-primary mb-3',
-                    exportOptions: {
-                        columns: ':not(:first-child)' // skip "Action" column
-                    }
+                    className: 'btn btn-primary mb-3'
                 },
                 {
                     extend: 'excel',
-                    className: 'btn btn-success mb-3',
-                    exportOptions: {
-                        columns: ':not(:first-child)'
-                    }
+                    className: 'btn btn-success mb-3'
                 },
                 {
                     extend: 'pdf',
-                    className: 'btn btn-danger mb-3',
-                    exportOptions: {
-                        columns: ':not(:first-child)'
-                    }
+                    className: 'btn btn-danger mb-3'
                 },
                 {
                     extend: 'print',
-                    className: 'btn btn-dark mb-3',
-                    exportOptions: {
-                        columns: ':not(:first-child)'
-                    }
+                    className: 'btn btn-dark mb-3'
                 }
             ]
         });
 
+        // ✅ Append dropdown beside search bar
+        $("#dataTable_filter").addClass("d-flex align-items-center flex-wrap");
+
+        // ✅ Append dropdown beside search bar
+        $("#dataTable_filter").append(`
+    <select id="violationFilter" class="form-control ml-2 mt-2 mt-sm-0" style="width:auto; display:inline-block; width: 100px;">
+        <option value="">Filter Violations</option>
+    </select>
+
+    `);
+
+        // ✅ Collect all unique violations from table
+        var violations = [];
+        table.column(2).data().each(function(value) {
+            if (value && !violations.includes(value)) {
+                violations.push(value);
+            }
+        });
+
+        // ✅ Populate dropdown
+        violations.sort().forEach(v => {
+            $('#violationFilter').append(`<option value="${v}">${v}</option>`);
+        });
+
+        // ✅ Filter by violation type
+        $('#violationFilter').on('change', function() {
+            table.column(2).search(this.value).draw();
+        });
+
+        // 🔐 Account lock check
         setInterval(function() {
             fetch("{{ route('enforcer.check-lock') }}", {
                     method: "POST",
@@ -117,12 +136,12 @@
                 .then(status => {
                     if (status.trim() === "locked") {
                         alert("Your account has been locked by the admin. You will be logged out.");
-                        window.location.href = "{{ route('enforcer.logout') }}"; // Adjust if your logout route is different
+                        window.location.href = "{{ route('enforcer.logout') }}";
                     }
                 })
                 .catch(error => {
                     console.error("Lock check failed:", error);
                 });
-        }, 5000); // every 5 seconds
+        }, 5000);
     </script>
     @endsection

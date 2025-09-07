@@ -8,11 +8,69 @@
 
 <div class="dashwrapper">
     <div class="container-fluid">
-        <h1 class="mt-4">View All Drivers Record</h1>
+        <h1 class="mt-4">Manage Driver Violation Records</h1>
         <ol class="breadcrumb mb-4">
             <li class="breadcrumb-item"><a href="{{ route('admin.admin-dashboard') }}">Dashboard</a></li>
-            <li class="breadcrumb-item active">View All Drivers</li>
+            <li class="breadcrumb-item active">Manage Driver Violation Records</li>
         </ol>
+        <div>
+            <a href="javascript:void(0);" data-toggle="modal" data-target="#archivedDriversModal" class="btn btn-secondary">
+                <i class="fas fa-archive"></i> View Archived Drivers
+            </a>
+        </div>
+        <!-- Archived Enforcers Modal -->
+        <div class="modal fade" id="archivedDriversModal" tabindex="-1" role="dialog" aria-labelledby="archivedDriversModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="archivedDriversModalLabel">Archived Drivers</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    @if(session('success'))
+                    <div class="alert alert-success">{{ session('success') }}</div>
+                    @elseif(session('error'))
+                    <div class="alert alert-danger">{{ session('error') }}</div>
+                    @endif
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="archivedTable">
+                            <thead>
+                                <tr>
+                                    <th>License ID</th>
+                                    <th>Driver Name</th>
+                                    <th>License Type</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Will be populated via AJAX -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Laravel Error and Success Messages --}}
+        @if(session('success'))
+        <div class="alert alert-success" id="success-alert">
+            <i class="fas fa-check-circle"></i> {{ session('success') }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+        @endif
+
+        @if($errors->any())
+        <div class="alert alert-danger" id="success-alert">
+            <i class="fas fa-exclamation-circle"></i>
+            <ul class="mb-0">
+                @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+        @endif
 
         <div class="card mt-4 mb-5">
             <div class="card-header">
@@ -38,7 +96,7 @@
                                 <td>
                                     <button class="btn btn-info btn-sm view_data" data-id="{{ $driver->license_id }}"><i class="fas fa-eye"></i></button>
                                     <button class="btn btn-success btn-sm edit_data" data-id="{{ $driver->license_id }}"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-danger btn-sm delete_data" data-id="{{ $driver->license_id }}"><i class="fas fa-trash-alt"></i></button>
+                                    <button class="btn btn-secondary btn-sm archive_data" data-id="{{ $driver->license_id }}"><i class="fas fa-archive"></i></button>
                                 </td>
                                 <td>{{ $driver->license_id }}</td>
                                 <td>{{ $driver->license_type }}</td>
@@ -190,26 +248,55 @@
             });
         });
 
+        // 🟢 Load Archived Drivers when modal is opened 
+        $('#archivedDriversModal').on('show.bs.modal', function() {
+            let tbody = $('#archivedTable tbody');
+            tbody.html('<tr><td colspan="4" class="text-center">Loading...</td></tr>');
 
-        // ✅ Delete
-        $('.delete_data').click(function() {
+            $.get('{{ route("drivers.archived") }}', function(res) {
+                tbody.empty();
+
+                if (res.drivers.length === 0) {
+                    tbody.html('<tr><td colspan="4" class="text-center">No archived drivers found.</td></tr>');
+                } else {
+                    res.drivers.forEach(function(driver) {
+                        tbody.append(`
+                    <tr>
+                        <td>${driver.license_id}</td>
+                        <td>${driver.driver_name}</td>
+                        <td>${driver.license_type ?? 'N/A'}</td>
+                        <td>
+                        <form action="/admin/drivers/restore/${driver.license_id}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    Restore
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                `);
+                    });
+                }
+            });
+        });
+
+
+        // ✅ Archive instead of delete
+        $('.archive_data').click(function() {
             const id = $(this).data('id');
-            if (!id) {
-                return Swal.fire("Error", "Invalid driver ID.", "error");
-            }
 
             Swal.fire({
-                title: 'Are you sure?',
-                text: 'This will permanently delete the driver.',
+                title: 'Archive Driver?',
+                text: 'Driver will be archived if fines are paid. Cannot archive if there are pending violations.',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#e3342f',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, delete it!'
+                confirmButtonColor: '#6c757d',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, proceed'
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: '/admin/driver/delete',
+                        url: '/admin/driver/archive',
                         type: 'POST',
                         data: {
                             did: id
@@ -218,9 +305,7 @@
                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
                         },
                         success: function(res) {
-                            Swal.fire('Deleted!', res.success, 'success');
-
-                            // ✅ Remove row without reload
+                            Swal.fire('Done!', res.success, 'success');
                             let table = $('#dataTable').DataTable();
                             table.row($(`button[data-id="${id}"]`).parents('tr')).remove().draw();
                         },
@@ -228,11 +313,11 @@
                             if (xhr.status === 400 && xhr.responseJSON?.error) {
                                 Swal.fire({
                                     icon: 'warning',
-                                    title: 'Cannot Delete Driver',
+                                    title: 'Cannot Archive',
                                     text: xhr.responseJSON.error
                                 });
                             } else {
-                                Swal.fire('Error', 'Delete failed due to server error.', 'error');
+                                Swal.fire('Error', 'Action failed due to server error.', 'error');
                             }
                         }
                     });

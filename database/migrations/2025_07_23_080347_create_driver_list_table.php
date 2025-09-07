@@ -21,6 +21,7 @@ return new class extends Migration
             $table->date('license_expire_date');
             $table->date('date_of_birth');
             $table->string('license_type');
+            $table->boolean('is_archived')->default(0);
             $table->date('registered_at')->nullable();
             $table->string('status')->default('verified');
         });

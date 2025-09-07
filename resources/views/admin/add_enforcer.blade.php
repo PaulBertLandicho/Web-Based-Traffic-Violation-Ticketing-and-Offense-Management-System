@@ -47,8 +47,15 @@
 
                         <div class="form-row">
                             <div class="form-group col-md-6">
-                                <label for="enforcer_id">Traffic Enforcer ID</label>
-                                <input type="text" class="form-control" id="enforcer_id" name="enforcerid" value="{{ old('enforcerid') }}" placeholder="Traffic Officer ID">
+                                <label for="enforcer_name">Traffic Enforcer Name</label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="enforcer_name"
+                                    name="enforcername"
+                                    value="{{ old('enforcername') }}"
+                                    placeholder="Traffic Enforcer Name"
+                                    required>
                             </div>
                             <div class="form-group col-md-6">
                                 <label for="enforcer_email">Traffic Enforcer Email</label>
@@ -69,15 +76,16 @@
 
                         <div class="form-row">
                             <div class="form-group col-md-6">
-                                <label for="enforcer_name">Traffic Enforcer Name</label>
-                                <input
-                                    type="text"
+                                <label for="gender">Gender</label>
+                                <select
+                                    name="gender"
+                                    id="gender"
                                     class="form-control"
-                                    id="enforcer_name"
-                                    name="enforcername"
-                                    value="{{ old('enforcername') }}"
-                                    placeholder="Traffic Enforcer Name"
                                     required>
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
                             </div>
                             <div class="form-group col-md-6">
                                 <label for="assignedarea">Enforcer Area</label>

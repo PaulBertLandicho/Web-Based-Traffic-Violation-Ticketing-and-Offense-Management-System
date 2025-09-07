@@ -17,11 +17,13 @@ return new class extends Migration
             $table->string('enforcer_password');
             $table->string('enforcer_name');
             $table->string('assigned_area');
+            $table->string('gender');
             $table->date('registered_at');
             $table->boolean('is_locked')->default(0);
             $table->timestamp('password_updated')->useCurrent()->nullable();
             $table->unsignedBigInteger('role_id');
             $table->mediumInteger('code')->nullable();
+            $table->boolean('is_archived')->default(0);
 
             $table->foreign('role_id')->references('role_id')->on('roles')->onDelete('cascade');
         });

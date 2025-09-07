@@ -18,6 +18,7 @@ class TrafficEnforcer extends Model
         'enforcer_email',
         'enforcer_password',
         'assigned_area',
+        'gender',
         'registered_at',
         'code',
         'is_locked',

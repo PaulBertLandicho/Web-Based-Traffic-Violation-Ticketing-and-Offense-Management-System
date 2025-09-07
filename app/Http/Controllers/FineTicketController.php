@@ -43,7 +43,10 @@ class FineTicketController extends Controller
     {
         $request->validate([
             'license_id' => 'required|exists:driver_list,license_id',
-            'vehicle_no' => 'required|string',
+            'vehicle_no' => [
+                'required',
+                'regex:/^[A-Z]{3}-\d{3,4}$/'
+            ],
             'vehicle_make' => 'required|string',
             'vehicle_model' => 'required|string',
             'vehicle_color' => 'required|string',
@@ -56,31 +59,31 @@ class FineTicketController extends Controller
             'total_amount' => 'required|numeric|min:0'
         ]);
 
-        //  Count only pending offenses previous pending offenses for this driver
+        // Count previous pending offenses
         $previousOffenses = DB::table('issued_fine_tickets')
             ->where('license_id', $request->license_id)
             ->where('status', 'pending')
             ->count();
 
-        $offenseNumber = $previousOffenses + 1; // Current offense count
+        $offenseNumber = $previousOffenses + 1;
 
-        //  Apply offense-based penalty
+        // Apply penalties
         $amount = $request->total_amount;
         switch ($offenseNumber) {
             case 2:
-                $amount += 200; // extra for 2nd offense
+                $amount += 200;
                 break;
             case 3:
-                $amount += 500; // extra for 3rd offense
+                $amount += 500;
                 break;
             default:
                 if ($offenseNumber > 3) {
-                    $amount += 1000; // extra for 4th+
+                    $amount += 1000;
                 }
                 break;
         }
 
-        //  Store vehicle if not exists
+        // Store vehicle if not exists
         $existingVehicle = DB::table('vehicles')->where('vehicle_no', $request->vehicle_no)->first();
         if (!$existingVehicle) {
             DB::table('vehicles')->insert([
@@ -91,9 +94,10 @@ class FineTicketController extends Controller
                 'vehicle_type' => $request->vehicle_type
             ]);
         }
+
         $secureToken = Str::random(32);
 
-        //  Insert fine record
+        // Insert fine record
         $ref_no = DB::table('issued_fine_tickets')->insertGetId([
             'enforcer_id' => Session::get('enforcer_id'),
             'license_id' => $request->license_id,
@@ -103,16 +107,16 @@ class FineTicketController extends Controller
             'issued_time' => $request->issued_time,
             'expire_date' => $request->expire_date,
             'violation_type' => $request->violations_type,
-            'total_amount'    => $amount,
-            'offense_number'  => $offenseNumber,
+            'total_amount' => $amount,
+            'offense_number' => $offenseNumber,
             'status' => 'pending',
-            'paid_date' => now(),
+            'paid_date' => null, // ✅ not paid yet
             'secure_token' => $secureToken,
             'penalty_applied' => false,
             'created_at' => now()
         ]);
 
-        //  Store to Firebase
+        // Store to Firebase
         $this->firebase->getDatabase()
             ->getReference('issued_fine_tickets/' . $ref_no)
             ->set([
@@ -126,53 +130,38 @@ class FineTicketController extends Controller
                 'issued_time' => $request->issued_time,
                 'expire_date' => $request->expire_date,
                 'violation_type' => $request->violations_type,
-                'total_amount' => $request->total_amount,
+                'total_amount' => $amount, // ✅ match MySQL
                 'status' => 'pending',
-                'paid_date' => now()->toDateTimeString(),
+                'paid_date' => null,
             ]);
 
-        //  Persist ticket modal state in session (NOT flash)
-        session([
-            'show_ticket' => true,
-            'ref_no' => $ref_no,
-            'license_type' => $request->license_type,
-            'home_address' => $request->home_address,
-            'vehicle_type' => $request->vehicle_type,
-            'vehicle_no' => $request->vehicle_no,
-            'vehicle_make' => $request->vehicle_make,
-            'vehicle_model' => $request->vehicle_model,
-            'vehicle_color' => $request->vehicle_color,
-            'violation_type' => $request->violations_type,
-            'place' => $request->place,
-            'issued_date' => $request->issued_date,
-            'issued_time' => $request->issued_time,
-            'expire_date' => $request->expire_date,
-            'total_amount' => $request->total_amount,
-        ]);
+        $ticket = DB::table('issued_fine_tickets')
+            ->join('vehicles', 'issued_fine_tickets.vehicle_no', '=', 'vehicles.vehicle_no')
+            ->select(
+                'issued_fine_tickets.*',
+                'vehicles.vehicle_make',
+                'vehicles.vehicle_model',
+                'vehicles.vehicle_color',
+                'vehicles.vehicle_type'
+            )
+            ->where('issued_fine_tickets.ref_no', $ref_no)
+            ->first();
+        $driver = DB::table('driver_list')->where('license_id', $request->license_id)->first();
 
-        //  Redirect without flash (so modal stays visible)
-        return redirect()->route('fine.create', $request->license_id);
+        // 👉 If AJAX, return modal partial
+        if ($request->ajax()) {
+            return view('layouts.components.enforcer.partials.ticket_modal_content', compact('ticket', 'driver'))->render();
+        }
+
+        // 👉 Otherwise, normal redirect
+        return redirect()->route('fine.create', $request->license_id)
+            ->with('show_ticket', true)
+            ->with('ref_no', $ref_no);
     }
 
     public function clearTicket()
     {
-        session()->forget([
-            'show_ticket',
-            'ref_no',
-            'license_type',
-            'home_address',
-            'vehicle_type',
-            'vehicle_no',
-            'vehicle_make',
-            'vehicle_model',
-            'vehicle_color',
-            'place',
-            'issued_date',
-            'issued_time',
-            'expire_date',
-            'total_amount'
-        ]);
-
+        session()->forget(['show_ticket', 'ref_no']);
         return redirect()->route('enforcer.enforcer-dashboard');
     }
 

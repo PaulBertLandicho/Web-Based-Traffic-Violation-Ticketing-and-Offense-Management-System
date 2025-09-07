@@ -6,7 +6,55 @@
                 <h4 class="modal-title"><i class="fas fa-user"></i> Traffic Enforcer Details Record</h4>
                 <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
             </div>
-            <div class="modal-body" id="enforcer_detail"></div>
+            <div class="modal-body" id="enforcer_detail">
+                <p><strong>Name:</strong> <span id="detail_name"></span></p>
+                <p><strong>Email:</strong> <span id="detail_email"></span></p>
+                <p><strong>Assigned Area:</strong> <span id="detail_area"></span></p>
+                <hr>
+                <hr>
+                <h5><strong>Violations Complaint Filed</strong></h5>
+                <table class="table-responsive table-bordered" id="enforcerViolationsTable">
+                    <thead>
+                        <tr>
+                            <th>Violation Type</th>
+                            <th>Details</th>
+                            <th>Penalty</th>
+                            <th>Date Issued</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <hr>
+                <hr>
+                <h5><strong>Drivers Issued Violations:</strong></h5>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <!-- Search box (DataTables will put input here) -->
+                    <div id="customSearch"></div>
+
+                    <!-- Filter dropdown -->
+                    <div>
+                        <select id="violationFilter" class="form-control" style="max-width:250px;">
+                            <option value="">Filter by Violation</option>
+                        </select>
+                    </div>
+                </div>
+
+                <table class="table-responsive table-bordered" id="violationsTable">
+                    <thead>
+                        <tr>
+                            <th>License ID</th>
+                            <th>Driver Name</th>
+                            <th>Violation</th>
+                            <th>Total Amount</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
             <div class="modal-footer"><button class="btn btn-secondary" data-dismiss="modal">Close</button></div>
         </div>
     </div>

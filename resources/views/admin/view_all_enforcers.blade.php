@@ -8,16 +8,109 @@
 
 <div class="dashwrapper">
     <div class="container-fluid">
-        <h1 class="mt-4">View All Traffic Enforcers</h1>
+        <h1 class="mt-4">Manage Traffic Enforcers</h1>
         <ol class="breadcrumb mb-4">
             <li class="breadcrumb-item"><a href="">Dashboard</a></li>
             <li class="breadcrumb-item active">Manage All Traffic Enforcers</li>
         </ol>
 
-        <!-- Lock All Button -->
-        <button id="toggleAllBtn" class="btn btn-primary" data-status="unlock">
-            <i class="fas fa-lock"></i> Lock All Officers
-        </button>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <button id="toggleAllBtn" class="btn btn-primary" data-status="unlock">
+                    <i class="fas fa-lock"></i> Lock All Officers
+                </button>
+            </div>
+            <div>
+                <a href="javascript:void(0);" data-toggle="modal" data-target="#archivedEnforcerModal" class="btn btn-secondary">
+                    <i class="fas fa-archive"></i> View Archived
+                </a>
+            </div>
+        </div>
+
+        <div class="modal fade" id="issueViolationModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form id="issueViolationForm">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Issue Violation to Enforcer</h5>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="enforcer_id" id="violation_enforcer_id">
+                            <div class="form-group">
+                                <label>Violation Type</label>
+                                <input type="text" name="violation_type" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Details</label>
+                                <textarea name="details" class="form-control"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Penalty Amount (₱)</label>
+                                <input type="number" name="penalty_amount" class="form-control" step="0.01" min="0">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-danger">Issue Violation</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Archived Enforcers Modal -->
+        <div class="modal fade" id="archivedEnforcerModal" tabindex="-1" role="dialog" aria-labelledby="archivedEnforcerModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="archivedEnforcerModalLabel">Archived Enforcers</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    @if(session('success'))
+                    <div class="alert alert-success">{{ session('success') }}</div>
+                    @elseif(session('error'))
+                    <div class="alert alert-danger">{{ session('error') }}</div>
+                    @endif
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="archivedTable">
+                            <thead>
+                                <tr>
+                                    <th>Enforcer ID</th>
+                                    <th>Name</th>
+                                    <th>Assigned Area</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Will be populated via AJAX -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Laravel Error and Success Messages --}}
+        @if(session('success'))
+        <div class="alert alert-success" id="success-alert">
+            <i class="fas fa-check-circle"></i> {{ session('success') }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+        @endif
+
+        @if($errors->any())
+        <div class="alert alert-danger" id="success-alert">
+            <i class="fas fa-exclamation-circle"></i>
+            <ul class="mb-0">
+                @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+        @endif
 
         <div class="card mt-2 mb-4">
             <div class="card-header">
@@ -32,6 +125,7 @@
                                 <th>Enforcer ID</th>
                                 <th>Name</th>
                                 <th>Assigned Area</th>
+                                <th>Gender</th>
                                 <th>Total Fines Issued</th>
                                 <th>Total Amount Collected</th>
                                 <th>Status</th>
@@ -43,18 +137,21 @@
                                 <td>
                                     <button class="btn btn-info btn-sm view_data" data-id="{{ $enforcer->enforcer_id }}"><i class="fas fa-eye"></i></button>
                                     <button class="btn btn-success btn-sm edit_data" data-id="{{ $enforcer->enforcer_id }}"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-danger btn-sm delete_data" data-id="{{ $enforcer->enforcer_id }}"><i class="fas fa-trash-alt"></i></button>
-
+                                    <button class="btn btn-secondary btn-sm archive_data" data-id="{{ $enforcer->enforcer_id }}"><i class="fas fa-archive"></i></button>
                                     <button class="btn toggle-btn {{ $enforcer->is_locked ? 'btn-danger' : 'btn-warning' }}"
                                         data-id="{{ $enforcer->enforcer_id }}"
                                         data-status="{{ $enforcer->is_locked ? 'locked' : 'unlocked' }}">
                                         <i class="fas {{ $enforcer->is_locked ? 'fa-lock' : 'fa-lock-open' }}"></i>
                                         {{ $enforcer->is_locked ? ' ' : ' ' }}
                                     </button>
+                                    <button class="btn btn-danger btn-sm issue_violation" data-id="{{ $enforcer->enforcer_id }}">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </button>
                                 </td>
                                 <td>{{ $enforcer->enforcer_id }}</td>
                                 <td>{{ $enforcer->enforcer_name }}</td>
                                 <td>{{ $enforcer->assigned_area }}</td>
+                                <td>{{ $enforcer->gender }}</td>
                                 @php
                                 $stats = $fineStats[$enforcer->enforcer_id] ?? null;
                                 @endphp
@@ -121,7 +218,41 @@
                         columns: ':not(:first-child)'
                     }
                 }
-            ]
+            ],
+
+            initComplete: function() {
+                let api = this.api();
+
+                // Add dropdown beside search bar
+                $("#dataTable_filter").append(`
+                <label class="ml-3">
+                    <select id="barangayFilter" class="form-control form-control-sm">
+                        <option value="">Filter by Barangay</option>
+                    </select>
+                </label>
+            `);
+
+                // Collect unique barangays from column 3 (Assigned Area)
+                let barangays = [];
+                api.column(3).data().each(function(value) {
+                    if (value && !barangays.includes(value.trim())) {
+                        barangays.push(value.trim());
+                    }
+                });
+
+                barangays.sort();
+
+                // Populate dropdown
+                barangays.forEach(function(b) {
+                    $('#barangayFilter').append(`<option value="${b}">${b}</option>`);
+                });
+
+                // Filter table when barangay selected
+                $('#barangayFilter').on('change', function() {
+                    let selected = $(this).val();
+                    api.column(3).search(selected).draw();
+                });
+            }
         });
 
         $.ajaxSetup({
@@ -131,23 +262,200 @@
         });
 
         $(document).on('click', '.view_data', function() {
-            const id = $(this).data('id'); // Get from button attribute
+            const id = $(this).data('id');
 
             $.post('/admin/enforcer/details', {
                 id: id
             }, function(res) {
-                if (res.enforcer) {
-                    $('#enforcer_detail').html(`
-                <p><strong>Name:</strong> ${res.enforcer.enforcer_name}</p>
-                <p><strong>Email:</strong> ${res.enforcer.enforcer_email ?? 'N/A'}</p>
-                <p><strong>Assigned Area:</strong> ${res.enforcer.assigned_area}</p>
-            `);
-                    $('#dataModal').modal('show');
-                } else {
+                if (!res.enforcer) {
                     Swal.fire('Error', 'Enforcer details not found.', 'error');
+                    return;
                 }
-            }).fail(() => {
+
+                // =========================
+                // ENFORCER INFO
+                $('#detail_name').text(res.enforcer.enforcer_name);
+                $('#detail_email').text(res.enforcer.enforcer_email ?? 'N/A');
+                $('#detail_area').text(res.enforcer.assigned_area ?? 'N/A');
+
+                // =========================
+                // ENFORCER VIOLATIONS FILED (against this enforcer)
+                let enforcerTbody = $('#enforcerViolationsTable tbody');
+                enforcerTbody.empty();
+
+                if (res.enforcer.is_locked) {
+                    Swal.fire('Notice', 'This enforcer is LOCKED due to violations filed.', 'warning');
+                    $('#detail_name').append(' <span class="badge badge-danger">Locked</span>');
+
+                    // 🛑 Also update toggle button & badge in table
+                    let row = $(`.toggle-btn[data-id="${res.enforcer.enforcer_id}"]`).closest('tr');
+                    row.find('.toggle-btn')
+                        .removeClass('btn-warning').addClass('btn-danger')
+                        .html('<i class="fas fa-lock"></i>')
+                        .data('status', 'locked');
+                    row.find('td:last span')
+                        .removeClass('bg-success').addClass('bg-danger')
+                        .text('Locked');
+                }
+
+                // =========================
+                // DRIVER VIOLATIONS (issued by this enforcer)
+                let violations = [];
+                let driverData = [];
+
+                if (res.drivers && res.drivers.length > 0) {
+                    res.drivers.forEach(d => {
+                        driverData.push([
+                            d.license_id,
+                            d.driver_name,
+                            d.violation_type,
+                            `₱${parseFloat(d.total_amount).toFixed(2)}`,
+                            d.created_at
+                        ]);
+                        violations.push(d.violation_type);
+                    });
+                }
+
+                // Destroy previous DataTable if exists
+                if ($.fn.DataTable.isDataTable('#violationsTable')) {
+                    $('#violationsTable').DataTable().clear().destroy();
+                }
+
+                // Reinitialize DataTable
+                let table = $('#violationsTable').DataTable({
+                    data: driverData,
+                    columns: [{
+                            title: "License ID"
+                        },
+                        {
+                            title: "Driver Name"
+                        },
+                        {
+                            title: "Violation"
+                        },
+                        {
+                            title: "Total Amount"
+                        },
+                        {
+                            title: "Date"
+                        }
+                    ],
+                    pageLength: 5,
+                    lengthChange: false,
+                    initComplete: function() {
+                        // ✅ Clear old search bar first to prevent duplicates
+                        $("#customSearch").empty();
+
+                        // Move DataTables search box into custom container
+                        $("#violationsTable_filter").appendTo("#customSearch");
+                        $("#violationsTable_filter label").addClass("mb-0");
+                        $("#violationsTable_filter input")
+                            .addClass("form-control")
+                            .css("width", "250px");
+                    }
+                });
+
+                // Populate violation filter dropdown
+                $('#violationFilter').empty().append(`<option value="">Filter by Violation</option>`);
+                [...new Set(violations)].sort().forEach(v => {
+                    $('#violationFilter').append(`<option value="${v}">${v}</option>`);
+                });
+
+                // 🎯 Filter by violation type
+                $('#violationFilter').off().on('change', function() {
+                    table.column(2).search(this.value).draw();
+                });
+
+                // ENFORCER VIOLATIONS FILED (against this enforcer)
+                if (res.violations && res.violations.length > 0) {
+                    res.violations.forEach(v => {
+                        let statusBadge = v.status === 'settled' ?
+                            '<span class="badge badge-success">Settled</span>' :
+                            '<span class="badge badge-danger">Pending</span>';
+
+                        let actionBtn = v.status === 'pending' ?
+                            `<button class="btn btn-sm btn-success settleViolationBtn" data-id="${v.id}">
+                        <i class="fas fa-check"></i> Settle
+                    </button>` :
+                            '';
+
+                        enforcerTbody.append(`
+                    <tr>
+                        <td>${v.violation_type}</td>
+                        <td>${v.details ?? 'N/A'}</td>
+                        <td>₱${parseFloat(v.penalty_amount).toFixed(2)}</td>
+                        <td>${new Date(v.date_issued).toLocaleString()}</td>
+                        <td>${statusBadge}</td>
+                        <td>${actionBtn}</td>
+                    </tr>
+                `);
+                    });
+                } else {
+                    enforcerTbody.append(`<tr><td colspan="6" class="text-center">No violations filed.</td></tr>`);
+                }
+
+                // Show modal
+                $('#dataModal').modal('show');
+            }).fail(err => {
                 Swal.fire('Error', 'Could not load enforcer details.', 'error');
+                console.error(err.responseText);
+            });
+        });
+
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        $(document).on('click', '.settleViolationBtn', function() {
+            const id = $(this).data('id');
+
+            Swal.fire({
+                title: 'Confirm Settlement',
+                text: "Are you sure you want to mark this violation as settled?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Settle'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.post("{{ route('enforcer.violation.settle') }}", {
+                        id: id
+                    }, function(res) {
+                        if (res.success) {
+                            Swal.fire('Settled!', 'Violation has been settled.', 'success');
+
+                            // 🔄 Update violation row instantly
+                            let btn = $(`.settleViolationBtn[data-id="${id}"]`);
+                            let row = btn.closest('tr');
+                            row.find('td:nth-child(5)').html('<span class="badge badge-success">Settled</span>');
+                            btn.remove(); // remove Settle button
+
+                            // 🔓 If all violations settled, unlock enforcer
+                            if (res.unlocked) {
+                                let tableRow = $(`.toggle-btn[data-id="${res.enforcer_id}"]`).closest('tr');
+
+                                // Update toggle button
+                                tableRow.find('.toggle-btn')
+                                    .removeClass('btn-danger').addClass('btn-warning')
+                                    .html('<i class="fas fa-lock-open"></i>')
+                                    .data('status', 'unlocked');
+
+                                // Update status badge (last column)
+                                tableRow.find('td:last span')
+                                    .removeClass('bg-danger').addClass('bg-success')
+                                    .text('Unlocked');
+
+                                // Update modal header badge too
+                                $('#detail_name .badge').remove();
+                                $('#detail_name').append(' <span class="badge badge-success">Unlocked</span>');
+                            }
+                        }
+                    }).fail(err => {
+                        Swal.fire('Error', 'Could not update violation.', 'error');
+                        console.error(err.responseText);
+                    });
+                }
             });
         });
 
@@ -196,35 +504,36 @@
 
         });
 
-        // 🟢 Delete enforcer
-        $(document).on('click', '.delete_data', function() {
+        // 🟢 Archive enforcer
+        $(document).on('click', '.archive_data', function() {
             const id = $(this).data('id');
 
             Swal.fire({
-                title: 'Are you sure?',
-                text: 'This will permanently delete the enforcer.',
+                title: 'Archive Enforcer?',
+                text: 'This will move the enforcer to archive list.',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Yes, delete it!',
+                confirmButtonText: 'Yes, archive it!',
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    $.post('/admin/enforcer/delete', {
-                        did: id
+                    $.post('/admin/enforcer/archive', {
+                        aid: id
                     }, function(res) {
                         if (res.success) {
-                            Swal.fire('Deleted!', res.success, 'success');
-                            // Remove row instantly without reloading
-                            $(`.delete_data[data-id="${id}"]`).closest('tr').remove();
+                            Swal.fire('Archived!', res.success, 'success');
+                            // Remove row instantly without reload
+                            $(`.archive_data[data-id="${id}"]`).closest('tr').remove();
                         } else {
-                            Swal.fire('Error', res.error || 'Deletion failed.', 'error');
+                            Swal.fire('Error', res.error || 'Archiving failed.', 'error');
                         }
                     }).fail(() => {
-                        Swal.fire('Error', 'Could not delete enforcer.', 'error');
+                        Swal.fire('Error', 'Could not archive enforcer.', 'error');
                     });
                 }
             });
         });
+
 
         // 🟢 Toggle Single Officer
         $('.toggle-btn').click(function() {
@@ -310,6 +619,121 @@
                     }
                 })
                 .catch(() => Swal.fire('Error', 'Something went wrong.', 'error'));
+        });
+    });
+    // 🟢 Load Archived Enforcers when modal is opened
+    $('#archivedEnforcerModal').on('show.bs.modal', function() {
+        $.get("{{ route('enforcers.archived') }}", function(res) {
+            let tbody = $('#archivedTable tbody');
+            tbody.html('<tr><td colspan="4" class="text-center">Loading...</td></tr>');
+
+            $.get('{{ route("enforcers.archived") }}', function(res) {
+                tbody.empty();
+
+                if (res.enforcers && res.enforcers.length > 0) {
+                    res.enforcers.forEach(function(e) {
+                        tbody.append(`
+            <tr>
+                <td>${e.enforcer_id}</td>
+                <td>${e.enforcer_name}</td>
+                <td>${e.assigned_area ?? 'N/A'}</td>
+                <td>
+                    <button class="btn btn-success btn-sm restore_enforcer" data-id="${e.enforcer_id}">
+                        Restore
+                    </button>
+                </td>
+            </tr>
+        `);
+                    });
+                } else {
+                    tbody.append(`<tr><td colspan="4" class="text-center">No archived enforcers</td></tr>`);
+                }
+
+            });
+        });
+    });
+    $(document).on('click', '.restore_enforcer', function(e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+        const rowToRestore = $(this).closest('tr');
+
+        Swal.fire({
+            title: 'Restore Enforcer?',
+            text: 'This will move the violation back to the active list.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, restore it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post("{{ route('enforcers.restore') }}", {
+                    rid: id
+                }, function(res) {
+                    if (res.success) {
+                        Swal.fire('Restored!', res.success, 'success');
+
+                        // Remove from archived modal
+                        rowToRestore.remove();
+
+                        // Add back to active DataTable
+                        const newRow = `
+                        <tr>
+                            <td>
+                                <button class="btn btn-success btn-sm edit_data" data-id="${res.enforcer.enforcer_id}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-secondary btn-sm archive_data" data-id="${res.enforcer.enforcer_id}">
+                                    <i class="fas fa-archive"></i>
+                                </button>
+                            </td>
+                            <td>${res.enforcer.enforcer_id}</td>
+                            <td>${res.enforcer.enforcer_name}</td>
+                            <td>${res.enforcer.assigned_area}</td>
+                            <td>${res.enforcer.gender}</td>
+                        </tr>
+                    `;
+
+                        $('#dataTable tbody').append(newRow);
+                    } else {
+                        Swal.fire('Error', res.error || 'Restore failed.', 'error');
+                    }
+                }).fail(() => {
+                    Swal.fire('Error', 'Could not restore Enforcer.', 'error');
+                });
+            }
+        });
+    });
+
+    $(document).on('click', '.issue_violation', function() {
+        let id = $(this).data('id');
+        $('#violation_enforcer_id').val(id);
+        $('#issueViolationModal').modal('show');
+    });
+
+    $('#issueViolationForm').submit(function(e) {
+        e.preventDefault();
+        $.post("{{ route('enforcer.issueViolation') }}", $(this).serialize(), function(res) {
+            if (res.success) {
+                $('#issueViolationModal').modal('hide');
+                Swal.fire('Success', res.success, 'success');
+
+                // 🛑 Auto-update toggle button + status badge
+                let row = $(`.issue_violation[data-id="${res.enforcer_id}"]`).closest('tr');
+
+                // Update toggle button
+                let toggleBtn = row.find('.toggle-btn');
+                toggleBtn.removeClass('btn-warning').addClass('btn-danger')
+                    .html('<i class="fas fa-lock"></i>')
+                    .data('status', 'locked');
+
+                // Update badge
+                row.find('td:last span')
+                    .removeClass('bg-success').addClass('bg-danger')
+                    .text('Locked');
+            }
+        }).fail(function(err) {
+            Swal.fire('Error', 'Could not issue violation.', 'error');
+            console.log(err.responseText);
         });
     });
 </script>

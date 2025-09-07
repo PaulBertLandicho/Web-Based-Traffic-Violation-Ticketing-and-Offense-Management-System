@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>@yield('title', 'Traffic Violation Ticketing Management System')</title>
+    <title>@yield('title', 'ICTPMO')</title>
 
     <!-- Meta tags start -->
     <meta charset="UTF-8">
@@ -70,7 +70,7 @@
                 setTimeout(function() {
                     document.getElementById("content").style.display = "block";
                     document.getElementById("loading").style.display = "none";
-                }, 1000);
+                }, );
             }
 
             // if ('serviceWorker' in navigator) {

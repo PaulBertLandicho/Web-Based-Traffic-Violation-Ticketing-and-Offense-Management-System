@@ -29,7 +29,10 @@ class ViolationController extends Controller
             return redirect('/admin-login')->with('error', 'Please login first.');
         }
 
-        $violations = DB::table('traffic_violations')->get();
+        $violations = DB::table('traffic_violations')
+            ->where('is_archived', 0)
+            ->get();
+
         return view('admin.traffic_violation', compact('violations'));
     }
 
@@ -127,22 +130,60 @@ class ViolationController extends Controller
         return response()->json(['success' => '✅ Violation updated successfully']);
     }
 
-    public function delete(Request $request)
+    public function archive(Request $request)
     {
-        $violationId = $request->did;
+        $violationId = $request->aid;
 
-        // Delete from MySQL
-        $deleted = DB::table('traffic_violations')->where('violation_id', $violationId)->delete();
+        $violation = DB::table('traffic_violations')
+            ->where('violation_id', $violationId)
+            ->first();
 
-        if ($deleted) {
-            // Delete from Firebase
-            $this->firebase->getDatabase()
-                ->getReference('traffic_violations/' . $violationId)
-                ->remove();
+        if (!$violation) {
+            return response()->json(['error' => 'Traffic Violation not found.']);
+        }
 
-            return response()->json(['success' => 'Violation deleted successfully']);
-        } else {
+        DB::table('traffic_violations')
+            ->where('violation_id', $violationId)
+            ->update(['is_archived' => 1]);
+
+        $this->firebase->getDatabase()
+            ->getReference('traffic_violations/' . $violationId)
+            ->update(['is_archived' => true]);
+
+        return response()->json(['success' => 'Violation archived successfully']);
+    }
+
+    public function archived()
+    {
+        $violations = DB::table('traffic_violations')
+            ->where('is_archived', 1)
+            ->get();
+
+        return response()->json(['violations' => $violations]);
+    }
+
+    public function restore(Request $request)
+    {
+        $violationId = $request->rid;
+
+        $violation = DB::table('traffic_violations')->where('violation_id', $violationId)->first();
+
+        if (!$violation) {
             return response()->json(['error' => 'Violation not found.']);
         }
+
+        DB::table('traffic_violations')
+            ->where('violation_id', $violationId)
+            ->update(['is_archived' => 0]);
+
+        // Return restored violation details
+        return response()->json([
+            'success' => 'Violation restored successfully!',
+            'violation' => [
+                'violation_id' => $violation->violation_id,
+                'violation_type' => $violation->violation_type,
+                'violation_amount' => $violation->violation_amount
+            ]
+        ]);
     }
 }

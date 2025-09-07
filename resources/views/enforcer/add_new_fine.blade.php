@@ -39,7 +39,7 @@
 
             <div class="card mb-4">
                 <div class="card-body p-lg-5">
-                    <form method="POST" action="{{ route('fine.store') }}">
+                    <form id="issueFineForm" method="POST" action="{{ route('fine.store') }}">
                         @csrf
                         <input type="hidden" name="license_id" value="{{ $driver->license_id }}">
 
@@ -163,7 +163,14 @@
                             </div>
                             <div class="form-group col-md-6">
                                 <label for="vehicle_no">Vehicle No</label>
-                                <input type="text" class="form-control" id="vehicle_no" name="vehicle_no" placeholder="Vehicle No">
+                                <input type="text"
+                                    class="form-control"
+                                    id="vehicle_no"
+                                    name="vehicle_no"
+                                    placeholder="ABC-123 or ABC-1234"
+                                    maxlength="8"
+                                    required>
+                                <small class="form-text text-muted">Format: ABC-123 or ABC-1234</small>
                             </div>
                         </div>
                         <div class="form-row">
@@ -195,8 +202,8 @@
                         <input type="hidden" id="violations" name="violations_type">
 
                         <!-- Issue Fine Button -->
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-ticket-alt"></i> Issue Fine
+                        <button type="submit" class="btn btn-primary" id="issueFineBtn">
+                            <i class="fas fa-ticket-alt" id="issueIcon"></i> Issue Fine
                         </button>
 
                         <!-- Cancel Button with JS function to avoid conflicts -->
@@ -209,143 +216,78 @@
             </div>
 
             <!-- {{--  Show Ticket Modal --}} -->
-            @if(session('show_ticket'))
-            @php
 
-            // Get ticket record from DB
-            $ticket = DB::table('issued_fine_tickets')
-            ->where('ref_no', session('ref_no'))
-            ->first();
 
-            // Fallbacks if DB doesn't have the data
-            $offenseNumber = $ticket->offense_number ?? 1;
-            $totalAmount = $ticket->total_amount ?? 0;
-            @endphp
-
-            <div class="modal fade show" id="ticketModal" tabindex="-1" role="dialog" style="display: block; background-color: rgba(0,0,0,0.5); overflow-y: auto; margin-top: 65px">
+            <div class="modal fade show"
+                id="ticketModal"
+                tabindex="-1"
+                role="dialog"
+                aria-modal="true"
+                style="background-color: rgba(0,0,0,0.5); overflow-y: auto; margin-top: 65px"
+                data-backdrop="static"
+                data-keyboard="false">
                 <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-                    <div class="modal-content" id="printableTicket">
-                        <div class="modal-header bg-info text-white">
-                            <h4 class="modal-title" id="ticketDetailsLabel">
-                                <img src="../assets/img/ICTPMO-logo.png" style="width: 40px; height: 40px; margin-right: 10px;">
-                                Citation Ticket Details
-                            </h4>
-                            <a href="{{ route('fine.clearTicket') }}" class="btn btn-danger"><span>&times;</span></a>
-                        </div>
+                    <div class="modal-content" id="ticketModalContainer">
 
-                        <div class="modal-body" id="fine_detail">
-                            <div class="ticket px-3">
-                                <p class="text-center">Citation No: <strong># {{ session('ref_no') }}</strong></p>
-
-                                <h4 class="border-bottom pb-1"><strong>Driver Information</strong></h4>
-                                <table class="table table-sm table-borderless mb-2">
-                                    <tr>
-                                        <td>Full Name:</td>
-                                        <td>{{ $driver->driver_name }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>License Number:</td>
-                                        <td>{{ $driver->license_id }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>License Type:</td>
-                                        <td>{{ session('license_type') }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Address:</td>
-                                        <td>{{ session('home_address') }}</td>
-                                    </tr>
-                                </table>
-
-                                <h4 class="border-bottom pb-1"><strong>Vehicle Information</strong></h4>
-                                <table class="table table-sm table-borderless mb-2">
-                                    <tr>
-                                        <td>Vehicle Number:</td>
-                                        <td>{{ session('vehicle_no') }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Vehicle Make:</td>
-                                        <td>{{ session('vehicle_make') }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Vehicle Model:</td>
-                                        <td>{{ session('vehicle_model') }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Vehicle Color:</td>
-                                        <td>{{ session('vehicle_color') }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Vehicle Type:</td>
-                                        <td>{{ session('vehicle_type') }}</td>
-                                    </tr>
-                                </table>
-
-                                <h4 class="border-bottom pb-1"><strong>Violation Details</strong></h4>
-                                <table class="table table-sm table-borderless mb-2">
-                                    <tr>
-                                        <td>Issued Place:</td>
-                                        <td>{{ session('place') }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Issued Date & Time:</td>
-                                        <td>{{ session('issued_date') }} {{ session('issued_time') }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Expiration Date:</td>
-                                        <td>{{ session('expire_date') }}</td>
-                                    </tr>
-                                    <p><strong>Offense Number:</strong>
-                                        @if($offenseNumber == 1)
-                                        1st Offense
-                                        @elseif($offenseNumber == 2)
-                                        2nd Offense
-                                        @elseif($offenseNumber == 3)
-                                        3rd Offense
-                                        @else
-                                        {{ $offenseNumber }}th Offense
-                                        @endif
-                                    </p>
-
-                                    <tr>
-                                        <td>Provisions:</td>
-                                        <td>
-                                            @php
-                                            $violationTypes = session('violation_type') ? explode(',', session('violation_type')) : [];
-                                            @endphp
-                                            @if(count($violationTypes) > 0)
-                                            @foreach($violationTypes as $type)
-                                            [ {{ trim($type) }} ]<br>
-                                            @endforeach
-                                            @else
-                                            [ ]
-                                            @endif
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Total Amount:</td>
-                                        <td><strong>₱{{ number_format($totalAmount, 2) }}</strong></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Status:</td>
-                                        <td><span class="badge badge-warning">Pending</span></td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-success" onclick="printFineDetails()">
-                                <i class="fas fa-print"></i> Print
-                            </button>
-                            <button class="btn btn-primary" id="send-sms" data-license-id="{{ $driver->license_id }}">
-                                <i class="fas fa-paper-plane"></i>Send SMS
-                            </button>
-                        </div>
                     </div>
                 </div>
             </div>
-            @endif
+
+
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+            <script>
+                function sendSMS(licenseId) {
+                    fetch(`/send-sms/${licenseId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.sent_status === 'success') {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'SMS Sent!',
+                                    html: `<p>${data.message}</p>
+                               <a href="${data.view_url}" target="_blank" class="btn btn-link">📄 View Ticket</a>`,
+                                    confirmButtonText: 'OK',
+                                    confirmButtonColor: '#28a745'
+                                });
+                            } else if (data.sent_status === 'failed') {
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Failed to Send',
+                                    text: data.message,
+                                    confirmButtonText: 'Close',
+                                    confirmButtonColor: '#ffc107'
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: data.message,
+                                    confirmButtonText: 'Close',
+                                    confirmButtonColor: '#dc3545'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error(error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Connection Error',
+                                text: 'Could not connect to server.',
+                                confirmButtonColor: '#dc3545'
+                            });
+                        });
+                }
+
+                // ✅ Event delegation: works for dynamically injected modals
+                document.addEventListener("click", function(e) {
+                    const smsButton = e.target.closest("#send-sms");
+                    if (smsButton) {
+                        const licenseId = smsButton.getAttribute("data-license-id");
+                        sendSMS(licenseId);
+                    }
+                });
+            </script>
 
             <script>
                 let selectedViolations = [];
@@ -484,31 +426,135 @@
                 }
             </script>
             <script>
-                function sendSMS(licenseId) {
-                    fetch(`/send-sms/${licenseId}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.status === 'success') {
-                                alert(`${data.message}\n\nView: ${data.view_url}`);
-                            } else {
-                                alert(`Failed: ${data.message}`);
-                            }
-                        })
-                        .catch(error => {
-                            console.error(error);
-                            alert('Error: Could not connect to server.');
-                        });
-                }
-
-                // ✅ Attach event listener AFTER DOM is fully loaded
                 document.addEventListener("DOMContentLoaded", function() {
-                    const smsButton = document.getElementById("send-sms");
-                    if (smsButton) {
-                        smsButton.addEventListener("click", function() {
-                            const licenseId = smsButton.getAttribute("data-license-id");
-                            sendSMS(licenseId);
-                        });
+                    const issueFineForm = document.getElementById("issueFineForm");
+                    const issueFineBtn = document.getElementById("issueFineBtn");
+
+                    if (!issueFineForm || !issueFineBtn) return; // nothing to do
+
+                    issueFineForm.addEventListener("submit", async function(e) {
+                        e.preventDefault();
+
+                        // UX: disable button and show spinner
+                        const originalHtml = issueFineBtn.innerHTML;
+                        issueFineBtn.disabled = true;
+                        issueFineBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Generating Ticket...`;
+
+                        try {
+                            // CSRF token: prefer meta, fallback to hidden _token input
+                            let csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                            if (!csrf) {
+                                csrf = issueFineForm.querySelector('input[name="_token"]')?.value || '';
+                            }
+
+                            const formData = new FormData(issueFineForm);
+
+                            const response = await fetch(issueFineForm.action, {
+                                method: "POST",
+                                credentials: "same-origin",
+                                body: formData,
+                                headers: {
+                                    "X-Requested-With": "XMLHttpRequest",
+                                    "X-CSRF-TOKEN": csrf
+                                }
+                            });
+
+                            // Helpful debug: if the server redirected (session expired/login), show message
+                            if (response.redirected) {
+                                console.warn("Request was redirected to:", response.url);
+                            }
+
+                            // Handle non-OK responses explicitly
+                            if (!response.ok) {
+                                const contentType = response.headers.get("content-type") || "";
+
+                                // Validation errors (422) - Laravel returns JSON
+                                if (response.status === 422 && contentType.includes("application/json")) {
+                                    const data = await response.json();
+                                    const msgs = [];
+                                    if (data.errors) {
+                                        for (const k in data.errors) msgs.push(...data.errors[k]);
+                                    } else if (data.message) {
+                                        msgs.push(data.message);
+                                    }
+                                    alert("Validation error:\n" + msgs.join("\n"));
+                                    console.error("Validation errors:", data);
+                                    return;
+                                }
+
+                                // Other JSON error (maybe controller throw)
+                                if (contentType.includes("application/json")) {
+                                    const json = await response.json();
+                                    console.error("Server JSON error:", json);
+                                    alert("Server error: " + (json.error || json.message || "see console"));
+                                    return;
+                                }
+
+                                // Fallback: read text (useful when server rendered a login page or 500 trace)
+                                const text = await response.text();
+                                console.error("Server returned non-OK status:", response.status, text);
+                                alert("Server error " + response.status + ". See console for details.");
+                                return;
+                            }
+
+                            // OK -> expect HTML partial
+                            const html = await response.text();
+
+                            // Ensure the modal wrapper + container exist (create if needed)
+                            if (!document.getElementById("ticketModal")) {
+                                const wrapper = document.createElement("div");
+                                wrapper.innerHTML = `
+<div class="modal fade" id="ticketModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-content" id="ticketModalContainer"></div>
+  </div>
+</div>`;
+                                document.body.appendChild(wrapper);
+                            }
+
+                            // Check container exists now
+                            const container = document.getElementById("ticketModalContainer");
+                            if (!container) {
+                                console.error("ticketModalContainer not found after creating wrapper.");
+                                alert("Internal error: modal container missing. See console.");
+                                return;
+                            }
+
+                            // Inject the returned partial (must be only modal header/body/footer)
+                            container.innerHTML = html;
+
+                            // Show the modal using bootstrap/jQuery
+                            if (window.jQuery && typeof jQuery('#ticketModal').modal === 'function') {
+                                jQuery('#ticketModal').modal('show');
+                            } else {
+                                // fallback: make it visible if bootstrap not loaded
+                                document.getElementById('ticketModal').style.display = 'block';
+                            }
+
+                        } catch (err) {
+                            // network error or JS error
+                            console.error("AJAX error while generating ticket:", err);
+                            alert("Failed to generate ticket. See browser console for details.");
+                        } finally {
+                            // restore button
+                            issueFineBtn.disabled = false;
+                            issueFineBtn.innerHTML = originalHtml;
+                        }
+                    });
+                });
+
+                document.getElementById("vehicle_no").addEventListener("input", function(e) {
+                    let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""); // only letters/numbers
+                    let formatted = "";
+
+                    if (value.length > 3) {
+                        formatted += value.substring(0, 3) + "-";
+                        formatted += value.substring(3, 7); // allow up to 4 digits
+                    } else {
+                        formatted = value;
                     }
+
+                    e.target.value = formatted;
                 });
             </script>
 

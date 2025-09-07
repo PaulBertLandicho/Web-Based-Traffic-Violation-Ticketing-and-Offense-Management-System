@@ -30,7 +30,7 @@
                 <div>
                     <i class="fas fa-flag-checkered"></i>
                 </div>
-                <span>View Reported Fine</span>
+                <span>Reported Driver Violation Records</span>
             </a>
         </li>
     </ul>

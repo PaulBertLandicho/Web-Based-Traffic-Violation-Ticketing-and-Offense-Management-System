@@ -33,13 +33,22 @@ Route::get('/admin/fetch-summary', [AdminController::class, 'fetchSummary'])
 Route::get('/view_all_drivers', [DriverController::class, 'view'])->name('admin.view.drivers');
 Route::post('/admin/driver/details', [DriverController::class, 'getDriverDetails']);
 Route::post('/admin/driver/update', [DriverController::class, 'update']);
-Route::post('/admin/driver/delete', [DriverController::class, 'delete']);
+Route::post('/admin/driver/archive', [DriverController::class, 'archive'])->name('driver.archive');
+Route::get('/admin/driver/archived', [DriverController::class, 'archived'])->name('drivers.archived');
+
+
+// Restore Driver
+Route::post('/admin/drivers/restore/{licenseId}', [DriverController::class, 'restore'])->name('drivers.restore');
 
 // View Enforcers
 Route::get('/view_all_enforcers', [EnforcerController::class, 'index'])->name('enforcers.view');
 Route::post('/admin/enforcer/details', [EnforcerController::class, 'getEnforcerDetails']);
 Route::post('/admin/enforcer/update', [EnforcerController::class, 'update']);
-Route::post('/admin/enforcer/delete', [EnforcerController::class, 'delete']);
+
+Route::post('/admin/enforcer/archive', [EnforcerController::class, 'archive']);
+Route::get('/admin/enforcer/archived', [EnforcerController::class, 'archived'])->name('enforcers.archived');
+
+Route::post('/admin/enforcer/restore', [EnforcerController::class, 'restore'])->name('enforcers.restore');
 
 // Add Enforcers
 Route::get('/add_enforcer', [EnforcerController::class, 'create'])->name('enforcers.create');
@@ -117,7 +126,11 @@ Route::post('/violation/store', [ViolationController::class, 'store'])->name('vi
 
 Route::post('/admin/violation/details', [ViolationController::class, 'getViolationDetails']);
 Route::post('/admin/violation/update', [ViolationController::class, 'update']);
-Route::post('/admin/violation/delete', [ViolationController::class, 'delete']);
+Route::post('/admin/violation/archive', [ViolationController::class, 'archive'])->name('violation.archive');
+Route::post('/admin/violation/restore', [ViolationController::class, 'restore'])->name('violations.restore');
+
+// Show archived Traffic Violation
+Route::get('/admin/violation/archived', [ViolationController::class, 'archived'])->name('violations.archived');
 
 Route::post('/enforcer/check-lock', [EnforcerController::class, 'checkLock'])->name('enforcer.check-lock');
 Route::post('/ajax/past-fines-search', [FineTicketController::class, 'ajaxSearchPastFines'])->name('fines.ajax-search');
@@ -135,3 +148,6 @@ Route::post('/enforcer/verify-code', [EnforcerForgotPasswordController::class, '
 
 Route::get('/enforcer/reset-password', [EnforcerForgotPasswordController::class, 'showResetForm'])->name('enforcer.reset.form');
 Route::post('/enforcer/reset-password', [EnforcerForgotPasswordController::class, 'resetPassword'])->name('enforcer.reset.password');
+
+Route::post('/admin/enforcer/violation', [EnforcerController::class, 'issueViolation'])->name('enforcer.issueViolation');
+Route::post('/admin/enforcer/violation/settle', [EnforcerController::class, 'settleSingleViolation'])->name('enforcer.violation.settle');

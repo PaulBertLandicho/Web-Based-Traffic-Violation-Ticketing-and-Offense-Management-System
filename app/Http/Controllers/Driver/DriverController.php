@@ -27,7 +27,10 @@ class DriverController extends Controller
     {
         // 🔍 Validate input
         $validator = Validator::make($request->all(), [
-            'licenseid' => 'required|unique:driver_list,license_id',
+            'licenseid' => [
+                'required',
+                'regex:/^([A-Z]{1}[0-9]{2}-[0-9]{2}-[0-9]{6}|[A-Z]{2}-[0-9]{2}-[0-9]{6})$/'
+            ],
             'drivername' => 'required|string',
             'licensetype' => 'required',
             'homeaddress' => 'required|string',
@@ -92,9 +95,17 @@ class DriverController extends Controller
         if (!session()->has('admin_email')) {
             return redirect('/admin-login')->with('error', 'Please login first.');
         }
+        // Active drivers
+        $drivers = DB::table('driver_list')
+            ->where('is_archived', 0)
+            ->get();
 
-        $drivers = DB::table('driver_list')->get();
-        return view('admin.view_all_drivers', compact('drivers'));
+        // Archived drivers
+        $archivedDrivers = DB::table('driver_list')
+            ->where('is_archived', 1)
+            ->get();
+
+        return view('admin.view_all_drivers',  compact('drivers', 'archivedDrivers'));
     }
 
     public function getDriverDetails(Request $request)
@@ -147,26 +158,45 @@ class DriverController extends Controller
         return response()->json(['success' => '✅ Driver details updated successfully']);
     }
 
-    public function delete(Request $request)
+    public function archive(Request $request)
     {
         $licenseId = $request->input('did');
 
-        // Check if driver has any associated fine tickets
-        $hasFines = DB::table('issued_fine_tickets')
+        // 🔍 Check if driver has PENDING violations
+        $hasPending = DB::table('issued_fine_tickets')
             ->where('license_id', $licenseId)
+            ->where('status', 'pending')
             ->exists();
 
-        if ($hasFines) {
+        if ($hasPending) {
             return response()->json([
-                'error' => '❌ Cannot delete driver: pending or paid fines still exist.'
+                'error' => '❌ Cannot archive driver: they still have pending violations.'
             ], 400);
         }
 
-        //  Proceed to delete from database
+        // 🔍 Check if driver has at least 1 paid violation
+        $hasPaid = DB::table('issued_fine_tickets')
+            ->where('license_id', $licenseId)
+            ->where('status', 'paid')
+            ->exists();
+
+        if ($hasPaid) {
+            // ✅ Archive instead of delete
+            DB::table('driver_list')
+                ->where('license_id', $licenseId)
+                ->update(['is_archived' => 1]);
+
+            $this->firebase->getDatabase()
+                ->getReference('driver_list/' . $licenseId)
+                ->update(['is_archived' => true]);
+
+            return response()->json(['success' => '🗄️ Driver archived successfully.']);
+        }
+
+        // 🚫 No fines at all → safe to delete
         $deleted = DB::table('driver_list')->where('license_id', $licenseId)->delete();
 
         if ($deleted) {
-            // Remove from Firebase only if DB deletion succeeded
             $this->firebase->getDatabase()
                 ->getReference('driver_list/' . $licenseId)
                 ->remove();
@@ -175,6 +205,31 @@ class DriverController extends Controller
         }
 
         return response()->json(['error' => '❌ Driver not found.']);
+    }
+
+    public function archived()
+    {
+        $archivedEnforcers = DB::table('driver_list')
+            ->where('is_archived', 1)
+            ->get();
+
+        return response()->json(['drivers' => $archivedEnforcers]);
+    }
+
+
+    public function restore($id)
+    {
+        $driver = DB::table('driver_list')->where('license_id', $id)->first();
+
+        if (!$driver) {
+            return redirect()->back()->with('error', 'Driver not found.');
+        }
+
+        DB::table('driver_list')
+            ->where('license_id', $id)
+            ->update(['is_archived' => 0]);
+
+        return redirect()->back()->with('success', 'Driver restored successfully.');
     }
 
     public function downloadPDF($refNo)

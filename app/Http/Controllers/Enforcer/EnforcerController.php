@@ -34,7 +34,6 @@ class EnforcerController extends Controller
 
         return view('admin.add_enforcer');
     }
-    // Handle login logic
     public function login(Request $request)
     {
         $request->validate([
@@ -47,10 +46,21 @@ class EnforcerController extends Controller
             ->first();
 
         if ($enforcer && Hash::check($request->enforcer_password, $enforcer->enforcer_password)) {
-            // If the account is locked, force logout and redirect with error
+            // If the account is locked, show reason
             if ($enforcer->is_locked) {
+                // Get latest violation complaint filed against this enforcer
+                $latestViolation = DB::table('enforcer_violations')
+                    ->where('enforcer_id', $enforcer->enforcer_id)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+
+                $reason = $latestViolation
+                    ? "Your account has been locked because of a violation filed: \"{$latestViolation->violation_type}\" - {$latestViolation->details}"
+                    : "Your account has been locked due to a complaint filed by a violator.";
+
                 Session::flush();
-                return redirect()->route('enforcer.login')->with('error', 'Your account is locked.');
+                return redirect()->route('enforcer.login')
+                    ->with('error', $reason);
             }
 
             // Store session if not locked
@@ -169,12 +179,13 @@ class EnforcerController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'enforcerid' => 'required|unique:traffic_enforcers,enforcer_id',
             'enforceremail' => 'required|email|unique:traffic_enforcers,enforcer_email',
             'enforcerpassword' => 'required|min:6',
             'enforcerpasswordconfirm' => 'required|same:enforcerpassword',
             'enforcername' => 'required',
             'assignedarea' => 'required',
+            'gender' => 'required',
+
         ]);
 
         if ($validator->fails()) {
@@ -183,30 +194,43 @@ class EnforcerController extends Controller
                 ->withInput();
         }
 
-        //  Get role_id once
-        $roleId = DB::table('roles')->where('role_name', 'traffic enforcer')->value('role_id');
+        // 🟢 Generate next Enforcer ID
+        $lastEnforcer = DB::table('traffic_enforcers')
+            ->orderBy('enforcer_id', 'desc')
+            ->first();
 
-        //  Ensure role_id is not null
+        if ($lastEnforcer) {
+            // Extract numeric part (after TE-)
+            $lastNumber = intval(substr($lastEnforcer->enforcer_id, 3));
+            $nextNumber = $lastNumber + 1;
+        } else {
+            $nextNumber = 1; // First enforcer
+        }
+
+        // Format as TE-01, TE-02, etc.
+        $enforcerId = 'TE-' . str_pad($nextNumber, 2, '0', STR_PAD_LEFT);
+
+        // Get role_id for traffic enforcer
+        $roleId = DB::table('roles')->where('role_name', 'traffic enforcer')->value('role_id');
         if (!$roleId) {
             return redirect()->back()->with('error', 'Enforcer role not found. Please check roles table.');
         }
 
-        //  Use correct variable for Firebase ID
-        $enforcerId = $request->enforcerid;
-
+        // Insert into DB
         DB::table('traffic_enforcers')->insert([
             'enforcer_id' => $enforcerId,
             'enforcer_email' => $request->enforceremail,
             'enforcer_password' => Hash::make($request->enforcerpassword),
             'enforcer_name' => $request->enforcername,
             'assigned_area' => $request->assignedarea,
+            'gender' => $request->gender,
             'registered_at' => now()->toDateString(),
             'code' => random_int(100000, 999999),
             'is_locked' => false,
             'role_id' => $roleId,
         ]);
 
-        //  Save to Firebase
+        // Save to Firebase
         $this->firebase->getDatabase()
             ->getReference('traffic_enforcers/' . $enforcerId)
             ->set([
@@ -215,12 +239,13 @@ class EnforcerController extends Controller
                 'enforcer_password' => Hash::make($request->enforcerpassword),
                 'enforcer_name' => $request->enforcername,
                 'assigned_area' => $request->assignedarea,
+                'gender' => $request->gender,
                 'registered_at' => now()->toDateString(),
                 'code' => random_int(100000, 999999),
                 'is_locked' => false,
             ]);
 
-        return redirect()->route('enforcers.create')->with('success', 'Traffic Enforcer added successfully!');
+        return redirect()->route('enforcers.create')->with('success', "Traffic Enforcer {$enforcerId} added successfully!");
     }
 
     public function index()
@@ -230,7 +255,13 @@ class EnforcerController extends Controller
         }
 
         // Get all enforcers
-        $enforcers = DB::table('traffic_enforcers')->get();
+        $enforcers = DB::table('traffic_enforcers')
+            ->where('is_archived', 0)
+            ->get();
+
+        $archivedEnforcers = DB::table('traffic_enforcers')
+            ->where('is_archived', 1)
+            ->get();
 
         // Get fine stats per enforcer
         $fineStats = DB::table('issued_fine_tickets')
@@ -265,6 +296,7 @@ class EnforcerController extends Controller
 
         return view('admin.view_all_enforcers', compact(
             'enforcers',
+            'archivedEnforcers',
             'fineStats',
         ));
     }
@@ -296,11 +328,31 @@ class EnforcerController extends Controller
             ->where('enforcer_id', $id)
             ->first();
 
-        if ($enforcer) {
-            return response()->json(['enforcer' => $enforcer]);
+        if (!$enforcer) {
+            return response()->json(['error' => 'Enforcer details not found.'], 404);
         }
-        return response()->json(['error' => 'Enforcer details not found.']);
+
+        $violations = DB::table('enforcer_violations')
+            ->where('enforcer_id', $id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $drivers = DB::table('issued_fine_tickets as f')
+            ->join('driver_list as d', 'f.license_id', '=', 'd.license_id')
+            ->select('d.license_id', 'd.driver_name', 'f.ref_no', 'f.violation_type', 'f.total_amount', 'f.created_at')
+            ->where('f.enforcer_id', $id)
+            ->orderBy('f.created_at', 'desc')
+            ->get();
+
+        // This function should only return details, not update status
+
+        return response()->json([
+            'enforcer'   => $enforcer,
+            'violations' => $violations,
+            'drivers'    => $drivers
+        ]);
     }
+
 
     public function update(Request $request)
     {
@@ -341,24 +393,65 @@ class EnforcerController extends Controller
     }
 
 
-    public function delete(Request $request)
+    // 🟢 Archive Enforcer Instead of Delete
+    public function archive(Request $request)
     {
-        $enforcerId = $request->did;
+        $enforcerId = $request->aid;
 
-        // Delete from MySQL
-        $deleted = DB::table('traffic_enforcers')->where('enforcer_id', $enforcerId)->delete();
+        $enforcer = DB::table('traffic_enforcers')->where('enforcer_id', $enforcerId)->first();
 
-        if ($deleted) {
-            // Delete from Firebase
-            $this->firebase->getDatabase()
-                ->getReference('traffic_enforcers/' . $enforcerId)
-                ->remove();
-
-            return response()->json(['success' => 'Driver deleted successfully']);
-        } else {
-            return response()->json(['error' => 'Driver not found.']);
+        if (!$enforcer) {
+            return response()->json(['error' => 'Enforcer not found.']);
         }
+
+        // Update archive status in DB
+        DB::table('traffic_enforcers')
+            ->where('enforcer_id', $enforcerId)
+            ->update(['is_archived' => 1]);
+
+        // Update in Firebase too
+        $this->firebase->getDatabase()
+            ->getReference('traffic_enforcers/' . $enforcerId)
+            ->update(['is_archived' => true]);
+
+        return response()->json(['success' => 'Enforcer archived successfully']);
     }
+
+    public function archived()
+    {
+        // Fetch enforcers where is_archived = 1 (archived)
+        $archivedEnforcers = DB::table('traffic_enforcers')
+            ->where('is_archived', 1)
+            ->get();
+
+        return response()->json(['enforcers' => $archivedEnforcers]);
+    }
+
+    public function restore(Request $request)
+    {
+        $enforcerId = $request->rid;
+
+        $enforcer = DB::table('traffic_enforcers')->where('enforcer_id', $enforcerId)->first();
+
+        if (!$enforcer) {
+            return response()->json(['error' => 'Enforcer not found.']); // ✅ fixed wording
+        }
+
+        DB::table('traffic_enforcers')
+            ->where('enforcer_id', $enforcerId)
+            ->update(['is_archived' => 0]);
+
+        return response()->json([
+            'success' => 'Enforcer restored successfully!',
+            'enforcer' => [
+                'enforcer_id'   => $enforcer->enforcer_id,
+                'enforcer_name' => $enforcer->enforcer_name,
+                'assigned_area' => $enforcer->assigned_area,
+                'gender'        => $enforcer->gender,
+            ]
+        ]);
+    }
+
 
     public function toggleLockAll()
     {
@@ -445,5 +538,77 @@ class EnforcerController extends Controller
         // Optional: log out after password change
         Session::flush();
         return redirect()->route('enforcer-login')->with('success', 'Password changed successfully. Please log in again.');
+    }
+
+    public function issueViolation(Request $request)
+    {
+        $enforcerId = $request->enforcer_id;
+
+        DB::table('enforcer_violations')->insert([
+            'enforcer_id'   => $enforcerId,
+            'violation_type' => $request->violation_type,
+            'details'       => $request->details,
+            'penalty_amount' => $request->penalty_amount,
+            'created_at'    => now(),
+            'updated_at'    => now(),
+        ]);
+
+        // 🛑 Auto-lock enforcer immediately
+        DB::table('traffic_enforcers')
+            ->where('enforcer_id', $enforcerId)
+            ->update(['is_locked' => 1]);
+
+        return response()->json([
+            'success' => 'Violation issued and enforcer account locked automatically.',
+            'enforcer_id' => $enforcerId
+        ]);
+    }
+
+    public function settleSingleViolation(Request $request)
+    {
+        $violationId = $request->id;
+
+        // ✅ Mark violation as settled
+        DB::table('enforcer_violations')
+            ->where('id', $violationId)
+            ->update([
+                'status' => 'settled',
+                'updated_at' => now()
+            ]);
+        // ✅ Get enforcer ID of this violation
+        $enforcerId = DB::table('enforcer_violations')
+            ->where('id', $violationId)
+            ->value('enforcer_id');
+
+        // ✅ Count remaining pending violations
+        $pending = DB::table('enforcer_violations')
+            ->where('enforcer_id', $enforcerId)
+            ->where('status', 'pending')
+            ->count();
+
+        $unlocked = false;
+
+        if ($pending === 0) {
+            // 🔓 Unlock enforcer if no pending violations
+            DB::table('traffic_enforcers')
+                ->where('enforcer_id', $enforcerId)
+                ->update(['is_locked' => 0]);
+
+            // 🔓 Update Firebase
+            $this->firebase->getDatabase()
+                ->getReference('traffic_enforcers/' . $enforcerId)
+                ->update([
+                    'is_locked' => false,
+                    'updated_at' => now()->toDateTimeString()
+                ]);
+
+            $unlocked = true;
+        }
+
+        return response()->json([
+            'success' => true,
+            'enforcer_id' => $enforcerId,
+            'unlocked' => $unlocked
+        ]);
     }
 }

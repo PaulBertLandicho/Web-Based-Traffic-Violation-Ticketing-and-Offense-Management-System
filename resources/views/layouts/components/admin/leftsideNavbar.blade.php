@@ -21,7 +21,7 @@
             <a href="{{ route('enforcers.view') }}"
                 class="leftsidebar-nav-link {{ request()->is('view_all_enforcers') ? 'active' : '' }}">
                 <div><i class="fas fa-users-cog"></i></div>
-                <span>View All Traffic Officers</span>
+                <span>Manage Traffic Enforcers</span>
             </a>
         </li>
 
@@ -37,7 +37,7 @@
             <a href="{{ route('admin.view.drivers') }}"
                 class="leftsidebar-nav-link {{ request()->is('view_all_drivers') ? 'active' : '' }}">
                 <div><i class="fas fa-users"></i></div>
-                <span>View All Driver Records</span>
+                <span>Manage Driver Violation Records</span>
             </a>
         </li>
 
@@ -45,7 +45,7 @@
             <a href="{{ route('admin.paidTickets') }}"
                 class="leftsidebar-nav-link {{ request()->is('paid_fine_tickets') ? 'active' : '' }}">
                 <div><i class="fas fa-check-double"></i></div>
-                <span>List of Paid Fine Tickets</span>
+                <span>List of Paid Violation Tickets</span>
             </a>
         </li>
 
@@ -53,7 +53,7 @@
             <a href="{{ route('admin.pendingTickets.index') }}"
                 class="leftsidebar-nav-link {{ request()->is('pending_fine_tickets') ? 'active' : '' }}">
                 <div><i class="fas fa-pause"></i></div>
-                <span>List of Pending Fine Tickets</span>
+                <span>List of Pending Violation Tickets</span>
             </a>
         </li>
 

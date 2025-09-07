@@ -145,8 +145,32 @@
                                 columns: ':not(:first-child)'
                             }
                         }
-                    ]
+                    ],
+                    initComplete: function() {
+                        let api = this.api();
+
+                        // Add dropdown beside search bar
+                        $("#dataTable_filter").append(`
+        <label class="ml-3">
+            <select id="statusFilter" class="form-control form-control-sm">
+                <option value="">Filter by Status</option>
+                <option value="Pending">Pending</option>
+                <option value="Due Date">Due Date</option>
+            </select>
+        </label>
+    `);
+
+                        // Filter table when Status selected
+                        $('#statusFilter').on('change', function() {
+                            let selected = $(this).val();
+                            api.column(6) // ✅ column index for "Status"
+                                .search(selected ? '^' + selected + '$' : '', true, false)
+                                .draw();
+                        });
+
+                    }
                 });
+
 
                 // ✅ View Ticket (Dynamic Modal Load)
                 $(document).on('click', '.view-btn', function() {
@@ -346,34 +370,38 @@
                         let rows = "";
                         data.forEach(ticket => {
                             rows += `
-                    <tr>
-                        <td>
-                            <button class="btn btn-secondary view-btn" data-id="${ticket.ref_no}">
-                                <i class="fas fa-ticket-alt text-warning"></i> Tickets
-                            </button>
-                            <button class="btn btn-warning pay-btn" data-id="${ticket.ref_no}">
-                                Paid Now <i class="fas fa-coins"></i>
-                            </button>
-                        </td>
-                        <td>${ticket.ref_no}</td>
-                        <td>${ticket.enforcer_id}</td>
-                        <td>${ticket.license_id}</td>
-                        <td>${ticket.driver_name}</td>
-                        <td>${ticket.formatted_amount}</td>
-                        <td>
-                            ${ticket.isExpired 
-                                ? '<span class="badge badge-danger">Due Date</span>' 
-                                : '<span class="badge badge-warning">Pending</span>'
-                            }
-                        </td>
-                    </tr>
-                `;
+                <tr>
+                    <td>
+                        <button class="btn btn-secondary view-btn" data-id="${ticket.ref_no}">
+                            <i class="fas fa-ticket-alt text-warning"></i> Tickets
+                        </button>
+                        <button class="btn btn-warning pay-btn" data-id="${ticket.ref_no}">
+                            Paid Now <i class="fas fa-coins"></i>
+                        </button>
+                    </td>
+                    <td>${ticket.ref_no}</td>
+                    <td>${ticket.enforcer_id}</td>
+                    <td>${ticket.license_id}</td>
+                    <td>${ticket.driver_name}</td>
+                    <td>${ticket.formatted_amount}</td>
+                    <td>
+                        ${ticket.isExpired 
+                            ? '<span class="badge badge-danger">Due Date</span>' 
+                            : '<span class="badge badge-warning">Pending</span>'
+                        }
+                    </td>
+                </tr>`;
                         });
 
                         $("#dataTable tbody").html(rows);
+
+                        // 🔄 Reapply current filter
+                        let selected = $('#statusFilter').val();
+                        $('#dataTable').DataTable().column(6).search(selected, true, false).draw();
                     }
                 });
             }
+
 
             // Initial load
             loadPendingTickets();
