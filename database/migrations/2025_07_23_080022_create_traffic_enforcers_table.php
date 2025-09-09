@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('enforcer_password');
             $table->string('enforcer_name');
             $table->string('assigned_area');
+            $table->string('contact_no');
             $table->string('gender');
             $table->date('registered_at');
             $table->boolean('is_locked')->default(0);

@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Mail;   // ✅ correct import
+use App\Mail\EnforcerRegisteredMail;   // ✅ import your mailable
 use Illuminate\Support\Facades\DB;
 use App\Services\FirebaseService;
 use App\Models\TrafficEnforcer;
@@ -184,8 +186,8 @@ class EnforcerController extends Controller
             'enforcerpasswordconfirm' => 'required|same:enforcerpassword',
             'enforcername' => 'required',
             'assignedarea' => 'required',
+            'contactno' => 'required|string',
             'gender' => 'required',
-
         ]);
 
         if ($validator->fails()) {
@@ -194,58 +196,46 @@ class EnforcerController extends Controller
                 ->withInput();
         }
 
-        // 🟢 Generate next Enforcer ID
+        //  Format contact number
+        $contact = $request->contactno;
+        if (!str_starts_with($contact, '+63')) {
+            $contact = '+63' . ltrim($contact, '0');
+        }
+        // Generate next Enforcer ID
         $lastEnforcer = DB::table('traffic_enforcers')
             ->orderBy('enforcer_id', 'desc')
             ->first();
 
-        if ($lastEnforcer) {
-            // Extract numeric part (after TE-)
-            $lastNumber = intval(substr($lastEnforcer->enforcer_id, 3));
-            $nextNumber = $lastNumber + 1;
-        } else {
-            $nextNumber = 1; // First enforcer
-        }
+        $nextNumber = $lastEnforcer
+            ? intval(substr($lastEnforcer->enforcer_id, 3)) + 1
+            : 1;
 
-        // Format as TE-01, TE-02, etc.
         $enforcerId = 'TE-' . str_pad($nextNumber, 2, '0', STR_PAD_LEFT);
 
-        // Get role_id for traffic enforcer
+        // Get role_id
         $roleId = DB::table('roles')->where('role_name', 'traffic enforcer')->value('role_id');
-        if (!$roleId) {
-            return redirect()->back()->with('error', 'Enforcer role not found. Please check roles table.');
-        }
 
-        // Insert into DB
-        DB::table('traffic_enforcers')->insert([
+        $data = [
             'enforcer_id' => $enforcerId,
             'enforcer_email' => $request->enforceremail,
             'enforcer_password' => Hash::make($request->enforcerpassword),
             'enforcer_name' => $request->enforcername,
             'assigned_area' => $request->assignedarea,
+            'contact_no' => $contact,
             'gender' => $request->gender,
             'registered_at' => now()->toDateString(),
             'code' => random_int(100000, 999999),
             'is_locked' => false,
             'role_id' => $roleId,
-        ]);
+        ];
 
-        // Save to Firebase
-        $this->firebase->getDatabase()
-            ->getReference('traffic_enforcers/' . $enforcerId)
-            ->set([
-                'enforcer_id' => $enforcerId,
-                'enforcer_email' => $request->enforceremail,
-                'enforcer_password' => Hash::make($request->enforcerpassword),
-                'enforcer_name' => $request->enforcername,
-                'assigned_area' => $request->assignedarea,
-                'gender' => $request->gender,
-                'registered_at' => now()->toDateString(),
-                'code' => random_int(100000, 999999),
-                'is_locked' => false,
-            ]);
+        DB::table('traffic_enforcers')->insert($data);
 
-        return redirect()->route('enforcers.create')->with('success', "Traffic Enforcer {$enforcerId} added successfully!");
+        // Send Email Notification
+        Mail::to($request->enforceremail)->send(new EnforcerRegisteredMail($data));
+
+        return redirect()->route('enforcers.create')
+            ->with('success', "Traffic Enforcer {$enforcerId} added successfully and notified via email!");
     }
 
     public function index()

@@ -111,15 +111,24 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <label for="registered_at"></label>
-                            <input type="date" class="form-control" id="registered_at" value="{{ now()->toDateString() }}" hidden>
-                            <button type="submit" class="btn btn-primary" name="add-tpo-submit">Add Traffic Enforcer</button>
                         </div>
-                    </form>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="contact_no">Enforcer Contact:</label>
+                                <input type="text" class="form-control" id="contact_no" name="contactno" value="{{ old('contactno') }}" placeholder="+63">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="registered_at">Enforcer Registerd</label>
+                                <input type="date" class="form-control" id="registered_at" value="{{ now()->toDateString() }}" disabled>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" name="add-tpo-submit">Add Traffic Enforcer</button>
                 </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
 </div>
 <!-- Dashboard main content end -->
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
