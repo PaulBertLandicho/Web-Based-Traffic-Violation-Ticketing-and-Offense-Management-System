@@ -47,6 +47,9 @@
                                 </td>
                                 <td>
                                     {{ $ticket->ref_no }}
+                                    @if(\Carbon\Carbon::parse($ticket->created_at)->isToday())
+                                    <span class="badge bg-success">New Issued</span>
+                                    @endif
                                 </td>
                                 <td>{{ $ticket->enforcer_id }}</td>
                                 <td>{{ $ticket->license_id }}</td>
@@ -367,33 +370,63 @@
                     url: "{{ route('admin.pendingTickets.fetch') }}",
                     method: "GET",
                     success: function(data) {
-                        let rows = "";
+                        let today = new Date().toISOString().slice(0, 10);
+                        let rows = ""; // initialize rows
+
+                        // Separate today's issued and older tickets
+                        let todaysTickets = [];
+                        let olderTickets = [];
+
                         data.forEach(ticket => {
-                            rows += `
-                <tr>
-                    <td>
-                        <button class="btn btn-secondary view-btn" data-id="${ticket.ref_no}">
-                            <i class="fas fa-ticket-alt text-warning"></i> Tickets
-                        </button>
-                        <button class="btn btn-warning pay-btn" data-id="${ticket.ref_no}">
-                            Paid Now <i class="fas fa-coins"></i>
-                        </button>
-                    </td>
-                    <td>${ticket.ref_no}</td>
-                    <td>${ticket.enforcer_id}</td>
-                    <td>${ticket.license_id}</td>
-                    <td>${ticket.driver_name}</td>
-                    <td>${ticket.formatted_amount}</td>
-                    <td>
-                        ${ticket.isExpired 
-                            ? '<span class="badge badge-danger">Due Date</span>' 
-                            : '<span class="badge badge-warning">Pending</span>'
-                        }
-                    </td>
-                </tr>`;
+                            if (ticket.issued_date === today) {
+                                todaysTickets.push(ticket);
+                            } else {
+                                olderTickets.push(ticket);
+                            }
                         });
 
+                        // Function to generate row HTML
+                        function generateRow(ticket) {
+                            let newIssuedBadge = (ticket.issued_date === today) ?
+                                '<span class="badge bg-success mr-1">New Issued</span>' :
+                                '';
+
+                            return `
+        <tr>
+            <td>
+                <button class="btn btn-secondary view-btn" data-id="${ticket.ref_no}">
+                    <i class="fas fa-ticket-alt text-warning"></i> Tickets
+                </button>
+                <button class="btn btn-warning pay-btn" data-id="${ticket.ref_no}">
+                    Paid Now <i class="fas fa-coins"></i>
+                </button>
+            </td>
+            <td>${newIssuedBadge} ${ticket.ref_no}</td>
+            <td>${ticket.enforcer_id}</td>
+            <td>${ticket.license_id}</td>
+            <td>${ticket.driver_name}</td>
+            <td>${ticket.formatted_amount}</td>
+            <td>
+                ${ticket.isExpired 
+                    ? '<span class="badge badge-danger">Due Date</span>' 
+                    : '<span class="badge badge-warning">Pending</span>'
+                }
+            </td>
+        </tr>`;
+                        }
+
+                        // Build rows with today's tickets first
+                        todaysTickets.forEach(ticket => {
+                            rows += generateRow(ticket);
+                        });
+
+                        olderTickets.forEach(ticket => {
+                            rows += generateRow(ticket);
+                        });
+
+                        // Render into table
                         $("#dataTable tbody").html(rows);
+
 
                         // 🔄 Reapply current filter
                         let selected = $('#statusFilter').val();

@@ -34,7 +34,10 @@ class DriverController extends Controller
             'drivername' => 'required|string',
             'licensetype' => 'required',
             'homeaddress' => 'required|string',
-            'contactno' => 'required|string',
+            'contactno' => [
+                'required',
+                'regex:/^(?:\+639\d{9}|09\d{9}|9\d{9})$/'
+            ],
             'licenseissuedate' => 'required|date',
             'licenseexpiredate' => 'required|date|after:licenseissuedate',
             'dateofbirth' => 'required|date'

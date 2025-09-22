@@ -170,7 +170,6 @@
                                     placeholder="ABC-123 or ABC-1234"
                                     maxlength="8"
                                     required>
-                                <small class="form-text text-muted">Format: ABC-123 or ABC-1234</small>
                             </div>
                         </div>
                         <div class="form-row">
@@ -187,7 +186,7 @@
                                     @endforeach
                                 </select>
                                 <div class="input-group-append">
-                                    <button type="button" class="btn btn-sm btn-success mt-2" onclick="addViolation()">Add Violation</button>
+                                    <button type="button" class="btn btn-sm btn-success mt-2" onclick="addViolation()"><i class="fas fa-circle-plus"></i> Add Violation</button>
                                 </div>
                             </div>
                             <!-- Total Violation Amount -->
@@ -205,12 +204,6 @@
                         <button type="submit" class="btn btn-primary" id="issueFineBtn">
                             <i class="fas fa-ticket-alt" id="issueIcon"></i> Issue Fine
                         </button>
-
-                        <!-- Cancel Button with JS function to avoid conflicts -->
-                        <button type="button" class="btn btn-danger" onclick="redirectToDashboard()">
-                            <i class="fas fa-times-circle"></i> Cancel
-                        </button>
-
                     </form>
                 </div>
             </div>
@@ -343,9 +336,6 @@
             </script>
 
             <script>
-                function redirectToDashboard() {
-                    window.location.href = "{{ route('enforcer.enforcer-dashboard') }}";
-                }
                 // Start Printable Citation Ticket
                 function printFineDetails() {
                     const fineContent = document.getElementById("fine_detail").innerHTML;
@@ -543,18 +533,41 @@
                     });
                 });
 
-                document.getElementById("vehicle_no").addEventListener("input", function(e) {
-                    let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""); // only letters/numbers
-                    let formatted = "";
+                document.addEventListener("DOMContentLoaded", function() {
+                    const vehicleInput = document.getElementById("vehicle_no");
 
-                    if (value.length > 3) {
-                        formatted += value.substring(0, 3) + "-";
-                        formatted += value.substring(3, 7); // allow up to 4 digits
-                    } else {
-                        formatted = value;
-                    }
+                    // Create error message element
+                    const vehicleError = document.createElement("div");
+                    vehicleError.id = "vehicle-error";
+                    vehicleError.className = "text-danger mt-1";
+                    vehicleError.style.display = "none"; // hidden by default
+                    vehicleError.innerHTML = "<i class='fas fa-exclamation-circle'></i> Invalid Vehicle No format. Use ABC-123 or ABC-1234.";
+                    vehicleInput.parentNode.appendChild(vehicleError);
 
-                    e.target.value = formatted;
+                    vehicleInput.addEventListener("input", function(e) {
+                        let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+                        let formatted = "";
+
+                        if (value.length > 3) {
+                            formatted += value.substring(0, 3) + "-";
+                            formatted += value.substring(3, 7); // allow 3 or 4 digits
+                        } else {
+                            formatted = value;
+                        }
+
+                        e.target.value = formatted;
+
+                        // Regex: ABC-123 or ABC-1234
+                        const vehiclePattern = /^[A-Z]{3}-\d{3,4}$/;
+
+                        if (formatted.length > 0 && !vehiclePattern.test(formatted)) {
+                            vehicleError.style.display = "block"; // show error
+                            vehicleInput.classList.add("is-invalid");
+                        } else {
+                            vehicleError.style.display = "none"; // hide error
+                            vehicleInput.classList.remove("is-invalid");
+                        }
+                    });
                 });
             </script>
 

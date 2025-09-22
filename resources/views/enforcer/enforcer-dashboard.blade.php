@@ -22,7 +22,7 @@
             <div class="col-12 p-3 d-lg-none d-md-block d-sm-block">
                 <button class="btn btn-secondary btn-lg btn-block" data-toggle="modal" data-target="#pastFinesModal">
                     <i style="font-size: 2rem;" class="fas fa-history"></i><br>
-                    View driver's Past Fine
+                    View Driver's Past Violations
                 </button>
             </div>
 
@@ -45,7 +45,7 @@
 </div>
 <!-- Dashboard main content end here ========================================-->
 
-<!-- Modal -->
+
 <div class="modal fade @if(isset($results)) show d-block @endif" id="pastFinesModal" tabindex="-1" role="dialog" aria-labelledby="pastFinesModalLabel" @if(isset($results)) style="display:block; background-color: rgba(0,0,0,0.5);" @endif>
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -63,10 +63,13 @@
                         <div class="col-md-9 mb-2">
                             <input type="text"
                                 class="form-control"
+                                id="license_id_input"
                                 name="licenseid"
                                 placeholder="Enter License ID"
                                 value="{{ request('licenseid') }}"
+                                maxlength="13"
                                 required>
+                            <small class="form-text text-muted">Format: AB-12-345678 or N01-23-456789</small>
                         </div>
                         <div class="col-md-3 mb-2">
                             <button type="submit" class="btn btn-primary">
@@ -90,6 +93,7 @@
 
     <script type="text/javascript" language="javascript" src="{{ asset('assets/vendors/bootstrap/bootstrap.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         document.getElementById('pastFinesSearchForm').addEventListener('submit', function(e) {
@@ -209,6 +213,76 @@
                     duration: 2000
                 }
             }
+        });
+
+        setInterval(function() {
+            fetch("{{ route('enforcer.checkStatus') }}")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'archived') {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Account Archived',
+                            text: 'Your account has been archived. Logging out...',
+                            timer: 3000, // 3 seconds
+                            timerProgressBar: true,
+                            showConfirmButton: false,
+                            allowOutsideClick: false,
+                            didClose: () => {
+                                window.location.href = "{{ route('enforcer.login') }}";
+                            }
+                        });
+                    } else if (data.status === 'locked') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Account Locked',
+                            text: 'Your account has been locked. Logging out...',
+                            timer: 3000, // 3 seconds
+                            timerProgressBar: true,
+                            showConfirmButton: false,
+                            allowOutsideClick: false,
+                            didClose: () => {
+                                window.location.href = "{{ route('enforcer.login') }}";
+                            }
+                        });
+                    }
+                });
+        }, 5000); // check every 5 seconds
+
+        document.getElementById("license_id_input").addEventListener("input", function(e) {
+            let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""); // only allow letters & numbers
+            let formatted = "";
+
+            // Detect if it's starting with 2 letters (old format) or 1 letter + digits (new format)
+            if (/^[A-Z]{2}/.test(value)) {
+                // OLD FORMAT -> AB-12-345678
+                if (value.length > 2) {
+                    formatted += value.substring(0, 2) + "-";
+                    if (value.length > 4) {
+                        formatted += value.substring(2, 4) + "-";
+                        formatted += value.substring(4, 10);
+                    } else {
+                        formatted += value.substring(2);
+                    }
+                } else {
+                    formatted = value;
+                }
+            } else {
+                // NEW FORMAT -> N01-23-456789
+                if (value.length > 3) {
+                    formatted += value.substring(0, 3) + "-";
+                    if (value.length > 5) {
+                        formatted += value.substring(3, 5) + "-";
+                        formatted += value.substring(5, 11);
+                    } else {
+                        formatted += value.substring(3);
+                    }
+                } else {
+                    formatted = value;
+                }
+            }
+
+            e.target.value = formatted;
         });
     </script>
 

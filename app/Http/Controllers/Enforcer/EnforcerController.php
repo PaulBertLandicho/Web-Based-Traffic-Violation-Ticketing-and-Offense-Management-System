@@ -6,11 +6,12 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Mail;   // ✅ correct import
-use App\Mail\EnforcerRegisteredMail;   // ✅ import your mailable
+use Illuminate\Support\Facades\Mail;
+use App\Mail\EnforcerRegisteredMail;
 use Illuminate\Support\Facades\DB;
 use App\Services\FirebaseService;
 use App\Models\TrafficEnforcer;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 
 class EnforcerController extends Controller
@@ -22,6 +23,68 @@ class EnforcerController extends Controller
         $this->firebase = $firebase;
     }
 
+    public function sendNotice(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string',
+            'message' => 'required|string',
+            'enforcer_id' => 'nullable|string' // if null → send to all
+        ]);
+
+        if ($request->enforcer_id === 'all') {
+            // Save notice for all enforcers
+            $enforcers = DB::table('traffic_enforcers')->pluck('enforcer_id');
+            foreach ($enforcers as $id) {
+                $notif = Notification::create([
+                    'enforcer_id' => $request->enforcer_id,
+                    'title'       => $request->title,
+                    'message'     => $request->message,
+                    'is_read'     => 0,
+                ]);
+                // Send to Firebase for realtime
+                $this->firebase->getDatabase()
+                    ->getReference('notifications/' . $id)
+                    ->push([
+                        'id'        => $notif->id,   // 👈 store MySQL ID
+                        'title'     => $notif->title,
+                        'message'   => $notif->message,
+                        'is_read'   => false,
+                        'created_at' =>  now()->timezone('Asia/Manila')->toDateTimeString() // 👈 unified field name
+                    ]);
+            }
+        } else {
+            // Send to one enforcer
+            $notif = Notification::create([
+                'enforcer_id' => $request->enforcer_id,
+                'title'       => $request->title,
+                'message'     => $request->message,
+                'is_read'     => 0,
+            ]);
+
+            $this->firebase->getDatabase()
+                ->getReference('notifications/' . $request->enforcer_id)
+                ->push([
+                    'id'        => $notif->id,   // 👈 store MySQL ID
+                    'title'     => $notif->title,
+                    'message'   => $notif->message,
+                    'is_read'   => false,
+                    'created_at' =>  now()->timezone('Asia/Manila')->toDateTimeString() // 👈 match frontend
+                ]);
+        }
+
+        return back()->with('success', 'Notice sent successfully!');
+    }
+
+    public function markNotificationRead(Request $request)
+    {
+        $request->validate(['notification_id' => 'required']);
+
+        DB::table('notifications')
+            ->where('id', $request->notification_id)
+            ->update(['is_read' => 1]);
+
+        return response()->json(['success' => true]);
+    }
     public function enforcer()
     {
         return view('enforcer.enforcer-login');
@@ -48,6 +111,13 @@ class EnforcerController extends Controller
             ->first();
 
         if ($enforcer && Hash::check($request->enforcer_password, $enforcer->enforcer_password)) {
+
+            // ✅ Prevent login if archived
+            if ($enforcer->is_archived) {
+                return redirect()->route('enforcer.login')
+                    ->with('error', 'Your account has been archived. Please contact the administrator.');
+            }
+
             // If the account is locked, show reason
             if ($enforcer->is_locked) {
                 // Get latest violation complaint filed against this enforcer
@@ -105,6 +175,12 @@ class EnforcerController extends Controller
         if ($enforcer && $enforcer->is_locked) {
             session()->flush();
             return redirect()->route('enforcer.login')->with('error', 'Your account is locked.');
+        }
+
+        // ✅ Auto logout if archived
+        if ($enforcer->is_archived) {
+            session()->flush();
+            return redirect()->route('enforcer.login')->with('error', 'Your account has been archived. Please contact the administrator.');
         }
 
         $reportedFines = DB::table('issued_fine_tickets')
@@ -176,6 +252,32 @@ class EnforcerController extends Controller
         ], $monthlyCounts));
     }
 
+    public function checkStatus()
+    {
+        if (!session()->has('enforcer_id')) {
+            return response()->json(['status' => 'logged_out']);
+        }
+
+        $enforcer = DB::table('traffic_enforcers')
+            ->where('enforcer_id', session('enforcer_id'))
+            ->first();
+
+        if (!$enforcer) {
+            return response()->json(['status' => 'not_found']);
+        }
+
+        if ($enforcer->is_archived) {
+            session()->flush();
+            return response()->json(['status' => 'archived']);
+        }
+
+        if ($enforcer->is_locked) {
+            session()->flush();
+            return response()->json(['status' => 'locked']);
+        }
+
+        return response()->json(['status' => 'active']);
+    }
 
     // Store Traffic Enforcer
     public function store(Request $request)
@@ -186,7 +288,10 @@ class EnforcerController extends Controller
             'enforcerpasswordconfirm' => 'required|same:enforcerpassword',
             'enforcername' => 'required',
             'assignedarea' => 'required',
-            'contactno' => 'required|string',
+            'contactno' => [
+                'required',
+                'regex:/^9\d{9}$/', // must start with 9 and have 10 digits
+            ],
             'gender' => 'required',
         ]);
 

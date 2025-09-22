@@ -133,7 +133,23 @@ class FineTicketController extends Controller
                 'total_amount' => $amount, // ✅ match MySQL
                 'status' => 'pending',
                 'paid_date' => null,
+                'created_at' => now()->toDateTimeString(),
             ]);
+
+        // 👉 Add an admin notification
+        $this->firebase->getDatabase()
+            ->getReference('admin_notifications/' . $ref_no)
+            ->set([
+                'ref_no'       => $ref_no,
+                'driver_name'  => DB::table('driver_list')->where('license_id', $request->license_id)->value('driver_name'),
+                'enforcer_id'  => Session::get('enforcer_id'),
+                'enforcer_name' => Session::get('enforcer_name'),
+                'title'        => 'New Fine Issued Today',
+                'message'      => 'A new violation has been issued by ' . Session::get('enforcer_name'),
+                'status'       => 'unread',
+                'created_at'   => now()->toDateTimeString(),
+            ]);
+
 
         $ticket = DB::table('issued_fine_tickets')
             ->join('vehicles', 'issued_fine_tickets.vehicle_no', '=', 'vehicles.vehicle_no')

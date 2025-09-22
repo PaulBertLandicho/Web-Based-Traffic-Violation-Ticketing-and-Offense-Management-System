@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Enforcer\EnforcerForgotPasswordController;
 use App\Http\Controllers\Admin\AdminForgotPasswordController;
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Enforcer\EnforcerController;
 use App\Http\Controllers\Driver\DriverController;
 use App\Http\Controllers\Admin\AdminController;
@@ -36,6 +37,9 @@ Route::post('/admin/driver/update', [DriverController::class, 'update']);
 Route::post('/admin/driver/archive', [DriverController::class, 'archive'])->name('driver.archive');
 Route::get('/admin/driver/archived', [DriverController::class, 'archived'])->name('drivers.archived');
 
+Route::get('/notifications', [NotificationController::class, 'notif'])->name('notifications.index');
+Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+Route::get('/notifications/ajax', [NotificationController::class, 'ajax'])->name('notifications.ajax');
 
 // Restore Driver
 Route::post('/admin/drivers/restore/{licenseId}', [DriverController::class, 'restore'])->name('drivers.restore');
@@ -95,6 +99,7 @@ Route::post('/enforcer-login', [EnforcerController::class, 'login'])->name('enfo
 // Toggle single and all enforcer lock
 Route::post('/enforcer/toggle-lock', [EnforcerController::class, 'toggleLock'])->name('enforcer.toggleLock');
 Route::post('/enforcer/toggle-lock-all', [EnforcerController::class, 'toggleLockAll'])->name('enforcer.toggleLockAll');
+Route::get('/enforcer/check-status', [EnforcerController::class, 'checkStatus'])->name('enforcer.checkStatus');
 
 // Enforcer Dashboard (protected by session check)
 Route::get('/enforcer-dashboard', [EnforcerController::class, 'enforcerDashboard'])->name('enforcer.enforcer-dashboard');
@@ -151,3 +156,8 @@ Route::post('/enforcer/reset-password', [EnforcerForgotPasswordController::class
 
 Route::post('/admin/enforcer/violation', [EnforcerController::class, 'issueViolation'])->name('enforcer.issueViolation');
 Route::post('/admin/enforcer/violation/settle', [EnforcerController::class, 'settleSingleViolation'])->name('enforcer.violation.settle');
+
+Route::post('/enforcers/send-notice', [EnforcerController::class, 'sendNotice'])
+    ->name('enforcer.sendNotice');
+Route::post('/enforcer/notifications/mark-read', [EnforcerController::class, 'markNotificationRead'])
+    ->name('enforcer.notifications.markRead');

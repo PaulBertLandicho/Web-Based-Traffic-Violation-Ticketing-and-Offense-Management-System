@@ -115,7 +115,25 @@
                         <div class="form-row">
                             <div class="form-group col-md-6">
                                 <label for="contact_no">Enforcer Contact:</label>
-                                <input type="text" class="form-control" id="contact_no" name="contactno" value="{{ old('contactno') }}" placeholder="+63">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text d-flex align-items-center">
+                                            <img src="https://flagcdn.com/w20/ph.png" alt="PH" style="width:20px; height:14px; margin-right:6px;">
+                                            +63
+                                        </span>
+                                    </div>
+                                    <input type="text"
+                                        class="form-control"
+                                        id="contact_no"
+                                        name="contactno"
+                                        placeholder="9XXXXXXXXX"
+                                        maxlength="10"
+                                        required
+                                        value="{{ old('contactno') }}">
+                                </div>
+                                <div id="contact-error" class="text-danger mt-1" style="display:none;">
+                                    <i class="fas fa-exclamation-circle"></i> Contact number must start with 9 and be 10 digits long.
+                                </div>
                             </div>
                             <div class="form-group col-md-6">
                                 <label for="registered_at">Enforcer Registerd</label>
@@ -134,4 +152,22 @@
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const contactInput = document.getElementById("contact_no");
+        const errorMsg = document.getElementById("contact-error");
+
+        contactInput.addEventListener("input", function() {
+            const pattern = /^9\d{9}$/; // must start with 9 + 9 more digits (total 10)
+
+            if (contactInput.value.length > 0 && !pattern.test(contactInput.value)) {
+                contactInput.classList.add("is-invalid");
+                errorMsg.style.display = "block";
+            } else {
+                contactInput.classList.remove("is-invalid");
+                errorMsg.style.display = "none";
+            }
+        });
+    });
+</script>
 @endsection

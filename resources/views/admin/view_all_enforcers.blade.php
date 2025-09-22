@@ -132,7 +132,28 @@
                             </tr>
                         </thead>
                         <tbody>
+                            @php
+                            // ✅ Rank enforcers by amount collected
+                            $sortedCollectors = collect($fineStats)->sortByDesc('reported_fine_amount')->values();
+
+                            $topCollectorId = $sortedCollectors->get(0)->enforcer_id ?? null;
+                            $secondCollectorId = $sortedCollectors->get(1)->enforcer_id ?? null;
+                            $lowestCollectorId = $sortedCollectors->last()->enforcer_id ?? null;
+                            @endphp
+
                             @foreach ($enforcers as $enforcer)
+                            @php
+                            $stats = $fineStats[$enforcer->enforcer_id] ?? null;
+
+                            // Check if new (no fines yet)
+                            $isNew = !$stats || $stats->reported_fine_count == 0;
+
+                            // Determine collector ranks
+                            $isTopCollector = $enforcer->enforcer_id == $topCollectorId && $stats && $stats->reported_fine_amount > 0;
+                            $isSecondCollector = $enforcer->enforcer_id == $secondCollectorId && $stats && $stats->reported_fine_amount > 0;
+                            $isLowestCollector = $enforcer->enforcer_id == $lowestCollectorId && $stats && $stats->reported_fine_amount > 0;
+                            @endphp
+
                             <tr>
                                 <td>
                                     <button class="btn btn-info btn-sm view_data" data-id="{{ $enforcer->enforcer_id }}"><i class="fas fa-eye"></i></button>
@@ -142,21 +163,37 @@
                                         data-id="{{ $enforcer->enforcer_id }}"
                                         data-status="{{ $enforcer->is_locked ? 'locked' : 'unlocked' }}">
                                         <i class="fas {{ $enforcer->is_locked ? 'fa-lock' : 'fa-lock-open' }}"></i>
-                                        {{ $enforcer->is_locked ? ' ' : ' ' }}
                                     </button>
                                     <button class="btn btn-danger btn-sm issue_violation" data-id="{{ $enforcer->enforcer_id }}">
                                         <i class="fas fa-exclamation-triangle"></i>
                                     </button>
                                 </td>
-                                <td>{{ $enforcer->enforcer_id }}</td>
+
+                                <!-- Enforcer ID column -->
+                                <td>
+                                    {{ $enforcer->enforcer_id }}
+                                    @if($isNew)
+                                    <span class="badge bg-success">New Enforcer</span>
+                                    @endif
+                                </td>
+
                                 <td>{{ $enforcer->enforcer_name }}</td>
                                 <td>{{ $enforcer->assigned_area }}</td>
                                 <td>{{ $enforcer->gender }}</td>
-                                @php
-                                $stats = $fineStats[$enforcer->enforcer_id] ?? null;
-                                @endphp
                                 <td>{{ $stats ? $stats->reported_fine_count : 0 }}</td>
-                                <td>₱{{ $stats ? number_format($stats->reported_fine_amount, 2) : '0.00' }}</td>
+
+                                <!-- Total Amount Collected column -->
+                                <td>
+                                    ₱{{ $stats ? number_format($stats->reported_fine_amount, 2) : '0.00' }}
+                                    @if($isTopCollector)
+                                    <span class="badge bg-primary">High Collected</span>
+                                    @elseif($isSecondCollector)
+                                    <span class="badge bg-warning text-dark">Second High</span>
+                                    @elseif($isLowestCollector)
+                                    <span class="badge bg-secondary">Lowest Collected</span>
+                                    @endif
+                                </td>
+
                                 <td>
                                     <span class="badge {{ $enforcer->is_locked ? 'bg-danger' : 'bg-success' }}">
                                         {{ $enforcer->is_locked ? 'Locked' : 'Unlocked' }}
@@ -165,6 +202,7 @@
                             </tr>
                             @endforeach
                         </tbody>
+
                     </table>
                 </div>
             </div>
@@ -277,6 +315,7 @@
                 $('#detail_name').text(res.enforcer.enforcer_name);
                 $('#detail_email').text(res.enforcer.enforcer_email ?? 'N/A');
                 $('#detail_area').text(res.enforcer.assigned_area ?? 'N/A');
+                $('#detail_contact').text(res.enforcer.contact_no ?? 'N/A');
 
                 // =========================
                 // ENFORCER VIOLATIONS FILED (against this enforcer)

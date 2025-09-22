@@ -10,6 +10,7 @@
                 <p><strong>Name:</strong> <span id="detail_name"></span></p>
                 <p><strong>Email:</strong> <span id="detail_email"></span></p>
                 <p><strong>Assigned Area:</strong> <span id="detail_area"></span></p>
+                <p><strong>Contact No#:</strong> <span id="detail_contact"></span></p>
                 <hr>
                 <hr>
                 <h5><strong>Violations Complaint Filed</strong></h5>

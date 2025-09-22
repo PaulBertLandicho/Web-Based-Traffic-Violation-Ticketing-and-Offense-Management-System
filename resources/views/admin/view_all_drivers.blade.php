@@ -190,8 +190,28 @@
                     <strong>Date of Birth:</strong> ${res.driver.date_of_birth || 'N/A'}<br>
                     <strong>License Type:</strong> ${res.driver.license_type || 'N/A'}<br>
                     <strong>Contact No:</strong> ${res.driver.contact_no || 'N/A'}<br>
-                    <hr><strong>Violations Details:</strong><br>
-                    ${res.violations.length ? res.violations.map(v => `${v.violation_type}, ₱${v.total_amount}, ${v.status}<br>`).join('') : 'No Violations'}
+                    <hr><strong>Violations Details:</strong>
+${res.violations.length ? `
+<table class="table table-bordered table-sm mt-2">
+    <thead class="thead-light">
+        <tr>
+            <th>Violation Type</th>
+            <th>Amount</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        ${res.violations.map(v => `
+            <tr>
+                <td>${v.violation_type}</td>
+                <td>₱${v.total_amount}</td>
+                <td>${v.status}</td>
+            </tr>
+        `).join('')}
+    </tbody>
+</table>
+` : '<p>No Violations</p>'}
+
                 `);
                 $('#dataModal').modal('show');
             });

@@ -65,5 +65,18 @@
             </a>
         </li>
 
+        <li class="leftsidebar-nav-item">
+            <a href="{{ route('notifications.index') }}"
+                class="leftsidebar-nav-link {{ request()->is('admin/notifications') ? 'active' : '' }}">
+                <div><i class="fas fa-bell"></i></div>
+                <span>Manage Notifications</span>
+                @php
+                $unreadCount = \App\Models\Notification::where('is_read', false)->count();
+                @endphp
+                @if($unreadCount > 0)
+                <span class="badge badge-danger ml-2">{{ $unreadCount }}</span>
+                @endif
+            </a>
+        </li>
     </ul>
 </div>
