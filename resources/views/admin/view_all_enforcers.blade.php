@@ -258,8 +258,37 @@
                 }
             ],
 
+            language: {
+                sSearch: "",
+                sSearchPlaceholder: "Search...",
+                sEmptyTable: "No data available in table",
+                sInfo: "Showing _START_ to _END_ of _TOTAL_ entries",
+                sInfoEmpty: "Showing 0 to 0 of 0 entries",
+                sInfoFiltered: "(filtered from _MAX_ total entries)",
+                sLengthMenu: "Show _MENU_ entries",
+                sLoadingRecords: "Loading...",
+                sProcessing: "Processing...",
+                sZeroRecords: "No matching records found"
+            },
             initComplete: function() {
                 let api = this.api();
+
+                // ✅ Style the search box and add search icon
+                const $filter = $('.dataTables_filter');
+                $filter.addClass('position-relative');
+
+                const $input = $filter.find('input');
+                $input
+                    .attr('placeholder', 'Search...')
+                    .addClass('form-control')
+                    .css({
+                        'padding-left': '30px',
+                        'width': '200px'
+                    });
+
+                // Add search icon inside label
+                $filter.find('label').prepend('<i class="fas fa-search search-icon position-absolute"></i>');
+
 
                 // Add dropdown beside search bar
                 $("#dataTable_filter").append(`
@@ -393,6 +422,10 @@
                             .css("width", "250px");
                     }
                 });
+                // ✅ Add search icon inside the label
+                $("#violationsTable_filter label").prepend(`
+                <i class="fas fa-search search-icon position-absolute"></i>
+        `);
 
                 // Populate violation filter dropdown
                 $('#violationFilter').empty().append(`<option value="">Filter by Violation</option>`);

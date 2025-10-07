@@ -70,7 +70,7 @@
                 setTimeout(function() {
                     document.getElementById("content").style.display = "block";
                     document.getElementById("loading").style.display = "none";
-                }, );
+                });
             }
 
             // if ('serviceWorker' in navigator) {

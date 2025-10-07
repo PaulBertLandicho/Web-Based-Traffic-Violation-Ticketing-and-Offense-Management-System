@@ -190,7 +190,38 @@
                             </form>`;
                     }
                 }
-            ]
+            ],
+
+            language: {
+                sSearch: "",
+                sSearchPlaceholder: "Search...",
+                sEmptyTable: "No data available in table",
+                sInfo: "Showing _START_ to _END_ of _TOTAL_ entries",
+                sInfoEmpty: "Showing 0 to 0 of 0 entries",
+                sInfoFiltered: "(filtered from _MAX_ total entries)",
+                sLengthMenu: "Show _MENU_ entries",
+                sLoadingRecords: "Loading...",
+                sProcessing: "Processing...",
+                sZeroRecords: "No matching records found"
+            },
+
+            initComplete: function() {
+                const $filter = $('.dataTables_filter');
+                $filter.addClass('position-relative');
+
+                const $input = $filter.find('input');
+                $input
+                    .attr('placeholder', 'Search...')
+                    .addClass('form-control')
+                    .css({
+                        'padding-left': '30px',
+                        'width': '200px'
+                    });
+
+                $filter.find('label').prepend(
+                    '<i class="fas fa-search search-icon position-absolute"></i>'
+                );
+            }
         });
 
         // 🔄 Auto-refresh every 5 seconds

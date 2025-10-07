@@ -152,25 +152,40 @@
                     initComplete: function() {
                         let api = this.api();
 
-                        // Add dropdown beside search bar
-                        $("#dataTable_filter").append(`
-        <label class="ml-3">
-            <select id="statusFilter" class="form-control form-control-sm">
-                <option value="">Filter by Status</option>
-                <option value="Pending">Pending</option>
-                <option value="Due Date">Due Date</option>
-            </select>
-        </label>
-    `);
+                        // ✅ Style the search box and add search icon
+                        const $filter = $('.dataTables_filter');
+                        $filter.addClass('position-relative');
 
-                        // Filter table when Status selected
+                        const $input = $filter.find('input');
+                        $input
+                            .attr('placeholder', 'Search...')
+                            .addClass('form-control')
+                            .css({
+                                'padding-left': '30px',
+                                'width': '200px'
+                            });
+
+                        // Add search icon inside label
+                        $filter.find('label').prepend('<i class="fas fa-search search-icon position-absolute"></i>');
+
+                        // ✅ Add dropdown filter beside search
+                        $filter.append(`
+                <label class="ml-3 mb-0">
+                    <select id="statusFilter" class="form-control form-control-sm">
+                        <option value="">Filter by Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Due Date">Due Date</option>
+                    </select>
+                </label>
+            `);
+
+                        // ✅ Apply filter on change
                         $('#statusFilter').on('change', function() {
-                            let selected = $(this).val();
-                            api.column(6) // ✅ column index for "Status"
+                            const selected = $(this).val();
+                            api.column(6) // 👉 change index if your "Status" column is different
                                 .search(selected ? '^' + selected + '$' : '', true, false)
                                 .draw();
                         });
-
                     }
                 });
 

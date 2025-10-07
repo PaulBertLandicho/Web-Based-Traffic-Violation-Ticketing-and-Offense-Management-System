@@ -90,39 +90,70 @@
                     extend: 'print',
                     className: 'btn btn-dark mb-3'
                 }
-            ]
-        });
+            ],
 
-        // ✅ Append dropdown beside search bar
-        $("#dataTable_filter").addClass("d-flex align-items-center flex-wrap");
+            language: {
+                sSearch: "",
+                sSearchPlaceholder: "Search...",
+                sEmptyTable: "No data available in table",
+                sInfo: "Showing _START_ to _END_ of _TOTAL_ entries",
+                sInfoEmpty: "Showing 0 to 0 of 0 entries",
+                sInfoFiltered: "(filtered from _MAX_ total entries)",
+                sLengthMenu: "Show _MENU_ entries",
+                sLoadingRecords: "Loading...",
+                sProcessing: "Processing...",
+                sZeroRecords: "No matching records found"
+            },
 
-        // ✅ Append dropdown beside search bar
-        $("#dataTable_filter").append(`
-    <select id="violationFilter" class="form-control ml-2 mt-2 mt-sm-0" style="width:auto; display:inline-block; width: 100px;">
-        <option value="">Filter Violations</option>
-    </select>
+            initComplete: function() {
+                let api = this.api();
 
+                // ✅ Style the search box and add search icon
+                const $filter = $('.dataTables_filter');
+                $filter.addClass('position-relative');
+
+                const $input = $filter.find('input');
+                $input
+                    .attr('placeholder', 'Search...')
+                    .addClass('form-control')
+                    .css({
+                        'padding-left': '30px',
+                        'width': '150px'
+                    });
+
+                // Add search icon inside label
+                $filter.find('label').prepend('<i class="fas fa-search search-icon position-absolute"></i>');
+
+                // ✅ Append dropdown beside search bar
+                $("#dataTable_filter").append(`
+                <label class="ml-3">
+                    <select id="violationFilter" class="form-control form-control-sm">
+                        <option value="">Filter Violations</option>
+                    </select>
+                </label>
     `);
 
-        // ✅ Collect all unique violations from table
-        var violations = [];
-        table.column(2).data().each(function(value) {
-            if (value && !violations.includes(value)) {
-                violations.push(value);
+                // ✅ Collect all unique violations from the table
+                var violations = [];
+                table.column(2).data().each(function(value) {
+                    if (value && !violations.includes(value)) {
+                        violations.push(value);
+                    }
+                });
+
+                // ✅ Populate dropdown
+                violations.sort().forEach(v => {
+                    $('#violationFilter').append(`<option value="${v}">${v}</option>`);
+                });
+
+                // ✅ Filter table when dropdown changes
+                $('#violationFilter').on('change', function() {
+                    table.column(2).search(this.value).draw();
+                });
             }
         });
 
-        // ✅ Populate dropdown
-        violations.sort().forEach(v => {
-            $('#violationFilter').append(`<option value="${v}">${v}</option>`);
-        });
-
-        // ✅ Filter by violation type
-        $('#violationFilter').on('change', function() {
-            table.column(2).search(this.value).draw();
-        });
-
-        // 🔐 Account lock check
+        // 🔐 Account lock check every 5 seconds
         setInterval(function() {
             fetch("{{ route('enforcer.check-lock') }}", {
                     method: "POST",
@@ -139,9 +170,7 @@
                         window.location.href = "{{ route('enforcer.logout') }}";
                     }
                 })
-                .catch(error => {
-                    console.error("Lock check failed:", error);
-                });
+                .catch(error => console.error("Lock check failed:", error));
         }, 5000);
     </script>
     @endsection

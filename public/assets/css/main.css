@@ -702,3 +702,29 @@ table th {
 
 @media (max-width: 1400px) {
 }
+
+/*===================================dataTables_filter Search=============================*/
+
+.dataTables_filter {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.dataTables_filter label {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.dataTables_filter .search-icon {
+    position: absolute;
+    left: 10px;
+    color: #6c757d;
+    font-size: 14px;
+    pointer-events: none;
+}
+
+.dataTables_filter input {
+    padding-left: 30px !important; /* space for icon */
+}
