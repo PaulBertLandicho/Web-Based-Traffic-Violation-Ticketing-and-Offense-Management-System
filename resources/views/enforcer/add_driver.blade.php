@@ -81,64 +81,65 @@
                                     <i class="fas fa-calendar-alt"></i>
                                 </span>
                             </div>
-                            <div class="form-row">
-                                <div class="form-group col-md-6">
-                                    <label for="home_address">Home Address</label>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="home_address">Home Address</label>
 
+                                <input type="text"
+                                    class="form-control"
+                                    id="home_address"
+                                    name="homeaddress"
+                                    placeholder="Driver Address"
+                                    value="{{ old('homeaddress') }}">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="contact_no">Contact No.</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text d-flex align-items-center">
+                                            <img src="https://flagcdn.com/w20/ph.png" alt="PH" style="width:20px; height:14px; margin-right:6px;">
+                                            +63
+                                        </span>
+                                    </div>
                                     <input type="text"
                                         class="form-control"
-                                        id="home_address"
-                                        name="homeaddress"
-                                        placeholder="Driver Address"
-                                        value="{{ old('homeaddress') }}">
+                                        id="contact_no"
+                                        name="contactno"
+                                        placeholder="9XXXXXXXXX"
+                                        maxlength="10"
+                                        required
+                                        value="{{ old('contactno') }}">
                                 </div>
+                                <div id="contact-error" class="text-danger mt-1" style="display:none;">
+                                    <i class="fas fa-exclamation-circle"></i> Contact number must start with 9 and be 10 digits long.
+                                </div>
+                            </div>
+                            <div class="form-row">
                                 <div class="form-group col-md-6">
-                                    <label for="contact_no">Contact No.</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text d-flex align-items-center">
-                                                <img src="https://flagcdn.com/w20/ph.png" alt="PH" style="width:20px; height:14px; margin-right:6px;">
-                                                +63
-                                            </span>
-                                        </div>
-                                        <input type="text"
-                                            class="form-control"
-                                            id="contact_no"
-                                            name="contactno"
-                                            placeholder="9XXXXXXXXX"
-                                            maxlength="10"
-                                            required
-                                            value="{{ old('contactno') }}">
-                                    </div>
-                                    <div id="contact-error" class="text-danger mt-1" style="display:none;">
-                                        <i class="fas fa-exclamation-circle"></i> Contact number must start with 9 and be 10 digits long.
-                                    </div>
+                                    <label for="license_issue_date">License Issue Date</label>
+                                    <input type="date"
+                                        class="form-control custom-date-input"
+                                        id="license_issue_date"
+                                        name="licenseissuedate"
+                                        value="{{ old('licenseissuedate') }}">
+                                    <span class="calendar-icon" onclick="document.getElementById('license_issue_date').showPicker()">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </span>
                                 </div>
-                                <div class="form-row">
-                                    <div class="form-group col-md-6">
-                                        <label for="license_issue_date">License Issue Date</label>
-                                        <input type="date"
-                                            class="form-control custom-date-input"
-                                            id="license_issue_date"
-                                            name="licenseissuedate"
-                                            value="{{ old('licenseissuedate') }}">
-                                        <span class="calendar-icon" onclick="document.getElementById('license_issue_date').showPicker()">
-                                            <i class="fas fa-calendar-alt"></i>
-                                        </span>
-                                    </div>
-                                    <div class="form-group col-md-6 position-relative">
-                                        <label for="license_expire_date">License Expire Date</label>
-                                        <input type="date"
-                                            class="form-control custom-date-input"
-                                            id="license_expire_date"
-                                            name="licenseexpiredate"
-                                            value="{{ old('licenseexpiredate') }}">
-                                        <span class="calendar-icon" onclick="document.getElementById('license_expire_date').showPicker()">
-                                            <i class="fas fa-calendar-alt"></i>
-                                        </span>
-                                    </div>
+                                <div class="form-group col-md-6 position-relative">
+                                    <label for="license_expire_date">License Expire Date</label>
+                                    <input type="date"
+                                        class="form-control custom-date-input"
+                                        id="license_expire_date"
+                                        name="licenseexpiredate"
+                                        value="{{ old('licenseexpiredate') }}">
+                                    <span class="calendar-icon" onclick="document.getElementById('license_expire_date').showPicker()">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </span>
                                 </div>
-                                <button type="submit" class="btn btn-primary">Proceed <i class="fas fa-arrow-right"></i></button>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Proceed <i class="fas fa-arrow-right"></i></button>
                     </form>
                 </div>
             </div>

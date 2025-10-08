@@ -135,7 +135,7 @@
 
                 // ✅ Collect all unique violations from the table
                 var violations = [];
-                table.column(2).data().each(function(value) {
+                api.column(2).data().each(function(value) {
                     if (value && !violations.includes(value)) {
                         violations.push(value);
                     }
@@ -148,7 +148,7 @@
 
                 // ✅ Filter table when dropdown changes
                 $('#violationFilter').on('change', function() {
-                    table.column(2).search(this.value).draw();
+                    api.column(2).search(this.value).draw();
                 });
             }
         });

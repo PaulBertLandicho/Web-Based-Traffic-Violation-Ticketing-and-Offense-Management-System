@@ -67,7 +67,7 @@
 
         <li class="leftsidebar-nav-item">
             <a href="{{ route('notifications.index') }}"
-                class="leftsidebar-nav-link {{ request()->is('admin/notifications') ? 'active' : '' }}">
+                class="leftsidebar-nav-link {{ request()->is('notifications') ? 'active' : '' }}">
                 <div><i class="fas fa-bell"></i></div>
                 <span>Manage Notifications</span>
                 @php

@@ -205,45 +205,93 @@
             }
         });
 
-        // ✅ View
+        // ✅ View Driver Details with Modern UI
         $('.view_data').click(function() {
             const id = $(this).data('id');
             $.post('/admin/driver/details', {
                 did: id
             }, function(res) {
-                $('#driver_detail').html(`
-                    <strong>Name:</strong> ${res.driver.driver_name}<br>
-                    <strong>License ID:</strong> ${res.driver.license_id}<br>
-                    <strong>Address:</strong> ${res.driver.home_address || 'N/A'}<br>
-                    <strong>Date of Birth:</strong> ${res.driver.date_of_birth || 'N/A'}<br>
-                    <strong>License Type:</strong> ${res.driver.license_type || 'N/A'}<br>
-                    <strong>Contact No:</strong> ${res.driver.contact_no || 'N/A'}<br>
-                    <hr><strong>Violations Details:</strong>
-${res.violations.length ? `
-<table class="table table-bordered table-sm mt-2">
-    <thead class="thead-light">
-        <tr>
-            <th>Violation Type</th>
-            <th>Amount</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        ${res.violations.map(v => `
-            <tr>
-                <td>${v.violation_type}</td>
-                <td>₱${v.total_amount}</td>
-                <td>${v.status}</td>
-            </tr>
-        `).join('')}
-    </tbody>
-</table>
-` : '<p>No Violations</p>'}
+                const driver = res.driver;
+                const violations = res.violations;
 
-                `);
+                // Generate Violations Table
+                const violationsHTML = violations.length ? `
+            <div class="table-responsive mt-3">
+                <table class="table table-hover align-middle rounded">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Violation Type</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${violations.map(v => `
+                            <tr>
+                                <td>${v.violation_type}</td>
+                                <td>₱${v.total_amount}</td>
+                                <td>
+                                    <span class="badge ${v.status === 'Pending' ? 'bg-warning text-dark' : 'bg-success'}">
+                                        ${v.status}
+                                    </span>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        ` : `<div class="text-center text-muted mt-2"><i class="fas fa-check-circle"></i> No Violations Recorded</div>`;
+
+                // Generate Driver Details
+                $('#driver_detail').html(`
+            <div class="card border-0 shadow-sm mb-4 rounded-4">
+                <div class="card-body">
+                    <h5 class="fw-semibold text-info mb-3">
+                        <i class="fas fa-user me-2"></i> Personal Information
+                    </h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <p class="mb-1 text-muted fw-bold">Name</p>
+                            <p class="fs-6">${driver.driver_name}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1 text-muted fw-bold">License ID</p>
+                            <p class="fs-6">${driver.license_id}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1 text-muted fw-bold">Address</p>
+                            <p class="fs-6">${driver.home_address || 'N/A'}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1 text-muted fw-bold">Date of Birth</p>
+                            <p class="fs-6">${driver.date_of_birth || 'N/A'}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1 text-muted fw-bold">License Type</p>
+                            <p class="fs-6">${driver.license_type || 'N/A'}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1 text-muted fw-bold">Contact No</p>
+                            <p class="fs-6">${driver.contact_no || 'N/A'}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body">
+                    <h5 class="fw-semibold text-danger mb-3">
+                        <i class="fas fa-gavel me-2"></i> Violations Details
+                    </h5>
+                    ${violationsHTML}
+                </div>
+            </div>
+        `);
+
                 $('#dataModal').modal('show');
             });
         });
+
 
         // ✅ Edit
         $('.edit_data').click(function() {

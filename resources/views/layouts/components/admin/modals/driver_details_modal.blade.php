@@ -1,16 +1,31 @@
 <!-- View Modal -->
+<!-- Modernized Driver Details Modal -->
 <div class="modal fade" id="dataModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-info text-white">
-                <h4 class="modal-title"><i class="fas fa-user"></i> Driver Details Record</h4>
-                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content shadow-lg border-0 rounded-4">
+            <!-- Header -->
+            <div class="modal-header bg-gradient-info text-white rounded-top-4 py-3">
+                <h4 class="modal-title fw-bold mb-0">
+                    <i class="fas fa-id-card me-2"></i> Driver Details Record
+                </h4>
+                <button type="button" class="btn-close btn-close-white" data-dismiss="modal"></button>
             </div>
-            <div class="modal-body" id="driver_detail"></div>
-            <div class="modal-footer"><button class="btn btn-secondary" data-dismiss="modal">Close</button></div>
+
+            <!-- Body -->
+            <div class="modal-body px-4 py-3" id="driver_detail">
+                <!-- Data will be injected by jQuery -->
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer border-0 py-3">
+                <button class="btn btn-outline-secondary rounded-pill px-4" data-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Close
+                </button>
+            </div>
         </div>
     </div>
 </div>
+
 
 <!-- Edit Modal -->
 <div class="modal fade" id="edit_data_Modal" tabindex="-1" role="dialog">

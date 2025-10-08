@@ -220,6 +220,9 @@ body {
     position: relative;
 }
 
+.mydropdown-toggle {
+    margin-top: -4px;
+}
 .mydropdown:hover {
     cursor: pointer;
 }
@@ -229,8 +232,9 @@ body {
     display: none;
     flex-direction: column;
     position: absolute;
-    right: 20%;
+    right: 10%;
     top: 90%;
+    margin-top: 20px;
     border-radius: 5px;
     background: var(--cards-background-color);
     max-width: 200px;
@@ -703,7 +707,7 @@ table th {
 @media (max-width: 1400px) {
 }
 
-/*===================================dataTables_filter Search=============================*/
+/*=================================== dataTables_filter Search=============================*/
 
 .dataTables_filter {
     position: relative;
@@ -727,4 +731,45 @@ table th {
 
 .dataTables_filter input {
     padding-left: 30px !important; /* space for icon */
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #0dcaf0, #0275d8);
+}
+
+.modal-content {
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.card {
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.table thead th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.5em 0.7em;
+}
+
+@media (max-width: 768px) {
+    .modal-dialog {
+        margin: 1rem;
+    }
 }

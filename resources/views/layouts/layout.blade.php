@@ -35,7 +35,6 @@
     <link rel="stylesheet" href="@yield('css')">
     <link rel="stylesheet" href="@yield('js')">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- @yield('js') {{-- Or @stack('scripts') --}} -->
     <!-- End styles -->
 
     <!-- Import fontawesome from CDN -->
@@ -72,12 +71,6 @@
                     document.getElementById("loading").style.display = "none";
                 });
             }
-
-            // if ('serviceWorker' in navigator) {
-            //     navigator.serviceWorker.register('/serviceworker.js')
-            //         .then(() => console.log("Service Worker Registered"))
-            //         .catch((error) => console.error("Service Worker Registration Failed", error));
-            // }
         </script>
 </body>
 
