@@ -128,7 +128,7 @@ class EnforcerController extends Controller
 
                 $reason = $latestViolation
                     ? "Your account has been locked because of a violation filed: \"{$latestViolation->violation_type}\" - {$latestViolation->details}"
-                    : "Your account has been locked due to a complaint filed by a violator.";
+                    : "Your account has been temporarily locked.";
 
                 Session::flush();
                 return redirect()->route('enforcer.login')
