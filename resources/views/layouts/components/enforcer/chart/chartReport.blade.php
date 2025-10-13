@@ -20,8 +20,6 @@
                 <h3 class="mycard-heading-charts mb-2 mb-md-0">
                     Reported Fine Amount
                 </h3>
-
-
             </div>
             <div class="mycard-content">
                 <canvas id="reportedFineAmount" height="300"></canvas>

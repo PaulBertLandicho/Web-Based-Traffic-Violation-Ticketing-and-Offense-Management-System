@@ -193,27 +193,60 @@
         let december = '{{ $decTotal ?? 0 }}';
 
 
+        // ✅ Reported Fine Amount (Fixed to show monthly sum, not count)
         new Chart(document.getElementById("reportedFineAmount"), {
             type: 'bar',
             data: {
-                labels: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+                labels: [
+                    "January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"
+                ],
                 datasets: [{
                     label: "Issued Fine Amount (₱)",
                     backgroundColor: "#d46d31",
-                    data: [jan, feb, march, april, may, june, july, aug, sep, oct, nov, dec]
+                    borderColor: "#d46d31",
+                    borderWidth: 1,
+                    data: [
+                        January, February, march, april, May, june,
+                        july, august, september, october, november, december
+                    ]
                 }]
             },
             options: {
-                legend: {
-                    display: false
-                },
                 responsive: true,
                 maintainAspectRatio: false,
                 animation: {
                     duration: 2000
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                // Format tooltips with ₱ and 2 decimals
+                                return '₱ ' + parseFloat(context.parsed.y).toLocaleString(undefined, {
+                                    minimumFractionDigits: 2
+                                });
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            // Format Y-axis values with ₱
+                            callback: function(value) {
+                                return '₱' + value.toLocaleString();
+                            }
+                        }
+                    }
                 }
             }
         });
+
 
         setInterval(function() {
             fetch("{{ route('enforcer.checkStatus') }}")

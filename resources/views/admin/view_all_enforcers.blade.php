@@ -31,9 +31,9 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <form id="issueViolationForm">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Issue Violation to Enforcer</h5>
-                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <div class="modal-header bg-danger">
+                            <h4 class="modal-title text-white"><i class="fas fa-pen"></i> Issue Violation to Enforcer</h4>
+                            <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
                         </div>
                         <div class="modal-body">
                             <input type="hidden" name="enforcer_id" id="violation_enforcer_id">

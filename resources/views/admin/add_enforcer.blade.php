@@ -136,7 +136,7 @@
                                 </div>
                             </div>
                             <div class="form-group col-md-6">
-                                <label for="registered_at">Enforcer Registerd</label>
+                                <label for="registered_at">Enforcer Registered</label>
                                 <input type="date" class="form-control" id="registered_at" value="{{ now()->toDateString() }}" disabled>
                             </div>
                         </div>
