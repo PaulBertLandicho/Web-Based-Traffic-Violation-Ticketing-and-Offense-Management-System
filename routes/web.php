@@ -143,6 +143,7 @@ Route::post('/ajax/past-fines-search', [FineTicketController::class, 'ajaxSearch
 // Enforcer Change password
 Route::get('/enforcer-profile', [EnforcerController::class, 'edit'])->name('enforcer.profile');
 Route::post('/enforcer/profile/update-password', [EnforcerController::class, 'updatePassword'])->name('enforcer.profile.updatePassword');
+Route::post('/enforcer/profile/update-profile', [EnforcerController::class, 'updateProfile'])->name('enforcer.profile.update');
 
 // Traffic Enforcer Forgot Password Routes
 Route::get('/enforcer-forgot-password', [EnforcerForgotPasswordController::class, 'showForgotForm'])->name('enforcer.forgot.form');

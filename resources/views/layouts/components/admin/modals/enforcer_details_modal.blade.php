@@ -12,6 +12,28 @@
 
             <!-- Body -->
             <div class="modal-body px-4 py-3" id="enforcer_detail">
+                <!-- ✅ Enforcer Profile Image Display -->
+                <div class="text-center mb-4">
+                    @php
+                    // Fetch the image path from database for the selected enforcer
+                    $imagePath = DB::table('traffic_enforcers')
+                    ->where('enforcer_id', session('enforcer_id'))
+                    ->value('profile_image');
+
+                    // If image exists, use it; otherwise show default
+                    $profileImage = $imagePath && file_exists(public_path($imagePath))
+                    ? asset($imagePath)
+                    : asset('assets/img/default-enforcer.png');
+                    @endphp
+
+                    <img id="detail_image"
+                        src="{{ asset('assets/img/default-enforcer.png') }}"
+                        alt="Enforcer Profile"
+                        class="rounded-circle shadow-sm border border-3 border-primary"
+                        width="120" height="120"
+                        style="object-fit: cover;">
+                </div>
+
                 <!-- Enforcer Info -->
                 <div class="card border-0 shadow-sm mb-4 rounded-4">
                     <div class="card-body">
@@ -104,6 +126,7 @@
         </div>
     </div>
 </div>
+
 
 
 <!-- Edit Modal -->

@@ -341,6 +341,12 @@
 
                 // =========================
                 // ENFORCER INFO
+                // ✅ Display profile image (or default if not uploaded)
+                let imgPath = res.enforcer.profile_image ?
+                    `/${res.enforcer.profile_image}` :
+                    '/assets/img/default-enforcer.png';
+
+                $('#detail_image').attr('src', imgPath);
                 $('#detail_name').text(res.enforcer.enforcer_name);
                 $('#detail_email').text(res.enforcer.enforcer_email ?? 'N/A');
                 $('#detail_area').text(res.enforcer.assigned_area ?? 'N/A');

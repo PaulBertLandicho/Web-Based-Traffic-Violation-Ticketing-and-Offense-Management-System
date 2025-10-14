@@ -27,6 +27,9 @@ return new class extends Migration
             $table->boolean('is_archived')->default(0);
 
             $table->foreign('role_id')->references('role_id')->on('roles')->onDelete('cascade');
+
+            // ✅ Add timestamps
+            $table->timestamps();
         });
     }
 

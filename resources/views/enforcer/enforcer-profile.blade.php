@@ -34,6 +34,55 @@
 
         <div class="card mb-4">
             <div class="card-body p-lg-5">
+                <!-- Profile Info Form -->
+                <form method="POST" action="{{ route('enforcer.profile.update') }}" enctype="multipart/form-data">
+                    @csrf
+
+                    <div class="row align-items-center">
+                        <div class="col-md-3 text-center">
+                            @php
+                            $imagePath = DB::table('traffic_enforcers')
+                            ->where('enforcer_id', session('enforcer_id'))
+                            ->value('profile_image');
+
+                            // ✅ Show default image if none uploaded
+                            $profileImage = $imagePath ? asset($imagePath) : asset('assets/img/default-enforcer.png');
+                            @endphp
+
+                            <!-- Profile Image Preview -->
+                            <img id="profilePreview"
+                                src="{{ $profileImage }}"
+                                alt="Profile Image"
+                                class="rounded-circle mb-3 shadow-sm"
+                                width="130" height="130"
+                                style="object-fit: cover; border: 3px solid #28a745;">
+
+                            <!-- Upload Input -->
+                            <input type="file"
+                                name="profile_image"
+                                id="profileImageInput"
+                                class="form-control mt-2"
+                                accept="image/*">
+                        </div>
+
+                        <div class="col-md-9">
+                            <div class="form-group">
+                                <label for="enforcer_name">Traffic Enforcer Name</label>
+                                <input type="text"
+                                    name="enforcer_name"
+                                    class="form-control"
+                                    value="{{ session('enforcer_name') }}"
+                                    required>
+                            </div>
+
+                            <button type="submit" class="btn btn-success mt-2">
+                                <i class="fas fa-save"></i> Update Profile
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <hr class="my-4">
 
                 <!-- Email Display -->
                 <h4>Your Email Address</h4>
@@ -90,6 +139,20 @@
             icon.classList.add("fa-eye");
         }
     }
+
+    document.getElementById('profileImageInput').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const preview = document.getElementById('profilePreview');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = e => preview.src = e.target.result;
+            reader.readAsDataURL(file);
+        } else {
+            // Revert to default image if no file selected
+            preview.src = "{{ asset('assets/img/default-enforcer.png') }}";
+        }
+    });
 </script>
 
 @endsection

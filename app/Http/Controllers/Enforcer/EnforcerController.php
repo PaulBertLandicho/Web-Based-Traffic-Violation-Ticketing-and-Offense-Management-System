@@ -635,6 +635,54 @@ class EnforcerController extends Controller
         return redirect()->route('enforcer-login')->with('success', 'Password changed successfully. Please log in again.');
     }
 
+
+    public function updateProfile(Request $request)
+    {
+        $request->validate([
+            'enforcer_name' => 'required|string|max:255',
+            'profile_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+        ]);
+
+        $enforcerId = session('enforcer_id');
+        $enforcer = DB::table('traffic_enforcers')->where('enforcer_id', $enforcerId)->first();
+
+        if (!$enforcer) {
+            return redirect()->back()->with('error', 'Enforcer not found.');
+        }
+
+        $imagePath = $enforcer->profile_image;
+
+        // ✅ Handle image upload if new file provided
+        if ($request->hasFile('profile_image')) {
+            $file = $request->file('profile_image');
+            $filename = $enforcerId . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('assets/uploads/enforcer_profiles'), $filename);
+            $imagePath = 'assets/uploads/enforcer_profiles/' . $filename;
+        }
+
+        // ✅ Update database
+        DB::table('traffic_enforcers')->where('enforcer_id', $enforcerId)->update([
+            'enforcer_name' => $request->enforcer_name,
+            'profile_image' => $imagePath,
+            'updated_at' => now(),
+        ]);
+
+        // ✅ Update session data
+        Session::put('enforcer_name', $request->enforcer_name);
+        Session::put('enforcer_profile_image', $imagePath);
+
+        // ✅ Firebase optional sync
+        $this->firebase->getDatabase()
+            ->getReference('traffic_enforcers/' . $enforcerId)
+            ->update([
+                'enforcer_name' => $request->enforcer_name,
+                'profile_image' => $imagePath,
+                'updated_at' => now()->toDateTimeString()
+            ]);
+
+        return redirect()->back()->with('success', 'Profile updated successfully!');
+    }
+
     public function issueViolation(Request $request)
     {
         $enforcerId = $request->enforcer_id;
