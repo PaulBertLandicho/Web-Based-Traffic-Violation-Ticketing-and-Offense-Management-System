@@ -43,6 +43,7 @@
     top: 30%;
     left: 40%;
     z-index: 50000;
+    transition: opacity 0.3s ease;
 }
 
 @keyframes ldio-1l6lp7zdq37-o {
@@ -209,7 +210,7 @@ body {
     letter-spacing: 2px;
     margin: 1rem 1rem 0 0;
     font-size: 0.8rem;
-    font-weight: 400;
+    font-weight: bold;
 }
 
 .pro-drop i {
@@ -232,14 +233,169 @@ body {
     display: none;
     flex-direction: column;
     position: absolute;
-    right: 10%;
+    right: 0;
     top: 90%;
     margin-top: 20px;
     border-radius: 5px;
     background: var(--cards-background-color);
-    max-width: 200px;
+    max-width: 250px;
     z-index: 1;
     padding: unset;
+}
+
+.dropdown-menu-right {
+    position: absolute;
+    top: 63px;
+    right: 100%;
+    display: none;
+    flex-direction: column;
+    width: 300px;
+    max-height: 400px;
+    margin-top: 10px;
+    border-radius: 8px;
+    background: var(--cards-background-color, #fff);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    z-index: 9999;
+    padding: 0;
+}
+
+/* Show dropdown when active (Bootstrap handles this automatically if JS is active) */
+.topnav-item.show .dropdown-menu {
+    display: flex;
+}
+
+/* Dropdown Header */
+.dropdown-header {
+    background: #f8f9fa;
+    color: #333;
+    font-weight: 600;
+    padding: 10px 15px;
+    position: sticky;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Notification list container */
+.notification-list {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0;
+}
+
+/* Notification item styling */
+.notification-item {
+    display: flex;
+    flex-direction: column;
+    background: #f9f9f9;
+    margin: 5px 10px;
+    border-radius: 6px;
+    padding: 10px 12px;
+    border: 1px solid #eee;
+    word-wrap: break-word;
+    white-space: normal;
+    overflow: visible;
+}
+
+.notification-item strong {
+    font-weight: 600;
+    color: #004085;
+    margin-bottom: 4px;
+}
+
+.notification-item span {
+    font-size: 0.9rem;
+    color: #333;
+    line-height: 1.3;
+    margin-bottom: 4px;
+    max-width: 100%;
+    white-space: nowrap; /* prevent wrapping */
+    overflow-x: auto; /* enable horizontal scroll */
+    overflow-y: hidden;
+    display: block;
+    scrollbar-width: thin; /* for Firefox */
+}
+
+/* Optional scrollbar styling for horizontal scroll */
+.notification-item span::-webkit-scrollbar {
+    height: 4px;
+}
+.notification-item span::-webkit-scrollbar-thumb {
+    background: #bbb;
+    border-radius: 2px;
+}
+
+.notification-item small {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.notification-item:hover {
+    background: #f1f1f1;
+    cursor: pointer;
+}
+
+/* Highlight new notifications */
+.highlight-notif {
+    background-color: #ffeeba !important; /* soft yellow */
+    animation: fadeHighlight 2s ease-in-out;
+    border-radius: 6px;
+}
+
+@keyframes fadeHighlight {
+    from {
+        background-color: #fff3cd;
+    }
+    to {
+        background-color: #ffeeba;
+    }
+}
+
+/* Bell shake animation */
+@keyframes bell-shake {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    10% {
+        transform: rotate(-15deg);
+    }
+
+    20% {
+        transform: rotate(15deg);
+    }
+
+    30% {
+        transform: rotate(-15deg);
+    }
+
+    40% {
+        transform: rotate(15deg);
+    }
+
+    50% {
+        transform: rotate(-10deg);
+    }
+
+    60% {
+        transform: rotate(10deg);
+    }
+
+    70% {
+        transform: rotate(-5deg);
+    }
+
+    80% {
+        transform: rotate(5deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+.shake {
+    animation: bell-shake 1s ease infinite;
+    /* repeat forever */
 }
 
 .mydropdown-expand {

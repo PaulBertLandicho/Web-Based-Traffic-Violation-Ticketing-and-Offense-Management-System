@@ -28,25 +28,33 @@
                 <div class="modal-content">
                     <form action="{{ route('enforcer.sendNotice') }}" method="POST">
                         @csrf
-                        <div class="modal-header">
+                        <div class="modal-header bg-warning">
                             <h5 class="modal-title">Send Notice / Reminder</h5>
                             <button type="button" class="close" data-dismiss="modal">&times;</button>
                         </div>
                         <div class="modal-body">
                             <div class="form-group">
                                 <label>Title</label>
-                                <input type="text" name="title" class="form-control" required>
+                                <select name="title" class="form-control" required>
+                                    <option value="" disabled selected>Select Title</option>
+                                    <option value="Notice">Notice</option>
+                                    <option value="Reminder">Reminder</option>
+                                </select>
                             </div>
+
                             <div class="form-group">
                                 <label>Message</label>
-                                <textarea name="message" class="form-control" required></textarea>
+                                <textarea name="message" class="form-control" rows="3" placeholder="Enter your message here..." required></textarea>
                             </div>
+
                             <div class="form-group">
                                 <label>Send To</label>
                                 <select name="enforcer_id" class="form-control">
                                     <option value="all">All Enforcers</option>
                                     @foreach($enforcers as $enforcer)
-                                    <option value="{{ $enforcer->enforcer_id }}">({{ $enforcer->enforcer_id }}) - {{ $enforcer->enforcer_name }}</option>
+                                    <option value="{{ $enforcer->enforcer_id }}">
+                                        ({{ $enforcer->enforcer_id }}) - {{ $enforcer->enforcer_name }}
+                                    </option>
                                     @endforeach
                                 </select>
                             </div>

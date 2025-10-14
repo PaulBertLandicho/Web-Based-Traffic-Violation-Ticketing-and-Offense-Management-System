@@ -35,7 +35,7 @@
                         <hr class="my-4">
                         <h6 style="text-align: center;">
                             <a href="admin-login"><i class="fas fa-sign-in-alt"></i> Back to Login</a>
-                            <span class="ml-2"><a href="{{ url('/gov') }}"><i class="fas fa-home"></i> Home</a></span>
+                            <span class="ml-2"><a href="{{ url('/admin-login') }}"><i class="fas fa-home"></i> Home</a></span>
                         </h6>
                     </form>
                 </div>

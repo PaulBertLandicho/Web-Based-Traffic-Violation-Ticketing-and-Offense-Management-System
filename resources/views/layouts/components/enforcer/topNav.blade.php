@@ -1,52 +1,3 @@
-<!--==================================================================================================================================SECTION_01====================================================================================================================================-->
-<style>
-    @keyframes bell-shake {
-        0% {
-            transform: rotate(0deg);
-        }
-
-        10% {
-            transform: rotate(-15deg);
-        }
-
-        20% {
-            transform: rotate(15deg);
-        }
-
-        30% {
-            transform: rotate(-15deg);
-        }
-
-        40% {
-            transform: rotate(15deg);
-        }
-
-        50% {
-            transform: rotate(-10deg);
-        }
-
-        60% {
-            transform: rotate(10deg);
-        }
-
-        70% {
-            transform: rotate(-5deg);
-        }
-
-        80% {
-            transform: rotate(5deg);
-        }
-
-        100% {
-            transform: rotate(0deg);
-        }
-    }
-
-    .shake {
-        animation: bell-shake 1s ease infinite;
-        /* repeat forever */
-    }
-</style>
 <!-- Topbar navigation start here ===================================================-->
 <div class="topnavbar">
     <!-- topnav left -->
@@ -72,10 +23,10 @@
                 <span id="notification-count" class="badge badge-danger"
                     style="display:none; position: absolute; top: 5px; right: -8px; font-size: 0.6rem;">0</span>
             </a>
-            <div class="dropdown-menu dropdown-menu-center" aria-labelledby="notificationDropdown" style="width: 100px; max-height: 400px; overflow-y: auto;">
+            <div class="dropdown-menu dropdown-menu-right shadow" aria-labelledby="notificationDropdown" style="margin-right: 50px;">
                 <h6 class="dropdown-header">Notifications</h6>
-                <div id="notification-list">
-                    <p class="text-left text-muted ml-4 mb-0"></p>
+                <div id="notification-list" class="px-2">
+                    <p id="no-notifications" class="text-muted text-left mb-0"></p>
                 </div>
             </div>
         </li>
@@ -150,54 +101,78 @@
                 once: true
             });
 
+            // 🔹 Add default "No new notifications" placeholder
+            notificationList.innerHTML = `
+        <p id="no-notifications" class="text-muted text-left mb-0 py-2">No new notifications</p>
+    `;
+
             // Firebase notifications listener
-            firebase.database().ref("notifications/" + enforcerId).on("child_added", function(snapshot) {
-                var data = snapshot.val();
+            firebase.database().ref("notifications/" + enforcerId).on("value", function(snapshot) {
+                notificationList.innerHTML = ""; // Clear list before reloading
+                count = 0;
 
-                // Format timestamp
-                let dateStr = "";
-                if (data.created_at || data.timestamp) {
-                    let dt = new Date(data.created_at || data.timestamp);
-                    dateStr = dt.toLocaleString("en-US", {
-                        dateStyle: "medium",
-                        timeStyle: "short"
-                    });
+                if (!snapshot.exists()) {
+                    // 🔹 Show empty message if no notifications at all
+                    notificationList.innerHTML = `
+                <p id="no-notifications" class="text-muted text-left mb-0 py-2">No new notifications</p>
+            `;
+                    notificationCount.style.display = "none";
+                    return;
                 }
 
-                if (!data.is_read) {
-                    count++;
-                    notificationCount.style.display = "inline-block";
-                    notificationCount.innerText = count;
+                snapshot.forEach(function(childSnapshot) {
+                    var data = childSnapshot.val();
 
-                    notificationBell.style.color = "red";
-                    notificationBell.classList.add("shake");
-
-                    // Dynamic sound interval: faster if more notifications
-                    if (soundUnlocked && !soundPlaying) {
-                        soundInterval = setInterval(() => {
-                            audio.currentTime = 0;
-                            audio.play().catch(err => console.log("Sound blocked:", err));
-                        }, Math.max(1000, 5000 - count * 500)); // min 1s, max slower
-                        soundPlaying = true;
+                    // Format timestamp
+                    let dateStr = "";
+                    if (data.created_at || data.timestamp) {
+                        let dt = new Date(data.created_at || data.timestamp);
+                        dateStr = dt.toLocaleString("en-US", {
+                            dateStyle: "medium",
+                            timeStyle: "short"
+                        });
                     }
-                }
 
-                // Display notification item
-                let item = `
-            <a class="dropdown-item ${data.is_read ? 'text-muted' : ''}" href="#"
-               data-toggle="modal" data-target="#notificationModal"
-               data-title="${data.title}" data-message="${data.message}" data-date="${dateStr}">
-                <strong>${data.title}</strong><br>
-                <small>${data.message}</small><br>
-                <small class="text-muted">${dateStr}</small>
-            </a>
-            <div class="dropdown-divider"></div>
-        `;
+                    if (!data.is_read) {
+                        count++;
+                        notificationCount.style.display = "inline-block";
+                        notificationCount.innerText = count;
+                        notificationBell.style.color = "red";
+                        notificationBell.classList.add("shake");
 
-                if (notificationList.innerHTML.includes("No new notifications")) {
-                    notificationList.innerHTML = "";
+                        // Dynamic sound
+                        if (soundUnlocked && !soundPlaying) {
+                            soundInterval = setInterval(() => {
+                                audio.currentTime = 0;
+                                audio.play().catch(err => console.log("Sound blocked:", err));
+                            }, Math.max(1000, 5000 - count * 500));
+                            soundPlaying = true;
+                        }
+                    }
+
+                    let item = `
+                <a class="dropdown-item ${data.is_read ? 'text-muted' : ''}" href="#"
+                   data-toggle="modal" data-target="#notificationModal"
+                   data-title="${data.title}" data-message="${data.message}" data-date="${dateStr}">
+                    <strong>${data.title}</strong><br>
+                    <small>${data.message}</small><br>
+                    <small class="text-muted">${dateStr}</small>
+                </a>
+                <div class="dropdown-divider"></div>
+            `;
+
+                    notificationList.insertAdjacentHTML("afterbegin", item);
+                });
+
+                // 🔹 If still no notifications (after loop)
+                if (count === 0 && snapshot.size === 0) {
+                    notificationList.innerHTML = `
+                <p id="no-notifications" class="text-muted text-center mb-0 py-2">No new notifications</p>
+            `;
+                    notificationCount.style.display = "none";
+                    notificationBell.style.color = "";
+                    notificationBell.classList.remove("shake");
                 }
-                notificationList.insertAdjacentHTML("afterbegin", item);
             });
 
             // Notification bell click
