@@ -11,7 +11,7 @@
         <p class="text-center">Citation No: <strong># {{ $ticket->ref_no ?? 'N/A' }}</strong></p>
 
         {{-- Driver Info --}}
-        <h4 class="border-bottom pb-1"><strong>Driver Information</strong></h4>
+        <h4 class="border-bottom pb-1 mb-3"><strong>Driver Information</strong></h4>
         <table class="table table-sm table-borderless mb-2">
             <tr>
                 <td>Full Name:</td>
@@ -30,9 +30,9 @@
                 <td>{{ $driver->home_address ?? 'N/A' }}</td>
             </tr>
         </table>
-
+        <br>
         {{-- Vehicle Info --}}
-        <h4 class="border-bottom pb-1"><strong>Vehicle Information</strong></h4>
+        <h4 class="border-bottom pb-1 mb-3"><strong>Vehicle Information</strong></h4>
         <table class="table table-sm table-borderless mb-2">
             <tr>
                 <td>Vehicle Number:</td>
@@ -55,9 +55,9 @@
                 <td>{{ $ticket->vehicle_type ?? 'N/A' }}</td>
             </tr>
         </table>
-
+        <br>
         {{-- Violation Details --}}
-        <h4 class="border-bottom pb-1"><strong>Violation Details</strong></h4>
+        <h4 class="border-bottom pb-1 mb-3"><strong>Violation Details</strong></h4>
         <table class="table table-sm table-borderless mb-2">
             <tr>
                 <td>Issued Place:</td>
@@ -99,7 +99,7 @@
             </tr>
             <tr>
                 <td>Total Amount:</td>
-                <td><strong>₱{{ number_format($ticket->total_amount, 2) }}</strong></td>
+                <td><strong>PHP{{ number_format($ticket->total_amount, 2) }}</strong></td>
             </tr>
             <tr>
                 <td>Status:</td>
@@ -110,8 +110,8 @@
 </div>
 
 <div class="modal-footer">
-    <button type="button" class="btn btn-success" onclick="printFineDetails()">
-        <i class="fas fa-print"></i> Print
+    <button class="btn btn-success" onclick="printCitationToPT210()">
+        🖨️ Print Ticket
     </button>
     <button class="btn btn-primary" id="send-sms" data-license-id="{{ $driver->license_id }}">
         <i class="fas fa-paper-plane"></i> Send SMS

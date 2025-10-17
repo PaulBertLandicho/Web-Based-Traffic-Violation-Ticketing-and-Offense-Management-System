@@ -335,86 +335,140 @@
                 }
             </script>
 
+            <!-- ===================== PRINT SCRIPT ===================== -->
             <script>
-                // Start Printable Citation Ticket
-                function printFineDetails() {
-                    const fineContent = document.getElementById("fine_detail").innerHTML;
+                async function printCitationToPT210() {
+                    try {
+                        const fineContent = document.getElementById("fine_detail")?.innerText || "No fine details available.";
+                        const formattedDate = new Date().toLocaleDateString();
 
-                    const logoUrl = window.location.origin + "/assets/img/ICTPMO-logo.png";
+                        const ticketText = `
+ICTPMO - Traffic Management Office
+Traffic Violation Citation Ticket
+--------------------------
+${fineContent}
 
-                    const headerContent = `
-<div style="text-align: center;">
-    <img src="${logoUrl}" style="width: 60px; height: 60px;">
-    <div style="font-size: 16px; font-weight: bold;">ICTPMO</div>
-    <div style="font-size: 14px;">Traffic Violation Citation Ticket</div>
-    <hr style="border-top: 1px dashed #000;">
-</div>
-`;
+--------------------------
+This citation is not an admission of guilt.
+Please retain this receipt for your records.
 
-                    const footerContent = `
-<hr style="border-top: 1px dashed #000;">
-<div style="font-size: 11px; text-align: center;">
-    This citation is not an admission of guilt.<br>
-    Please retain this receipt for your records.
-</div>
-<br>
-<div style="display: flex; justify-content: space-around; font-size: 12px;">
-    <div style="text-align: center;">
-        _______________________<br>
-        Driver Signature
-    </div>
-    <div style="text-align: center;">
-        _______________________<br>
-        Officer Signature
-    </div>
-</div>
-`;
+Driver Signature: ______________
+Officer Signature: ____________
 
-                    const printWindow = window.open('', '', 'width=350,height=600'); // Small window for mobile print
+Printed via ICTPMO System ${new Date().getFullYear()}
+\n\n\n\n`;
 
-                    printWindow.document.write('<html><head><title>Print Citation</title>');
-                    printWindow.document.write(`
-    <style>
-        @media print {
-            @page { margin: 5mm; size: auto; }
-            body {
-                font-family: monospace, sans-serif;
-                font-size: 12px;
-                line-height: 1.4;
-                margin: 0;
-                padding: 0;
-                width: 100%;
-            }
-            table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-            td {
-                padding: 3px 0;
-                vertical-align: top;
-            }
-            hr {
-                margin: 6px 0;
-            }
-        }
-    </style>
-`);
-                    printWindow.document.write('</head><body>');
-                    printWindow.document.write(headerContent);
-                    printWindow.document.write('<div style="padding: 5px;">' + fineContent + '</div>');
-                    printWindow.document.write(footerContent);
-                    printWindow.document.write('</body></html>');
+                        // ===== Ask user to connect printer =====
+                        const confirm = await Swal.fire({
+                            title: "Connect to PT-210 Printer?",
+                            text: "Make sure your Bluetooth printer PT-210_E3BD is turned on and paired.",
+                            icon: "question",
+                            showCancelButton: true,
+                            confirmButtonText: "Connect & Print",
+                            cancelButtonText: "Cancel"
+                        });
 
-                    printWindow.document.close();
-                    printWindow.focus();
+                        if (!confirm.isConfirmed) return;
 
-                    // Trigger print after content is loaded
-                    printWindow.onload = function() {
-                        printWindow.print();
-                        printWindow.close();
-                    };
+                        Swal.fire({
+                            title: "Connecting to PT-210_E3BD...",
+                            text: "Please wait while connecting...",
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            didOpen: () => Swal.showLoading()
+                        });
+
+                        // ===== Connect Bluetooth =====
+                        const device = await navigator.bluetooth.requestDevice({
+                            filters: [{
+                                name: "PT-210_E3BD"
+                            }],
+                            optionalServices: [0x18F0, 0xFF00, 0xFFE0]
+                        });
+
+                        const server = await device.gatt.connect();
+                        const service =
+                            await server.getPrimaryService(0x18F0)
+                            .catch(() => server.getPrimaryService(0xFF00))
+                            .catch(() => server.getPrimaryService(0xFFE0));
+                        const characteristic =
+                            await service.getCharacteristic(0x2AF1)
+                            .catch(() => service.getCharacteristic(0xFF01))
+                            .catch(() => service.getCharacteristic(0xFFE1));
+
+                        Swal.fire({
+                            title: "Connected!",
+                            text: "Sending ticket to printer...",
+                            icon: "success",
+                            showConfirmButton: false,
+                            timer: 1000
+                        });
+
+                        const encoder = new TextEncoder();
+
+                        // ===== Print ticket text =====
+                        const textData = encoder.encode(ticketText.replace(/₱/g, "PHP"));
+                        await writeInChunks(characteristic, textData, 200);
+
+                        Swal.fire({
+                            title: "✅ Ticket Printed!",
+                            text: "Traffic Violation Citation Ticket was successfully printed.",
+                            icon: "success",
+                            timer: 2500,
+                            showConfirmButton: false
+                        });
+
+                        await server.disconnect();
+
+                    } catch (err) {
+                        console.error("❌ Bluetooth Print Error:", err);
+                        Swal.fire({
+                            title: "Bluetooth Error",
+                            text: err.message || "Failed to connect or print to PT-210_E3BD.",
+                            icon: "error"
+                        });
+                    }
+
+                    // ===== Helper: Convert image to ESC/POS monochrome =====
+                    function convertToMonochrome(imageData) {
+                        const ESC = 0x1B;
+                        const width = imageData.width;
+                        const height = imageData.height;
+                        let bytes = [];
+
+                        for (let y = 0; y < height; y += 24) {
+                            bytes.push(ESC, 0x2A, 0x21, width & 0xFF, (width >> 8) & 0xFF);
+                            for (let x = 0; x < width; x++) {
+                                for (let k = 0; k < 3; k++) {
+                                    let slice = 0;
+                                    for (let b = 0; b < 8; b++) {
+                                        const i = ((y + b) * width + x) * 4;
+                                        const gray = (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2]) / 3;
+                                        if (gray < 128) slice |= (1 << (7 - b));
+                                    }
+                                    bytes.push(slice);
+                                }
+                            }
+                            bytes.push(0x0A);
+                        }
+
+                        return new Uint8Array(bytes);
+                    }
+
+                    // ===== Helper: Safe chunked writing (<=512 bytes) =====
+                    async function writeInChunks(characteristic, data, chunkSize = 200) {
+                        for (let i = 0; i < data.length; i += chunkSize) {
+                            const chunk = data.slice(i, i + chunkSize);
+                            await characteristic.writeValue(chunk);
+                            await new Promise(r => setTimeout(r, 100)); // delay between writes
+                        }
+                    }
                 }
             </script>
+
+
+
+
             <script>
                 document.addEventListener("DOMContentLoaded", function() {
                     const issueFineForm = document.getElementById("issueFineForm");
