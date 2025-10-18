@@ -13,7 +13,7 @@
 <!-- Dashboard main content start here =================================================-->
 <div class="dashwrapper animated fadeIn">
     <div class="container-fluid" style="margin-top: 30px;">
-        <h6 class="mt-1 badge badge-pill badge-light tag-hover" style="padding: 10px; font-size: 0.75rem;">Enforcer Officer ID : <a href="profile_details.php">{{ session('enforcer_id') }}</a></h6>
+        <h6 class="mt-1 badge badge-pill badge-light tag-hover" style="padding: 10px; font-size: 0.75rem;"><i class="fas fa-user" style="background-color: #333; color: white; padding: 5px; border-radius: 50%; margin-right: 5px;"></i> Enforcer Officer ID : <a href="profile_details.php">{{ session('enforcer_id') }}</a></h6>
         <div class="row">
             <div class="col-12 p-3 d-lg-none d-md-block d-sm-block">
                 <a class="btn btn-secondary btn-lg btn-block" href="add_driver"><span><i style="font-size: 2rem;" class="fas fa-plus-circle"></i> <br>Issue New Driver Fine</span></a>

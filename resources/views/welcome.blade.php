@@ -45,11 +45,11 @@
                         <div class="row mt-4">
                             <div class="col-md-6 ">
                                 <div class="detail-box animated bounceInLeft custom-slide-animi">
-                                    <h1>
-                                        Available 24x7
-                                    </h1>
+                                    <h1>24/7 Traffic Assistance</h1>
                                     <p>
-                                        No more holidays or weekends. Our service is available throughout 24 hours every day. No matter, our online service is ready for you anytime.
+                                        The ICTPMO Traffic Management Office ensures that road safety and monitoring are
+                                        available 24 hours a day, 7 days a week. Our system enables real-time coordination,
+                                        emergency response, and data-driven traffic enforcement anytime, anywhere.
                                     </p>
                                 </div>
                             </div>
@@ -66,11 +66,11 @@
                         <div class="row mt-4">
                             <div class="col-md-6 animated bounceInLeft custom-slide-animi">
                                 <div class="detail-box">
-                                    <h1>
-                                        Save Time
-                                    </h1>
+                                    <h1>Efficient Violation Processing</h1>
                                     <p>
-                                        Unlike convertional fines system, you don't have to be inques. It takes seconds to pay even you can pay it while you are any kind of busy situation.
+                                        No more manual paperwork or long queues. The ICTPMO online ticketing system allows
+                                        motorists to view, verify, and settle their violations efficiently—promoting a faster,
+                                        transparent, and accountable traffic management process.
                                     </p>
                                 </div>
                             </div>
@@ -87,11 +87,11 @@
                         <div class="row mt-4">
                             <div class="col-md-6 ">
                                 <div class="detail-box animated bounceInLeft custom-slide-animi">
-                                    <h1>
-                                        Analyze Fines
-                                    </h1>
+                                    <h1>Data-Driven Insights</h1>
                                     <p>
-                                        We keep tracks of your every single payment from the beginning. Furthermore, we are going to analyze your data for you. You will see all of your records with many analysed way at a glance.
+                                        With integrated data analytics, the system helps ICTPMO analyze trends in traffic
+                                        violations, identify accident-prone zones, and improve enforcement strategies through
+                                        data visualization and digital reports.
                                     </p>
                                 </div>
                             </div>
@@ -108,11 +108,11 @@
                         <div class="row mt-4">
                             <div class="col-md-6 ">
                                 <div class="detail-box animated bounceInLeft custom-slide-animi">
-                                    <h1>
-                                        Check Past Fines
-                                    </h1>
+                                    <h1>Transparency and Accountability</h1>
                                     <p>
-                                        Every driver has a driving record, which is a record of their driving story show traffic violation. Because your driving record can affect everything from your driving privileges. It's important to check your driving record for accuracy after handling a traffic ticket.
+                                        Every transaction is recorded securely, ensuring that both motorists and officers are
+                                        protected under a fair, transparent, and reliable system—upholding ICTPMO’s mission to
+                                        maintain discipline and trust in traffic management.
                                     </p>
                                 </div>
                             </div>
@@ -161,4 +161,22 @@
         });
     });
 </script>
+<!-- <style>
+    /* ===== Topbar Transparent Modern Design ===== */
+    .topnavbar {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 1000;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        backdrop-filter: blur(12px);
+        background: rgba(0, 0, 0, 0.4);
+        /* Transparent dark overlay */
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        transition: background 0.3s ease-in-out;
+    }
+</style> -->
 @endsection

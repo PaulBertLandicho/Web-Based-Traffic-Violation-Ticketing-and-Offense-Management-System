@@ -5,12 +5,9 @@
         </div>
         <div class="mycard-content text-center">
             <canvas id="PendingPaidfines" height="200"></canvas>
-            <div class="summary mt-3">
-                <strong>Summary:</strong><br>
-                <ul class="text-left" style="list-style-type: disc; padding-left: 20px;">
-                    <li><strong>Paid Fines:</strong> ₱{{ number_format($paidFineAmount, 2) }}<br></li>
-                    <li><strong>Pending Fines:</strong> ₱{{ number_format($pendingFineAmount, 2) }}</li>
-                </ul>
+            <div class="summary mt-3 text-left" id="fine-summary">
+                <strong>Summary:</strong>
+                <ul id="fineList" class="summary-list"></ul>
             </div>
         </div>
     </div>
@@ -22,12 +19,9 @@
         </div>
         <div class="mycard-content text-center">
             <canvas id="DriverAndEnforcersCount" height="200"></canvas>
-            <div class="summary mt-3">
-                <strong>Summary:</strong><br>
-                <ul class="text-left" style="list-style-type: disc; padding-left: 20px;">
-                    <li><strong>Total Issued Drivers:</strong> {{ $issuedDriversCount }}<br></li>
-                    <li><strong>Total Registered Enforcers:</strong> {{ $enforcersCount }}</li>
-                </ul>
+            <div class="summary mt-3 text-left" id="driver-summary">
+                <strong>Summary:</strong>
+                <ul id="driverList" class="summary-list"></ul>
             </div>
         </div>
     </div>
@@ -42,13 +36,9 @@
             <div class="mycard-content text-center">
                 <canvas id="vehicleClassChart" height="200"></canvas>
 
-                <div class="summary mt-3" id="vehicle-summary">
-                    <strong>Summary:</strong><br>
-                    <ul class="text-left" style="list-style-type: disc; padding-left: 20px;">
-                        @foreach($vehicleTypesData as $vehicle)
-                        <li><strong>{{ $vehicle->vehicle_type }}:</strong>{{ $vehicle->count }} vehicles</li>
-                        @endforeach
-                    </ul>
+                <div class="summary mt-3 text-left" id="vehicle-summary">
+                    <strong>Summary:</strong>
+                    <ul id="vehicleList" class="summary-list"></ul>
                 </div>
             </div>
         </div>
@@ -63,14 +53,9 @@
             <div class="mycard-content text-center">
                 <canvas id="violationTypeChart" height="200"></canvas>
 
-                <div class="summary mt-3" id="violation-summary">
-                    <strong>Summary (Top 6 Violations):</strong><br>
-                    <ul class="text-left" style="list-style-type: disc; padding-left: 20px;">
-                        @foreach($violationTypeData as $violation => $count)
-                        <li><strong>{{ ucwords($violation) }}:</strong> {{ $count }}</li>
-                        @endforeach
-
-                    </ul>
+                <div class="summary mt-3 text-left" id="violation-summary">
+                    <strong>Summary (Top 6 Violations):</strong>
+                    <ul id="violationList" class="summary-list"></ul>
                 </div>
             </div>
 

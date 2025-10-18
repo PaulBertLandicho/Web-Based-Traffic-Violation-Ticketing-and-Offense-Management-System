@@ -105,32 +105,67 @@ margin-top: 10px;
 text-align: left;
 padding: 0 10%;
 }
+.summary ul {
+list-style: none;
+padding-left: 0;
+margin: 0;
+}
+.summary li {
+margin-bottom: 4px;
+display: flex;
+align-items: center;
+}
+.summary li span {
+display: inline-block;
+width: 14px;
+height: 14px;
+border-radius: 50%;
+margin-right: 8px;
+}
 img.chart-image {
 max-width: 90%;
 height: auto;
 display: block;
 margin: 0 auto;
 }
+
+.section-title img {
+    width: 50px;
+    height: 50px;
+}
+
+}
+
+/* Make sure colors appear in print */
+@media print {
+* {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
 }
 </style>
 </head>
 <body>
-<div class="section-title"><h2>Traffic Violation Charts Report</h2></div>
+<div class="section-title"><img src="../assets/img/ICTPMO-logo.png" alt="ICTPMO Logo" />
+<h2>ICTPMO - Traffic Management Office</h2>
+</div>
 <div class="chart-grid">
 ${pieAndDoughnutCharts}
 </div>
 
-<div class="section-title"><h2>Traffic Violation Charts Report</h2></div>
+<div class="section-title"><img src="../assets/img/ICTPMO-logo.png" alt="ICTPMO Logo" />
+<h2>ICTPMO - Traffic Management Office</h2>
+</div>
 <div>
 ${lineAndBarCharts}
 </div>
 
 <script>
 window.onload = function () {
-window.print();
-window.onafterprint = function () {
-window.close();
-};
+    window.print();
+    window.onafterprint = function () {
+        window.close();
+    };
 };
 <\/script>
 </body>
