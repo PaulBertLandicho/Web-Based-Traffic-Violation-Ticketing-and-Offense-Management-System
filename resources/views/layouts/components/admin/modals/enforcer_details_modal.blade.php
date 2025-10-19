@@ -142,15 +142,15 @@
                 <div class="modal-body">
                     <input type="hidden" name="enforcer_id" id="edit_enforcer_id">
                     <div class="form-group">
-                        <label for="edit_enforcer_email">Email</label>
+                        <label for="edit_enforcer_email">Enforcer Email</label>
                         <input type="email" name="enforcer_email" id="edit_enforcer_email" class="form-control">
                     </div>
                     <div class="form-group">
-                        <label for="edit_enforcer_name">Driver Name</label>
+                        <label for="edit_enforcer_name">Traffic Enforcer Name</label>
                         <input type="text" name="enforcer_name" id="edit_enforcer_name" class="form-control">
                     </div>
                     <div class="form-group">
-                        <label for="edit_assigned_area">Class of Vehicle</label>
+                        <label for="edit_assigned_area">Enforcer Assigned Area</label>
 
                         <select name="assigned_area" id="edit_assigned_area" class="form-control" required>
                             <option value="">Select Assigned Area</option>

@@ -21,7 +21,7 @@ return new class extends Migration
             $table->text('status');
             $table->unsignedBigInteger('role_id');
             $table->mediumInteger('code');
-
+            $table->timestamps();
             $table->foreign('role_id')
                 ->references('role_id')
                 ->on('roles')
@@ -33,6 +33,7 @@ return new class extends Migration
             'admin_email'    => 'admin@example.com',
             'admin_password' => Hash::make('admin123'), // secure hash
             'admin_name'     => 'Traffic Administrative',
+            'profile_image'  => 'assets/img/default-admin.png',
             'status'         => 'active',
             'role_id'        => 1, // assumes role_id 1 exists
             'code'           => 12345,

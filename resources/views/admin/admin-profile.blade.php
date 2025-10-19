@@ -44,14 +44,23 @@
                         <div class="form-group col-md-4">
                             <label>Old Password</label>
                             <input type="password" name="oldpassword" class="form-control" placeholder="Old Password" required>
+                            <span class="toggle-password" onclick="togglePassword(this)">
+                                <i class="fas fa-eye"></i>
+                            </span>
                         </div>
                         <div class="form-group col-md-4">
                             <label>New Password</label>
                             <input type="password" name="newpassword" class="form-control" placeholder="New Password" required>
+                            <span class="toggle-password" onclick="togglePassword(this)">
+                                <i class="fas fa-eye"></i>
+                            </span>
                         </div>
                         <div class="form-group col-md-4">
                             <label>Confirm New Password</label>
                             <input type="password" name="passwordconfirm" class="form-control" placeholder="Confirm New Password" required>
+                            <span class="toggle-password" onclick="togglePassword(this)">
+                                <i class="fas fa-eye"></i>
+                            </span>
                         </div>
                     </div>
 
@@ -63,6 +72,21 @@
 </div>
 
 <script>
+    function togglePassword(iconWrapper) {
+        const input = iconWrapper.previousElementSibling;
+        const icon = iconWrapper.querySelector("i");
+
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
+        } else {
+            input.type = "password";
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+        }
+    }
+
     $("#success-alert").delay(4000).fadeTo(2000, 500).slideUp(1000, function() {
         $(this).slideUp(1000);
     });

@@ -26,7 +26,7 @@
         <div class="modal fade" id="sendNoticeModal" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form action="{{ route('enforcer.sendNotice') }}" method="POST">
+                    <form id="sendNoticeForm">
                         @csrf
                         <div class="modal-header bg-warning">
                             <h5 class="modal-title">Send Notice / Reminder</h5>
@@ -236,6 +236,52 @@
         setInterval(() => {
             table.ajax.reload(null, false); // false = keep current page
         }, 5000);
+    });
+</script>
+<script>
+    // ✅ AJAX form submission for Send Notice / Reminder
+    $('#sendNoticeForm').on('submit', function(e) {
+        e.preventDefault();
+
+        const formData = $(this).serialize();
+
+        $.ajax({
+            url: "{{ route('enforcer.sendNotice') }}",
+            method: "POST",
+            data: formData,
+            beforeSend: function() {
+                Swal.fire({
+                    title: 'Sending...',
+                    text: 'Please wait while the notice is being sent.',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+            },
+            success: function(response) {
+                Swal.close();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Notice Sent!',
+                    text: response.message || 'The notice/reminder has been sent successfully.',
+                    confirmButtonColor: '#28a745'
+                });
+
+                $('#sendNoticeModal').modal('hide');
+                $('#sendNoticeForm')[0].reset();
+
+                // Reload DataTable (no full page reload)
+                table.ajax.reload(null, false);
+            },
+            error: function(xhr) {
+                Swal.close();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: xhr.responseJSON?.message || 'Something went wrong. Please try again.',
+                    confirmButtonColor: '#d33'
+                });
+            }
+        });
     });
 </script>
 

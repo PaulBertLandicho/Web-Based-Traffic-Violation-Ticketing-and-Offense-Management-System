@@ -72,7 +72,7 @@ class EnforcerController extends Controller
                 ]);
         }
 
-        return back()->with('success', 'Notice sent successfully!');
+        return response()->json(['success' => true, 'message' => 'Notification sent successfully!']);
     }
 
     public function markNotificationRead(Request $request)
