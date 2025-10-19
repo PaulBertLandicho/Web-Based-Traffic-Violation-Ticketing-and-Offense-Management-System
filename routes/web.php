@@ -10,6 +10,7 @@ use App\Http\Controllers\FineTicketController;
 use App\Http\Controllers\ViolationController;
 use App\Http\Controllers\SmsLogController;
 use App\Http\Controllers\IntroController;
+use App\Http\Controllers\SMSController;
 use Illuminate\Support\Facades\Route;
 
 // Admin Routes
@@ -117,6 +118,7 @@ Route::get('/enforcer.enforcer-dashboard', [FineTicketController::class, 'search
 Route::get('/view_reported_fine', [FineTicketController::class, 'viewReportedFines'])->name('enforcer.view_fines');
 
 // SMS Function
+Route::get('/send-sms/{license_id}', [SMSController::class, 'sendSMS'])->name('send.sms');
 Route::get('/send-sms/{licenseId}', [SmsLogController::class, 'sendSMSViaVonage']);
 Route::get('/driver/view-ticket/{token}', [FineTicketController::class, 'viewSecureTicket'])->name('ticket.view.secure');
 Route::get('/driver/ticket/download/{licenseId}', [DriverController::class, 'downloadPDF'])->name('download.ticket.pdf');

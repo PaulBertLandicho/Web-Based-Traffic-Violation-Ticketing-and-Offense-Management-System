@@ -239,7 +239,7 @@
                                     icon: 'success',
                                     title: 'SMS Sent!',
                                     html: `<p>${data.message}</p>
-                               <a href="${data.view_url}" target="_blank" class="btn btn-link">📄 View Ticket</a>`,
+                           <a href="${data.view_url}" target="_blank" class="btn btn-link">📄 View Ticket</a>`,
                                     confirmButtonText: 'OK',
                                     confirmButtonColor: '#28a745'
                                 });
@@ -271,6 +271,7 @@
                             });
                         });
                 }
+
 
                 // ✅ Event delegation: works for dynamically injected modals
                 document.addEventListener("click", function(e) {
@@ -345,15 +346,15 @@
                         const ticketText = `
 ICTPMO - Traffic Management Office
 Traffic Violation Citation Ticket
---------------------------
+--------------------------------
 ${fineContent}
 
---------------------------
+--------------------------------
 This citation is not an admission of guilt.
 Please retain this receipt for your records.
 
 Driver Signature: ______________
-Officer Signature: ____________
+Officer Signature: _____________
 
 Printed via ICTPMO System ${new Date().getFullYear()}
 \n\n\n\n`;

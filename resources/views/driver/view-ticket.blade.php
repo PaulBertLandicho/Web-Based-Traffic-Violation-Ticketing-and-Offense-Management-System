@@ -9,6 +9,12 @@
 
     <div class="card shadow-lg border-0 rounded-4 p-4 mx-auto" style="max-width: 700px;">
         <div class="mb-3">
+            <h5 class="text-dark"><i class="bi bi-file-earmark-ear me-2"></i><strong>Citation Ticket #:</strong>
+                <span class="mb-0 ps-4">{{ $ticket->ref_no }}</span>
+            </h5>
+        </div>
+
+        <div class="mb-3">
             <h5 class="text-dark"><i class="bi bi-person-circle me-2"></i><strong> Driver Name:</strong></h5>
             <p class="mb-0 ps-4">{{ $ticket->driver_name }}</p>
         </div>

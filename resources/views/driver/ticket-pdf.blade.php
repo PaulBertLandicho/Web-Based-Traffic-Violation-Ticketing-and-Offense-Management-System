@@ -69,6 +69,7 @@
     <div class="subtitle">View detailed information about your violation</div>
 
     <div class="card">
+        <div class="field"><strong>Citation Ticket #:</strong> {{ $ticket->ref_no }}</div>
         <div class="field"><strong>Driver Name:</strong> {{ $ticket->driver_name }}</div>
         <div class="field"><strong>License ID:</strong> {{ $ticket->license_id }}</div>
         <div class="field"><strong>Vehicle No. & Type:</strong> {{ $ticket->vehicle_no }} ({{ $ticket->vehicle_type }})</div>

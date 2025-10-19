@@ -11,7 +11,7 @@
         <p class="text-center">Citation No: <strong># {{ $ticket->ref_no ?? 'N/A' }}</strong></p>
 
         {{-- Driver Info --}}
-        <h4 class="border-bottom pb-1 mb-3"><strong>Driver Information</strong></h4>
+        <h4 class="border-bottom pb-1 mb-3" style="font-weight: bold;"><strong>Driver Information</strong></h4>
         <table class="table table-sm table-borderless mb-2">
             <tr>
                 <td>Full Name:</td>
@@ -32,7 +32,7 @@
         </table>
         <br>
         {{-- Vehicle Info --}}
-        <h4 class="border-bottom pb-1 mb-3"><strong>Vehicle Information</strong></h4>
+        <h4 class="border-bottom pb-1 mb-3" style="font-weight: bold;"><strong>Vehicle Information</strong></h4>
         <table class="table table-sm table-borderless mb-2">
             <tr>
                 <td>Vehicle Number:</td>
@@ -57,7 +57,7 @@
         </table>
         <br>
         {{-- Violation Details --}}
-        <h4 class="border-bottom pb-1 mb-3"><strong>Violation Details</strong></h4>
+        <h4 class="border-bottom pb-1 mb-3" style="font-weight: bold;"><strong>Violation Details</strong></h4>
         <table class="table table-sm table-borderless mb-2">
             <tr>
                 <td>Issued Place:</td>
@@ -73,7 +73,7 @@
             </tr>
         </table>
 
-        <p><strong>Offense Number:</strong>
+        <p style="font-weight: bold;"><strong>Offense Number:</strong>
             @if($ticket->offense_number == 1) 1st Offense
             @elseif($ticket->offense_number == 2) 2nd Offense
             @elseif($ticket->offense_number == 3) 3rd Offense
@@ -83,7 +83,7 @@
 
         <table class="table table-sm table-borderless mb-2">
             <tr>
-                <td>Provisions:</td>
+                <td style="font-weight: bold;">Provisions:</td>
                 <td>
                     @php
                     $violationTypes = $ticket->violation_type ? explode(',', $ticket->violation_type) : [];
@@ -98,7 +98,7 @@
                 </td>
             </tr>
             <tr>
-                <td>Total Amount:</td>
+                <td style="font-weight: bold;">Total Amount:</td>
                 <td><strong>PHP{{ number_format($ticket->total_amount, 2) }}</strong></td>
             </tr>
             <tr>
