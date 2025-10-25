@@ -1,7 +1,7 @@
 <div class="modal-header bg-info text-white">
     <h4 class="modal-title" id="ticketDetailsLabel">
         <img src="../assets/img/ICTPMO-logo.png" style="width: 40px; height: 40px; margin-right: 10px;">
-        Citation Ticket Details
+        Citation Tickets
     </h4>
     <a href="{{ route('fine.clearTicket') }}" class="btn btn-danger"><span>&times;</span></a>
 </div>

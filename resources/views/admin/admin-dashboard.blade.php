@@ -169,7 +169,7 @@
                 const paid = parseFloat('{{ $totalPaid ?? 0 }}');
                 const pending = parseFloat('{{ $totalPending ?? 0 }}');
 
-                const fineLabels = ["Paid Fine Amount (₱)", "Pending Fine Amount (₱)"];
+                const fineLabels = ["Paid Fine Amount", "Pending Fine Amount"];
                 const fineColors = ["#1d9e8b", "#d46d31"];
                 const fineCounts = [paid, pending];
 

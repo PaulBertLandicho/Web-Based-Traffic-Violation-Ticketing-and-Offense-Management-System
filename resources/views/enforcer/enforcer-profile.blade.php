@@ -55,7 +55,7 @@
                                 alt="Profile Image"
                                 class="rounded-circle mb-3 shadow-sm"
                                 width="130" height="130"
-                                style="object-fit: cover; border: 3px solid #28a745;">
+                                style="object-fit: cover; border: 3px solid #00587a;">
 
                             <!-- Upload Input -->
                             <input type="file"

@@ -340,12 +340,15 @@
             <script>
                 async function printCitationToPT210() {
                     try {
-                        const fineContent = document.getElementById("fine_detail")?.innerText || "No fine details available.";
-                        const formattedDate = new Date().toLocaleDateString();
+                        const fineDetailElement = document.getElementById("fine_detail");
+                        const fineContent = fineDetailElement?.innerText || "No fine details available.";
+                        const encoder = new TextEncoder();
 
                         const ticketText = `
-ICTPMO - Traffic Management Office
-Traffic Violation Citation Ticket
+            ICTPMO 
+   Traffic Management Office
+   Traffic Violation Citation 
+            Ticket
 --------------------------------
 ${fineContent}
 
@@ -354,12 +357,11 @@ This citation is not an admission of guilt.
 Please retain this receipt for your records.
 
 Driver Signature: ______________
-Officer Signature: _____________
 
-Printed via ICTPMO System ${new Date().getFullYear()}
-\n\n\n\n`;
+Enforcer Signature: ____________
+`;
 
-                        // ===== Ask user to connect printer =====
+                        // Confirm connection
                         const confirm = await Swal.fire({
                             title: "Connect to PT-210 Printer?",
                             text: "Make sure your Bluetooth printer PT-210_E3BD is turned on and paired.",
@@ -368,7 +370,6 @@ Printed via ICTPMO System ${new Date().getFullYear()}
                             confirmButtonText: "Connect & Print",
                             cancelButtonText: "Cancel"
                         });
-
                         if (!confirm.isConfirmed) return;
 
                         Swal.fire({
@@ -379,21 +380,17 @@ Printed via ICTPMO System ${new Date().getFullYear()}
                             didOpen: () => Swal.showLoading()
                         });
 
-                        // ===== Connect Bluetooth =====
                         const device = await navigator.bluetooth.requestDevice({
                             filters: [{
                                 name: "PT-210_E3BD"
                             }],
                             optionalServices: [0x18F0, 0xFF00, 0xFFE0]
                         });
-
                         const server = await device.gatt.connect();
-                        const service =
-                            await server.getPrimaryService(0x18F0)
+                        const service = await server.getPrimaryService(0x18F0)
                             .catch(() => server.getPrimaryService(0xFF00))
                             .catch(() => server.getPrimaryService(0xFFE0));
-                        const characteristic =
-                            await service.getCharacteristic(0x2AF1)
+                        const characteristic = await service.getCharacteristic(0x2AF1)
                             .catch(() => service.getCharacteristic(0xFF01))
                             .catch(() => service.getCharacteristic(0xFFE1));
 
@@ -402,24 +399,28 @@ Printed via ICTPMO System ${new Date().getFullYear()}
                             text: "Sending ticket to printer...",
                             icon: "success",
                             showConfirmButton: false,
-                            timer: 1000
+                            timer: 800
                         });
 
-                        const encoder = new TextEncoder();
+                        // Print text content
+                        await writeInChunks(characteristic, encoder.encode(ticketText.replace(/₱/g, "PHP")), 200);
 
-                        // ===== Print ticket text =====
-                        const textData = encoder.encode(ticketText.replace(/₱/g, "PHP"));
-                        await writeInChunks(characteristic, textData, 200);
+                        // Footer
+                        const footerText = `
+--------------------------------
+Printed via ICTPMO System ${new Date().getFullYear()}
+\n\n\n`;
+                        await writeInChunks(characteristic, encoder.encode(footerText), 200);
+
+                        await server.disconnect();
 
                         Swal.fire({
                             title: "✅ Ticket Printed!",
-                            text: "Traffic Violation Citation Ticket was successfully printed.",
+                            text: "Traffic Violation Citation Ticket printed successfully.",
                             icon: "success",
                             timer: 2500,
                             showConfirmButton: false
                         });
-
-                        await server.disconnect();
 
                     } catch (err) {
                         console.error("❌ Bluetooth Print Error:", err);
@@ -430,7 +431,25 @@ Printed via ICTPMO System ${new Date().getFullYear()}
                         });
                     }
 
-                    // ===== Helper: Convert image to ESC/POS monochrome =====
+                    // ==== Helpers ====
+                    async function loadImageAndConvert(src) {
+                        const img = new Image();
+                        img.crossOrigin = "anonymous";
+                        img.src = src;
+                        await img.decode();
+
+                        const canvas = document.createElement("canvas");
+                        const maxWidth = 250; // adjust to printer width
+                        const scale = maxWidth / img.width;
+                        canvas.width = maxWidth;
+                        canvas.height = img.height * scale;
+                        const ctx = canvas.getContext("2d");
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                        return convertToMonochrome(imageData);
+                    }
+
                     function convertToMonochrome(imageData) {
                         const ESC = 0x1B;
                         const width = imageData.width;
@@ -456,19 +475,15 @@ Printed via ICTPMO System ${new Date().getFullYear()}
                         return new Uint8Array(bytes);
                     }
 
-                    // ===== Helper: Safe chunked writing (<=512 bytes) =====
                     async function writeInChunks(characteristic, data, chunkSize = 200) {
                         for (let i = 0; i < data.length; i += chunkSize) {
                             const chunk = data.slice(i, i + chunkSize);
                             await characteristic.writeValue(chunk);
-                            await new Promise(r => setTimeout(r, 100)); // delay between writes
+                            await new Promise(r => setTimeout(r, 100));
                         }
                     }
                 }
             </script>
-
-
-
 
             <script>
                 document.addEventListener("DOMContentLoaded", function() {

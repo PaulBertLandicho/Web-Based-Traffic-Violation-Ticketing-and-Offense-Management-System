@@ -62,7 +62,7 @@
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
                 <h4 class="modal-title" id="ticketDetailsLabel">
-                    <img src="../assets/img/ICTPMO-logo.png" style="width: 40px; height: 40px; margin-right: 10px;">
+                    <img src="/assets/img/ICTPMO-logo.png" style="width: 40px; height: 40px; margin-right: 10px;">
                     Paid Ticket Details
                 </h4>
                 <button class="close" data-dismiss="modal"><span>&times;</span></button>

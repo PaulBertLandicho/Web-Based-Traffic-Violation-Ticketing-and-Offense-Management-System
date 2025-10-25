@@ -17,7 +17,7 @@
         <img src="{{ $profileImage }}"
             alt="Profile"
             class="rounded-circle mx-auto mb-3"
-            style="width: 80px; height: 80px; object-fit: cover; border: 2px solid #4CAF50;">
+            style="width: 80px; height: 80px; object-fit: cover; border: 2px solid #00587a;">
 
         <!-- Enforcer Name -->
         <h6 class="text-white mb-0">{{ session('enforcer_name', 'Traffic Enforcer') }}</h6>
