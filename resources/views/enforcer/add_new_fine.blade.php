@@ -107,8 +107,8 @@
                             </div>
                             <div class="form-group col-md-6">
                                 <label for="expire_date">Expire Date</label>
-                                <input type="date" class="form-control" id="expire_date" value="{{ date('Y-m-d', strtotime('+21 days')) }}" name="expire_date" placeholder="Expire Date" disabled>
-                                <input type="hidden" class="form-control" id="expire_date" value="{{ date('Y-m-d', strtotime('+21 days')) }}" name="expire_date" placeholder="Expire Date">
+                                <input type="date" class="form-control" id="expire_date" value="{{ date('Y-m-d', strtotime('+7 days')) }}" name="expire_date" placeholder="Expire Date" disabled>
+                                <input type="hidden" class="form-control" id="expire_date" value="{{ date('Y-m-d', strtotime('+7 days')) }}" name="expire_date" placeholder="Expire Date">
                             </div>
                         </div>
                         <h3 class="mt-5">Vehicle Information</h3>

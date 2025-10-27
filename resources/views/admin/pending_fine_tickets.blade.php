@@ -65,7 +65,7 @@
                                         data-issued="{{ $ticket->issued_date }}"
                                         data-expire="{{ $ticket->expire_date }}"
                                         data-amount="{{ $ticket->total_amount }}">
-                                        Due Date
+                                        <i class="fas fa-exclamation-triangle"></i> Due Date
                                     </span>
                                     @else
                                     <span class="badge badge-warning">Pending</span>
@@ -87,7 +87,7 @@
         <div class="modal-content shadow-lg border-0 rounded-4">
             <div class="modal-header bg-primary text-white rounded-top-4">
                 <h5 class="modal-title fw-bold">
-                    <i class="bi bi-file-earmark-text me-2"></i>ICTPMO Judicial Violation Report
+                    <i class="bi bi-file-earmark-text me-2"></i> ICTPMO Judicial Violation Report
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
