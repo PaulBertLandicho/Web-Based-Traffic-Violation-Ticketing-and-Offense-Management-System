@@ -25,14 +25,14 @@ class DriverController extends Controller
 
     public function store(Request $request, FirebaseService $firebaseService)
     {
-        // 🔍 Validate input
+        // ✅ Validate input fields
         $validator = Validator::make($request->all(), [
             'licenseid' => [
                 'required',
                 'regex:/^([A-Z]{1}[0-9]{2}-[0-9]{2}-[0-9]{6}|[A-Z]{2}-[0-9]{2}-[0-9]{6})$/'
             ],
             'drivername' => 'required|string',
-            'licensetype' => 'required',
+            'licensetype' => 'required|string',
             'homeaddress' => 'required|string',
             'contactno' => [
                 'required',
@@ -40,20 +40,47 @@ class DriverController extends Controller
             ],
             'licenseissuedate' => 'required|date',
             'licenseexpiredate' => 'required|date|after:licenseissuedate',
-            'dateofbirth' => 'required|date'
+            'dateofbirth' => 'required|date',
+            'signature' => 'required'
+        ], [
+            'signature.required' => 'Please sign before proceeding.'
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        //  Format contact number
+        // ✅ Normalize contact number format
         $contact = $request->contactno;
         if (!str_starts_with($contact, '+63')) {
             $contact = '+63' . ltrim($contact, '0');
         }
 
-        //  Save to MySQL
+        // ✅ Handle base64 signature
+        $signatureData = $request->input('signature');
+        $signaturePath = null;
+
+        if ($signatureData) {
+            try {
+                $signature = str_replace('data:image/png;base64,', '', $signatureData);
+                $signature = str_replace(' ', '+', $signature);
+
+                // Ensure directory exists
+                $signatureDir = public_path('uploads/signatures');
+                if (!file_exists($signatureDir)) {
+                    mkdir($signatureDir, 0777, true);
+                }
+
+                $fileName = 'signature_' . time() . '.png';
+                $signaturePath = 'uploads/signatures/' . $fileName;
+
+                file_put_contents(public_path($signaturePath), base64_decode($signature));
+            } catch (\Exception $e) {
+                return redirect()->back()->withErrors(['signature' => 'Failed to save signature: ' . $e->getMessage()]);
+            }
+        }
+
+        // ✅ Insert into MySQL
         DB::table('driver_list')->insert([
             'license_id' => $request->licenseid,
             'driver_name' => $request->drivername,
@@ -63,13 +90,12 @@ class DriverController extends Controller
             'license_expire_date' => $request->licenseexpiredate,
             'date_of_birth' => $request->dateofbirth,
             'license_type' => $request->licensetype,
-            'registered_at' => now()->toDateString(),
+            'registered_at' => now(),
+            'signature_path' => $signaturePath,
             'status' => 'verified'
         ]);
 
-        //  Use correct variable for Firebase ID
-        $licenseId = $request->licenseid;
-        // Sync to Firebase Realtime Database
+        // ✅ Sync to Firebase
         try {
             $firebase = $firebaseService->getDatabase();
             $firebase->getReference('driver_list/' . $request->licenseid)->set([
@@ -82,6 +108,7 @@ class DriverController extends Controller
                 'date_of_birth' => $request->dateofbirth,
                 'license_type' => $request->licensetype,
                 'registered_at' => now()->toDateTimeString(),
+                'signature_path' => url($signaturePath),
                 'status' => 'verified'
             ]);
         } catch (\Exception $e) {
@@ -89,8 +116,9 @@ class DriverController extends Controller
         }
 
         return redirect()->route('fine.create', ['license_id' => $request->licenseid])
-            ->with('success', 'Driver added successfully! Now you can issue a fine.');
+            ->with('success', '✅ Driver added successfully! You can now issue a fine.');
     }
+
 
     public function view()
     {

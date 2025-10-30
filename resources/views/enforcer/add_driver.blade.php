@@ -138,6 +138,19 @@
                                         <i class="fas fa-calendar-alt"></i>
                                     </span>
                                 </div>
+                                <div class="form-group col-md-6 position-relative">
+                                    <label for="signature">Driver Electronic Signature</label>
+                                    <div class="border rounded bg-light p-3 text-center">
+                                        <canvas id="signature-pad" class="border rounded bg-white w-100" style="height: 200px;"></canvas>
+                                    </div>
+                                    <div class="mt-2 text-center">
+                                        <button type="button" id="clear-signature" class="btn btn-sm btn-warning">
+                                            <i class="fas fa-eraser"></i> Clear
+                                        </button>
+                                    </div>
+                                    <input type="hidden" name="signature" id="signature-data">
+                                </div>
+
                             </div>
                             <button type="submit" class="btn btn-primary">Proceed <i class="fas fa-arrow-right"></i></button>
                     </form>
@@ -147,6 +160,56 @@
     </div>
 </div>
 <!-- Dashboard main content end here ========================================-->
+
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const canvas = document.getElementById("signature-pad");
+        const signaturePad = new SignaturePad(canvas, {
+            backgroundColor: "white",
+            penColor: "black"
+        });
+        const clearBtn = document.getElementById("clear-signature");
+        const hiddenInput = document.getElementById("signature-data");
+        const form = document.querySelector("form");
+
+        // Adjust canvas for device pixel ratio
+        function resizeCanvas() {
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * ratio;
+            canvas.height = rect.height * ratio;
+            canvas.getContext("2d").scale(ratio, ratio);
+            signaturePad.clear();
+        }
+        window.addEventListener("resize", resizeCanvas);
+        resizeCanvas();
+
+        // Clear signature
+        clearBtn.addEventListener("click", function() {
+            signaturePad.clear();
+            hiddenInput.value = "";
+        });
+
+        // On form submit
+        form.addEventListener("submit", function(e) {
+            if (signaturePad.isEmpty()) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: "warning",
+                    title: "Signature Required",
+                    text: "Please sign before submitting.",
+                    confirmButtonColor: "#3085d6",
+                });
+            } else {
+                hiddenInput.value = signaturePad.toDataURL("image/png");
+            }
+        });
+    });
+</script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const licenseInput = document.getElementById("license_id_input");
