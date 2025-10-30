@@ -26,15 +26,15 @@ a:focus {
     margin: auto;
 }
 
-/*header section=============================================================================*/
+/* HEADER SECTION ============================================================================= */
 
 .hero_area {
-    height: 100vh;
-    display: -webkit-box;
-    display: -ms-flexbox;
+    position: relative;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background-image: url(../../assets/img/hero-bg.png);
+    background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 1.3)),
+        /* <-- transparent overlay */ url(../../assets/img/bg-cover.png);
     background-repeat: no-repeat;
     background-size: cover;
     background-position: bottom;
@@ -57,7 +57,7 @@ a:focus {
     -ms-flex-pack: center;
     justify-content: center;
     color: #ffffff;
-    padding-top: 45px;
+    margin-top: 55px;
 }
 
 .slider_section #carouselExampleIndicators {

@@ -23,7 +23,7 @@
                 <span id="notification-count" class="badge badge-danger"
                     style="display:none; position: absolute; top: 5px; right: -8px; font-size: 0.6rem;">0</span>
             </a>
-            <div class="dropdown-menu dropdown-menu-right shadow" aria-labelledby="notificationDropdown" style="margin-right: 50px;">
+            <div class="dropdown-menu dropdown-menu-right shadow" aria-labelledby="notificationDropdown" style="margin-left: -130px;">
                 <h6 class="dropdown-header">Notifications</h6>
                 <div id="notification-list" class="px-2">
                     <p id="no-notifications" class="text-muted text-left mb-0"></p>

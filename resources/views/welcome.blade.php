@@ -9,7 +9,7 @@
     <ul class="topnavbar-nav">
         <li class="topnav-item" style="display: flex; align-items: center; gap: 13px;">
             <img src="{{ asset('assets/img/ICTPMO-logo.png') }}" alt="ICTPMO logo" style="width: 50px; height: 50px; background-color: white; border-radius: 10px; margin-left: 20px;">
-            <span style="color: white; font-size: 20px; font-weight: bold;">ICTPMO - Welcome</span>
+            <span class="ictpmo-title">ICTPMO - Iligan City Traffic and Parking Management Office</span>
         </li>
     </ul>
     <!-- end topnav left -->
