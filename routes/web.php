@@ -8,8 +8,8 @@ use App\Http\Controllers\Driver\DriverController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\FineTicketController;
 use App\Http\Controllers\ViolationController;
-use App\Http\Controllers\UserLogController;
 use App\Http\Controllers\SmsLogController;
+use App\Http\Controllers\UserLogController;
 use App\Http\Controllers\IntroController;
 use App\Http\Controllers\SMSController;
 use Illuminate\Support\Facades\Route;
@@ -90,16 +90,13 @@ Route::get('/admin/fetch-issued-fines', [AdminController::class, 'fetchIssuedFin
 Route::get('/admin/barangay-violations', [AdminController::class, 'fetchBarangayViolations']);
 Route::get('/admin/fetch-total-amount', [AdminController::class, 'totalIssuedAmount']);
 Route::get('/admin/fine-amount-by-enforcer', [AdminController::class, 'getFineAmountByEnforcer']);
-Route::get('/user_logs', [UserLogController::class, 'index'])->name('admin.userLogs');
+
 
 
 
 // Enforcers Routes
 Route::get('/enforcer-login', [EnforcerController::class, 'enforcer'])->name('enforcer.login');
 Route::post('/enforcer-login', [EnforcerController::class, 'login'])->name('enforcer.login.submit');
-Route::get('/enforcer-otp', [EnforcerController::class, 'otpPage'])->name('enforcer.otp-page');
-Route::post('/enforcer-otp-verify', [EnforcerController::class, 'verifyOtp'])->name('enforcer.verify-otp');
-Route::post('/enforcer/resend-otp', [EnforcerController::class, 'resendOtp'])->name('enforcer.resend-otp');
 
 // Toggle single and all enforcer lock
 Route::post('/enforcer/toggle-lock', [EnforcerController::class, 'toggleLock'])->name('enforcer.toggleLock');
@@ -162,11 +159,16 @@ Route::get('/enforcer/reset-password', [EnforcerForgotPasswordController::class,
 Route::post('/enforcer/reset-password', [EnforcerForgotPasswordController::class, 'resetPassword'])->name('enforcer.reset.password');
 
 Route::post('/admin/enforcer/violation', [EnforcerController::class, 'issueViolation'])->name('enforcer.issueViolation');
-Route::post('/admin/enforcer/violation/settle', [EnforcerController::class, 'settleViolation'])->name('enforcer.violation.settle');
-Route::get('/enforcer/get-complaint-history', [ViolationController::class, 'getComplaintHistory'])
-    ->name('enforcer.complaintHistory');
+Route::post('/admin/enforcer/violation/settle', [EnforcerController::class, 'settleSingleViolation'])->name('enforcer.violation.settle');
 
 Route::post('/enforcers/send-notice', [EnforcerController::class, 'sendNotice'])
     ->name('enforcer.sendNotice');
 Route::post('/enforcer/notifications/mark-read', [EnforcerController::class, 'markNotificationRead'])
     ->name('enforcer.notifications.markRead');
+
+Route::post('/admin/enforcer/violation/settle', [EnforcerController::class, 'settleViolation'])->name('enforcer.violation.settle');
+Route::get('/enforcer-otp', [EnforcerController::class, 'otpPage'])->name('enforcer.otp-page');
+Route::post('/enforcer-otp-verify', [EnforcerController::class, 'verifyOtp'])->name('enforcer.verify-otp');
+Route::get('/user-logs', [UserLogController::class, 'index'])->name('admin.userLogs');
+Route::post('/enforcer/resend-otp', [EnforcerController::class, 'resendOtp'])
+    ->name('enforcer.resend-otp');
