@@ -22,6 +22,7 @@ return new class extends Migration
             $table->date('registered_at');
             $table->boolean('is_locked')->default(0);
             $table->string('profile_image')->nullable()->default('assets/img/default-enforcer.png');
+            $table->string('signature_image')->nullable();
             $table->timestamp('password_updated')->useCurrent()->nullable();
             $table->unsignedBigInteger('role_id');
             $table->mediumInteger('code')->nullable();

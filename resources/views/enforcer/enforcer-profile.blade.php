@@ -74,7 +74,28 @@
                                     value="{{ session('enforcer_name') }}"
                                     required>
                             </div>
+                            <div class="col-md-3 text-center mt-4">
+                                <label for="signature">Electronic Signature</label>
 
+                                @php
+                                $signaturePath = DB::table('traffic_enforcers')
+                                ->where('enforcer_id', session('enforcer_id'))
+                                ->value('signature_image');
+                                $signatureImage = $signaturePath ? asset($signaturePath) : asset('assets/img/no-signature.png');
+                                @endphp
+
+                                <img id="signaturePreview"
+                                    src="{{ $signatureImage }}"
+                                    alt="Signature Preview"
+                                    class="border rounded mb-2"
+                                    style="width: 130px; height: auto; object-fit: contain;">
+
+                                <input type="file"
+                                    name="signature_image"
+                                    id="signatureInput"
+                                    class="form-control mt-2"
+                                    accept="image/*">
+                            </div>
                             <button type="submit" class="btn btn-success mt-2">
                                 <i class="fas fa-save"></i> Update Profile
                             </button>
@@ -155,4 +176,18 @@
     });
 </script>
 
+<script>
+    document.getElementById('signatureInput').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const preview = document.getElementById('signaturePreview');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = e => preview.src = e.target.result;
+            reader.readAsDataURL(file);
+        } else {
+            preview.src = "{{ asset('assets/img/no-signature.png') }}";
+        }
+    });
+</script>
 @endsection

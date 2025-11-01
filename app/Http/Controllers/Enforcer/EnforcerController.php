@@ -650,6 +650,19 @@ class EnforcerController extends Controller
             return redirect()->back()->with('error', 'Enforcer not found.');
         }
 
+        if ($request->hasFile('signature_image')) {
+            $file = $request->file('signature_image');
+            $filename = $enforcerId . '_signature_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('assets/uploads/enforcer_signatures'), $filename);
+            $signaturePath = 'assets/uploads/enforcer_signatures/' . $filename;
+
+            DB::table('traffic_enforcers')->where('enforcer_id', $enforcerId)->update([
+                'signature_image' => $signaturePath,
+            ]);
+
+            Session::put('enforcer_signature', $signaturePath);
+        }
+
         $imagePath = $enforcer->profile_image;
 
         // ✅ Handle image upload if new file provided
