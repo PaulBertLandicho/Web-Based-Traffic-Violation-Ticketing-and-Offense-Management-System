@@ -59,3 +59,14 @@
     </ul>
 </div>
 <!-- Left sidebar navigation end here =============================================-->
+
+<style>
+    /* Hide the sidebar profile image and name on larger screens */
+    @media (min-width: 992px) {
+
+        .leftsidebar img[alt="Profile"],
+        .leftsidebar h6 {
+            display: none !important;
+        }
+    }
+</style>

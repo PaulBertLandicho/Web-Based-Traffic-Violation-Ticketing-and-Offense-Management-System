@@ -13,9 +13,9 @@
     <table class="table table-bordered table-striped table-sm">
         <thead class="thead-dark">
             <tr>
-                <th>Reference No</th>
+                <th>License No</th>
                 <th>Violations</th>
-                <th>Vehicle No</th>
+                <th>Plate No</th>
                 <th>Place</th>
                 <th>Status</th>
                 <th>Issued Date</th>
@@ -23,9 +23,9 @@
         </thead>
         <tfoot>
             <tr>
-                <th>Reference No</th>
+                <th>License No</th>
                 <th>Violations</th>
-                <th>Vehicle No</th>
+                <th>Plate No</th>
                 <th>Place</th>
                 <th>Status</th>
                 <th>Issued Date</th>

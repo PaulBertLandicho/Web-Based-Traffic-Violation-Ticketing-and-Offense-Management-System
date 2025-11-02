@@ -150,9 +150,9 @@
                                     </div>
                                     <input type="hidden" name="signature" id="signature-data">
                                 </div>
-
                             </div>
-                            <button type="submit" class="btn btn-primary">Proceed <i class="fas fa-arrow-right"></i></button>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Proceed <i class="fas fa-arrow-right"></i></button>
                     </form>
                 </div>
             </div>
