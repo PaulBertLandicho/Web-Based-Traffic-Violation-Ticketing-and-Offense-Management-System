@@ -58,7 +58,7 @@
         </li>
         <li class="topnav-item" style="display: flex; align-items: center; gap: 13px;">
             <img src="../assets/img/ICTPMO-logo.png" alt="ICTPMO logo" style="width: 50px; height: 50px; background-color: white; border-radius: 10px;">
-            <span style="color: white; font-size: 20px; font-weight: bold;">ICTPMO - Iligan City Traffic and Parking Management Office</span>
+            <span class="ictpmo-title">ICTPMO - Iligan City Traffic and Parking Management Office</span>
         </li>
     </ul>
     <!-- end topnav left -->
