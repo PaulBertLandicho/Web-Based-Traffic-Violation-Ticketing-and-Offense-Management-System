@@ -33,7 +33,7 @@ return new class extends Migration
             'admin_email'    => 'admin@example.com',
             'admin_password' => Hash::make('admin123'), // secure hash
             'admin_name'     => 'Traffic Administrative',
-            'profile_image'  => 'assets/img/default-admin.png',
+            // 'profile_image'  => 'assets/img/default-admin.png',
             'status'         => 'active',
             'role_id'        => 1, // assumes role_id 1 exists
             'code'           => 12345,
