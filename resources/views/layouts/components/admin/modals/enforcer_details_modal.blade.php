@@ -12,27 +12,53 @@
 
             <!-- Body -->
             <div class="modal-body px-4 py-3" id="enforcer_detail">
-                <!-- ✅ Enforcer Profile Image Display -->
+                <!-- ✅ Enforcer Profile & Signature Display -->
                 <div class="text-center mb-4">
                     @php
-                    // Fetch the image path from database for the selected enforcer
-                    $imagePath = DB::table('traffic_enforcers')
-                    ->where('enforcer_id', session('enforcer_id'))
-                    ->value('profile_image');
+                    use Illuminate\Support\Facades\DB;
 
-                    // If image exists, use it; otherwise show default
-                    $profileImage = $imagePath && file_exists(public_path($imagePath))
-                    ? asset($imagePath)
+                    $enforcerId = session('enforcer_id');
+
+                    // Fetch both profile and signature from DB
+                    $enforcerData = DB::table('traffic_enforcers')
+                    ->select('profile_image', 'enforcer_signature')
+                    ->where('enforcer_id', $enforcerId)
+                    ->first();
+
+                    // ✅ Profile image fix
+                    $profilePath = $enforcerData && !empty($enforcerData->profile_image)
+                    ? asset($enforcerData->profile_image)
                     : asset('assets/img/default-enforcer.png');
+
+                    // ✅ Signature path fix (ensure correct directory)
+                    $signaturePath = $enforcerData && !empty($enforcerData->enforcer_signature)
+                    ? asset('assets/uploads/enforcer_signatures/' . basename($enforcerData->enforcer_signature))
+                    : asset('assets/img/no-signature.png');
                     @endphp
 
-                    <img id="detail_image"
-                        src="{{ asset('assets/img/default-enforcer.png') }}"
-                        alt="Enforcer Profile"
-                        class="rounded-circle shadow-sm border border-3 border-primary"
-                        width="120" height="120"
-                        style="object-fit: cover;">
+                    <!-- Profile -->
+                    <div class="d-flex flex-column align-items-center justify-content-center mb-3">
+                        <img id="detail_image"
+                            src="{{ $profilePath }}"
+                            alt="Enforcer Profile"
+                            class="rounded-circle shadow-sm border border-3 border-primary mb-3"
+                            width="120" height="120"
+                            style="object-fit: cover;">
+                        <h6 class="fw-bold text-secondary mb-0">Traffic Enforcer</h6>
+                    </div>
+
+                    <!-- Signature -->
+                    <div class="d-flex flex-column align-items-center">
+                        <img id="detail_signature"
+                            src="{{ $signaturePath }}"
+                            alt="Enforcer Signature"
+                            class="border border-2 rounded shadow-sm p-2 bg-white"
+                            width="220" height="110"
+                            style="object-fit: contain;">
+                        <p class="mt-2 text-muted small">Enforcer Signature</p>
+                    </div>
                 </div>
+
 
                 <!-- Enforcer Info -->
                 <div class="card border-0 shadow-sm mb-4 rounded-4">
@@ -76,6 +102,7 @@
                                         <th>Penalty</th>
                                         <th>Date Issued</th>
                                         <th>Status</th>
+                                        <th>Remarks</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -84,6 +111,36 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Complaint / Violation History Against This Enforcer -->
+                <div class="card border-0 shadow-sm mt-4 rounded-4">
+                    <div class="card-body">
+                        <h5 class="fw-semibold text-warning mb-3">
+                            <i class="fas fa-clipboard-list me-2"></i> Complaint / Violation History Against This Enforcer
+                        </h5>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle" id="complaintHistoryTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Violation Type</th>
+                                        <th>Details</th>
+                                        <th>Penalty</th>
+                                        <th>Date Filed</th>
+                                        <th>Status</th>
+                                        <th>Remarks</th>
+                                        <th>Settled At</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="7" class="text-center">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
 
                 <!-- Drivers Issued Violations -->
                 <div class="card border-0 shadow-sm rounded-4">

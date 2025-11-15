@@ -318,5 +318,20 @@
             e.target.value = formatted;
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstViolationWarning = '@json($firstViolationWarning)';
+            const pendingCount = '@json($pendingViolationsCount ?? 0)';
+
+            if (pendingCount > 0 && firstViolationWarning) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'First Violation Warning',
+                    text: firstViolationWarning,
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+    </script>
 
     @endsection

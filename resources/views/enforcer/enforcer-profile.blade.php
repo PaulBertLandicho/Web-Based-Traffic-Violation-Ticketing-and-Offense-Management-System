@@ -80,8 +80,14 @@
                                 @php
                                 $signaturePath = DB::table('traffic_enforcers')
                                 ->where('enforcer_id', session('enforcer_id'))
-                                ->value('signature_image');
-                                $signatureImage = $signaturePath ? asset($signaturePath) : asset('assets/img/no-signature.png');
+                                ->value('enforcer_signature');
+
+                                // Ensure the path exists and is relative to 'public'
+                                if ($signaturePath && file_exists(public_path($signaturePath))) {
+                                $signatureImage = asset($signaturePath);
+                                } else {
+                                $signatureImage = asset('assets/img/no-signature.png');
+                                }
                                 @endphp
 
                                 <img id="signaturePreview"
@@ -90,8 +96,9 @@
                                     class="border rounded mb-2"
                                     style="width: 130px; height: auto; object-fit: contain;">
 
+
                                 <input type="file"
-                                    name="signature_image"
+                                    name="enforcer_signature"
                                     id="signatureInput"
                                     class="form-control mt-2"
                                     accept="image/*">

@@ -320,8 +320,18 @@ class FineTicketController extends Controller
         $ticket = DB::table('issued_fine_tickets')
             ->join('driver_list', 'issued_fine_tickets.license_id', '=', 'driver_list.license_id')
             ->leftJoin('vehicles', 'issued_fine_tickets.vehicle_no', '=', 'vehicles.vehicle_no')
+            ->leftJoin('traffic_enforcers', 'issued_fine_tickets.enforcer_id', '=', 'traffic_enforcers.enforcer_id')
             ->where('issued_fine_tickets.ref_no', $refNo)
-            ->select('issued_fine_tickets.*', 'driver_list.driver_name', 'driver_list.contact_no', 'driver_list.license_type', 'vehicles.vehicle_type')
+            ->select(
+                'issued_fine_tickets.*',
+                'driver_list.driver_name',
+                'driver_list.contact_no',
+                'driver_list.license_type',
+                'driver_list.driver_signature',
+                'vehicles.vehicle_type',
+                'traffic_enforcers.enforcer_name',
+                'traffic_enforcers.enforcer_signature'
+            )
             ->first();
 
         if (!$ticket) {
@@ -331,6 +341,7 @@ class FineTicketController extends Controller
         return view('layouts.components.admin.modals.pending_ticket_modal_view', compact('ticket'))->render();
     }
 
+
     public function paidTicketDetails(Request $request)
     {
         $refNo = $request->input('ref_no');
@@ -338,9 +349,19 @@ class FineTicketController extends Controller
         $ticket = DB::table('issued_fine_tickets')
             ->join('driver_list', 'issued_fine_tickets.license_id', '=', 'driver_list.license_id')
             ->leftJoin('vehicles', 'issued_fine_tickets.vehicle_no', '=', 'vehicles.vehicle_no')
+            ->leftJoin('traffic_enforcers', 'issued_fine_tickets.enforcer_id', '=', 'traffic_enforcers.enforcer_id')
             ->where('issued_fine_tickets.ref_no', $refNo)
             ->where('issued_fine_tickets.status', 'paid')
-            ->select('issued_fine_tickets.*', 'driver_list.driver_name', 'driver_list.contact_no', 'driver_list.license_type', 'vehicles.vehicle_type')
+            ->select(
+                'issued_fine_tickets.*',
+                'driver_list.driver_name',
+                'driver_list.contact_no',
+                'driver_list.license_type',
+                'driver_list.driver_signature',
+                'vehicles.vehicle_type',
+                'traffic_enforcers.enforcer_name',
+                'traffic_enforcers.enforcer_signature'
+            )
             ->first();
 
         if (!$ticket) {
@@ -349,6 +370,7 @@ class FineTicketController extends Controller
 
         return view('layouts.components.admin.modals.paid_ticket_modal_view', compact('ticket'))->render();
     }
+
 
 
     public function payFine(Request $request)

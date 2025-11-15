@@ -29,17 +29,25 @@ class ViolationController extends Controller
             return redirect('/admin-login')->with('error', 'Please login first.');
         }
 
-        $violations = DB::table('traffic_violations')
-            ->where('is_archived', 0)
-            ->get();
+        // Get the last violation ID
+        $lastViolation = DB::table('traffic_violations')
+            ->orderByDesc('violation_id')
+            ->first();
 
-        return view('admin.traffic_violation', compact('violations'));
+        $nextViolationId = $lastViolation ? $lastViolation->violation_id + 1 : 101;
+
+        $violations = DB::table('traffic_violations')->where('is_archived', 0)->get();
+
+        return view('admin.traffic_violation', compact('violations', 'nextViolationId'));
     }
 
     public function store(Request $request)
     {
+        // Auto-generate Violation ID
+        $lastViolation = DB::table('traffic_violations')->orderByDesc('violation_id')->first();
+        $violation_id = $lastViolation ? $lastViolation->violation_id + 1 : 101;
+
         $validator = Validator::make($request->all(), [
-            'violationid' => 'required|unique:traffic_violations,violation_id',
             'violationtype' => 'required|string',
             'violationamount' => 'required|numeric',
         ]);
@@ -51,44 +59,39 @@ class ViolationController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $violation_id = $request->violationid;
+        // Convert amount to decimal
+        $amount = number_format((float) $request->violationamount, 2, '.', '');
 
+        // Insert into MySQL
         DB::table('traffic_violations')->insert([
             'violation_id' => $violation_id,
             'violation_type' => $request->violationtype,
-            'violation_amount' => $request->violationamount,
+            'violation_amount' => $amount,
             'created_at' => Carbon::now(),
         ]);
 
+        // Insert into Firebase
         $this->firebase->getDatabase()
             ->getReference('traffic_violations/' . $violation_id)
             ->set([
                 'violation_id' => $violation_id,
                 'violation_type' => $request->violationtype,
-                'violation_amount' => $request->violationamount,
+                'violation_amount' => $amount,
                 'created_at' => Carbon::now()->toDateTimeString(),
             ]);
 
         if ($request->ajax()) {
             return response()->json([
-                'success' => true,
-                'message' => 'Violation added successfully',
+                'success' => '✅ Violation added successfully',
                 'violation' => [
                     'violation_id' => $violation_id,
                     'violation_type' => $request->violationtype,
-                    'violation_amount' => $request->violationamount,
+                    'violation_amount' => $amount,
                 ]
             ]);
         }
 
-        return response()->json([
-            'success' => '✅ Violation added successfully',
-            'violation' => [
-                'violation_id' => $violation_id,
-                'violation_type' => $request->violationtype,
-                'violation_amount' => $request->violationamount,
-            ]
-        ]);
+        return redirect()->back()->with('success', 'Violation added successfully');
     }
 
 

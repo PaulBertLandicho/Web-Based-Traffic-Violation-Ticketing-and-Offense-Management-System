@@ -63,18 +63,32 @@
     </ul>
     <!-- end topnav left -->
     <!-- topnav right -->
-    <ul class="topnavbar-nav topnav-right" style="display: flex; align-items: center; gap: -10px;">
+    <ul class="topnavbar-nav topnav-right" style="display:flex; align-items:center; gap:10px;">
         <!-- Notification Bell -->
-        <li class="topnav-item dropdown" style="position: relative;">
-            <a class="topnav-link" href="#" id="notificationDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="position: relative;">
+        <li class="topnav-item dropdown" style="position:relative;">
+            <a class="topnav-link" href="#" id="notificationDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i id="notification-bell" class="fas fa-bell"></i>
-                <span id="notification-count" class="badge badge-danger" style="display: none;">0</span>
+                <span id="notification-count" class="badge badge-danger" style="display:none;">0</span>
             </a>
-            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="notificationDropdown"
-                style="width: 300px; max-height: 400px; overflow-y: auto;">
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="notificationDropdown" style="width:300px; max-height:400px; overflow-y:auto;">
                 <h6 class="dropdown-header">Notifications</h6>
                 <div id="notification-list">
                     <p class="text-center text-muted mb-0">No new notifications</p>
+                </div>
+            </div>
+        </li>
+
+        <!-- User Logs Bell -->
+
+        <li class="topnav-item dropdown" style="position:relative;">
+            <a class="topnav-link" href="#" id="userLogDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i id="user-log-bell" class="fas fa-user-clock"></i>
+                <span id="user-log-count" class="badge badge-danger" style="display:none;">0</span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userLogDropdown" style="width:350px; max-height:400px; overflow-y:auto;">
+                <h6 class="dropdown-header">User Activity Logs</h6>
+                <div id="user-log-list">
+                    <p class="text-center text-muted mb-0">No new logs</p>
                 </div>
             </div>
         </li>
@@ -232,42 +246,173 @@
                 });
             });
         });
+
+        // 🔔 Listen for user activity logs
+        db.ref("admin_user_logs").on("value", function(snapshot) {
+            const list = document.getElementById("user-log-list");
+            const badge = document.getElementById("user-log-count");
+            const bell = document.getElementById("user-log-bell");
+            let count = 0;
+
+            list.innerHTML = "";
+
+            snapshot.forEach(child => {
+                const data = child.val();
+                if (!data) return;
+
+                if (data.status === "unread") {
+                    count++;
+                    const date = new Date(data.created_at).toLocaleString();
+                    const item = `
+                <a class="dropdown-item" href="{{ route('admin.userLogs') }}">
+                    <strong>${data.title}</strong><br>
+                    <small>${data.message}</small><br>
+                    <small class="text-muted">${date}</small>
+                </a>
+                <div class="dropdown-divider"></div>
+            `;
+                    list.insertAdjacentHTML("afterbegin", item);
+                }
+            });
+
+            if (count > 0) {
+                badge.textContent = count;
+                badge.style.display = "inline-block";
+                bell.classList.add("shake");
+                bell.style.color = "blue";
+
+                if (audioEnabled) {
+                    audio.currentTime = 0;
+                    audio.play().catch(err => console.warn("Sound blocked:", err));
+                }
+            } else {
+                badge.style.display = "none";
+                bell.classList.remove("shake");
+                bell.style.color = "";
+            }
+        });
+
+        // ✅ When user log dropdown opened → mark as read
+        document.getElementById("userLogDropdown").addEventListener("click", function() {
+            const badge = document.getElementById("user-log-count");
+            const bell = document.getElementById("user-log-bell");
+
+            badge.style.display = "none";
+            bell.classList.remove("shake");
+            bell.style.color = "";
+
+            // Mark all unread logs as read
+            db.ref("admin_user_logs").once("value", function(snapshot) {
+                snapshot.forEach(child => {
+                    const data = child.val();
+                    const key = child.key;
+                    if (data.status === "unread") {
+                        db.ref("admin_user_logs/" + key).update({
+                            status: "read"
+                        });
+                    }
+                });
+            });
+        });
     </script>
 
     <script>
-        const body = document.getElementsByTagName('body')[0]
-
-        //Left sidebar toggle
-        function collapseSidebar() {
-            body.classList.toggle('leftsidebar-expand')
-        }
-
-        //Topnavbar dropdown function
-        window.onclick = function(event) {
-            openCloseDropdown(event)
-        }
-
-        function closeAllDropdown() {
-            var dropdowns = document.getElementsByClassName('mydropdown-expand')
-            for (var i = 0; i < dropdowns.length; i++) {
-                dropdowns[i].classList.remove('mydropdown-expand')
+        document.addEventListener('click', function(e) {
+            // Allow clicking dropdown links normally
+            if (e.target.closest('.dropdown-item')) {
+                window.location.href = e.target.closest('.dropdown-item').getAttribute('href');
             }
-        }
+        });
 
-        function openCloseDropdown(event) {
-            if (!event.target.matches('.mydropdown-toggle')) {
-                closeAllDropdown()
-            } else {
-                var toggle = event.target.dataset.toggle
-                var content = document.getElementById(toggle)
-                if (content.classList.contains('mydropdown-expand')) {
-                    closeAllDropdown()
-                } else {
-                    closeAllDropdown()
-                    content.classList.add('mydropdown-expand')
+        // User logs
+        const userBadge = document.getElementById("user-log-count");
+        const userBell = document.getElementById("user-log-bell");
+        const userList = document.getElementById("user-log-list");
+
+        let userLogsData = {}; // Store logs locally
+
+        // Listen for logs changes
+        db.ref("admin_user_logs").on("value", snapshot => {
+            userLogsData = {}; // reset
+            let count = 0;
+            userList.innerHTML = "";
+
+            snapshot.forEach(child => {
+                const data = child.val();
+                if (!data) return;
+
+                userLogsData[child.key] = data; // store for later
+
+                const date = new Date(data.created_at).toLocaleString();
+                const isUnread = data.status === "unread";
+
+                const item = `
+            <a class="dropdown-item ${isUnread ? 'font-weight-bold text-primary' : ''}" href="{{ route('admin.userLogs') }}">
+                <strong>${data.title}</strong><br>
+                <small>${data.message}</small><br>
+                <small class="text-muted">${date}</small>
+            </a>
+            <div class="dropdown-divider"></div>
+        `;
+                userList.insertAdjacentHTML("afterbegin", item);
+
+                if (isUnread) count++;
+            });
+
+            if (count > 0) {
+                userBadge.textContent = count;
+                userBadge.style.display = "inline-block";
+                userBell.classList.add("shake");
+                userBell.style.color = "blue";
+
+                if (audioEnabled) {
+                    audio.currentTime = 0;
+                    audio.play().catch(() => {});
                 }
+            } else {
+                userBadge.style.display = "none";
+                userBell.classList.remove("shake");
+                userBell.style.color = "";
             }
-        }
+
+            if (!userList.innerHTML.trim()) {
+                userList.innerHTML = `<p class="text-center text-muted mb-0">No activity logs</p>`;
+            }
+        });
+
+        // When user bell clicked → show all logs and mark unread as read
+        document.getElementById("userLogDropdown").addEventListener("click", () => {
+            userBadge.style.display = "none";
+            userBell.classList.remove("shake");
+            userBell.style.color = "";
+
+            // Render all logs (read + unread) dynamically
+            userList.innerHTML = "";
+            for (const key in userLogsData) {
+                const data = userLogsData[key];
+                const date = new Date(data.created_at).toLocaleString();
+                const isUnread = data.status === "unread";
+
+                const item = `
+            <a class="dropdown-item ${isUnread ? 'font-weight-bold text-primary' : ''}" href="{{ route('admin.userLogs') }}">
+                <strong>${data.title}</strong><br>
+                <small>${data.message}</small><br>
+                <small class="text-muted">${date}</small>
+            </a>
+            <div class="dropdown-divider"></div>
+        `;
+                userList.insertAdjacentHTML("afterbegin", item);
+
+                // Mark unread as read in Firebase
+                if (isUnread) db.ref("admin_user_logs/" + key).update({
+                    status: "read"
+                });
+            }
+
+            if (!userList.innerHTML.trim()) {
+                userList.innerHTML = `<p class="text-center text-muted mb-0">No activity logs</p>`;
+            }
+        });
     </script>
 </div>
 <!-- Topbar navigation end here ===================================================-->

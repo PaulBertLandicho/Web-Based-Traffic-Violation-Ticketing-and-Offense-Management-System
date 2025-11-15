@@ -76,3 +76,23 @@
 <p class="text-center mt-4" style="font-size: 12px;">
     This citation is not an admission of guilt. Please settle within 7 days to avoid additional penalties.
 </p>
+<div class="row mt-4 text-center">
+    <div class="col">
+        <p>Traffic Enforcer Signature</p>
+        @if(!empty($ticket->enforcer_signature))
+        <img src="{{ asset($ticket->enforcer_signature) }}" alt="Enforcer Signature" style="height: 80px;">
+        @else
+        <p>_________________________</p>
+        @endif
+        <p>{{ $ticket->enforcer_name }}</p>
+    </div>
+    <div class="col">
+        <p>Driver Signature</p>
+        @if(!empty($ticket->driver_signature))
+        <img src="{{ asset($ticket->driver_signature) }}" alt="Driver Signature" style="height: 80px;">
+        @else
+        <p>_________________________</p>
+        @endif
+        <p>{{ $ticket->driver_name }}</p>
+    </div>
+</div>

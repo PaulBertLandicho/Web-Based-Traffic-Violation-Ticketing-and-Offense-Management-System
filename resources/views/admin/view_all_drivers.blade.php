@@ -205,8 +205,9 @@
             }
         });
 
-        // ✅ View Driver Details with Modern UI
-        $('.view_data').click(function() {
+
+        // ✅ View Driver (works after search/filter)
+        $(document).on('click', '.view_data', function() {
             const id = $(this).data('id');
             $.post('/admin/driver/details', {
                 did: id
@@ -214,87 +215,74 @@
                 const driver = res.driver;
                 const violations = res.violations;
 
-                // Generate Violations Table
                 const violationsHTML = violations.length ? `
-            <div class="table-responsive mt-3">
-                <table class="table table-hover align-middle rounded">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Violation Type</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${violations.map(v => `
+                <div class="table-responsive mt-3">
+                    <table class="table table-hover align-middle rounded">
+                        <thead class="table-light">
                             <tr>
-                                <td>${v.violation_type}</td>
-                                <td>₱${v.total_amount}</td>
-                                <td>
-                                    <span class="badge ${v.status === 'Pending' ? 'bg-warning text-dark' : 'bg-success'}">
-                                        ${v.status}
-                                    </span>
-                                </td>
+                                <th>Violation Type</th>
+                                <th>Amount</th>
+                                <th>Status</th>
                             </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
-        ` : `<div class="text-center text-muted mt-2"><i class="fas fa-check-circle"></i> No Violations Recorded</div>`;
+                        </thead>
+                        <tbody>
+                            ${violations.map(v => `
+                                <tr>
+                                    <td>${v.violation_type}</td>
+                                    <td>₱${v.total_amount}</td>
+                                    <td>
+                                        <span class="badge ${v.status === 'Pending' ? 'bg-warning text-dark' : 'bg-success'}">
+                                            ${v.status}
+                                        </span>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            ` : `<div class="text-center text-muted mt-2"><i class="fas fa-check-circle"></i> No Violations Recorded</div>`;
 
-                // Generate Driver Details
+                const baseAsset = "{{ asset('') }}";
+                const signaturePath = driver.driver_signature ?
+                    baseAsset + driver.driver_signature :
+                    "{{ asset('assets/img/no-signature.png') }}";
+
                 $('#driver_detail').html(`
-            <div class="card border-0 shadow-sm mb-4 rounded-4">
-                <div class="card-body">
-                    <h5 class="fw-semibold text-info mb-3">
-                        <i class="fas fa-user me-2"></i> Personal Information
-                    </h5>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <p class="mb-1 text-muted fw-bold">Name</p>
-                            <p class="fs-6">${driver.driver_name}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p class="mb-1 text-muted fw-bold">License ID</p>
-                            <p class="fs-6">${driver.license_id}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p class="mb-1 text-muted fw-bold">Address</p>
-                            <p class="fs-6">${driver.home_address || 'N/A'}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p class="mb-1 text-muted fw-bold">Date of Birth</p>
-                            <p class="fs-6">${driver.date_of_birth || 'N/A'}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p class="mb-1 text-muted fw-bold">License Type</p>
-                            <p class="fs-6">${driver.license_type || 'N/A'}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p class="mb-1 text-muted fw-bold">Contact No</p>
-                            <p class="fs-6">${driver.contact_no || 'N/A'}</p>
+                <div class="card border-0 shadow-sm mb-4 rounded-4">
+                    <div class="card-body">
+                        <h5 class="fw-semibold text-info mb-3"><i class="fas fa-user me-2"></i> Personal Information</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6"><p class="mb-1 text-muted fw-bold">Name</p><p>${driver.driver_name}</p></div>
+                            <div class="col-md-6"><p class="mb-1 text-muted fw-bold">License ID</p><p>${driver.license_id}</p></div>
+                            <div class="col-md-6"><p class="mb-1 text-muted fw-bold">Address</p><p>${driver.home_address || 'N/A'}</p></div>
+                            <div class="col-md-6"><p class="mb-1 text-muted fw-bold">Date of Birth</p><p>${driver.date_of_birth || 'N/A'}</p></div>
+                            <div class="col-md-6"><p class="mb-1 text-muted fw-bold">License Type</p><p>${driver.license_type || 'N/A'}</p></div>
+                            <div class="col-md-6"><p class="mb-1 text-muted fw-bold">Contact No</p><p>${driver.contact_no || 'N/A'}</p></div>
+                            <div class="col-md-12 text-center mt-4">
+                                <p class="mb-1 text-muted fw-bold">Driver Signature</p>
+                                <img src="${signaturePath}" alt="Driver Signature" 
+                                     class="img-fluid border rounded p-2 bg-light shadow-sm"
+                                     style="max-height: 120px; object-fit: contain;">
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-body">
-                    <h5 class="fw-semibold text-danger mb-3">
-                        <i class="fas fa-gavel me-2"></i> Violations Details
-                    </h5>
-                    ${violationsHTML}
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body">
+                        <h5 class="fw-semibold text-danger mb-3"><i class="fas fa-gavel me-2"></i> Violations Details</h5>
+                        ${violationsHTML}
+                    </div>
                 </div>
-            </div>
-        `);
+            `);
 
                 $('#dataModal').modal('show');
             });
         });
 
 
-        // ✅ Edit
-        $('.edit_data').click(function() {
+        // ✅ Edit Driver (still works after search/filter)
+        $(document).on('click', '.edit_data', function() {
             const id = $(this).data('id');
             $.post('/admin/driver/details', {
                 did: id
@@ -344,52 +332,48 @@
             });
         });
 
-        // 🟢 Load Archived Drivers when modal is opened 
+        // 🟢 Load Archived Drivers Modal dynamically
         $('#archivedDriversModal').on('show.bs.modal', function() {
-            let tbody = $('#archivedTable tbody');
+            const tbody = $('#archivedTable tbody');
             tbody.html('<tr><td colspan="4" class="text-center">Loading...</td></tr>');
 
             $.get('{{ route("drivers.archived") }}', function(res) {
                 tbody.empty();
-
-                if (res.drivers.length === 0) {
+                if (!res.drivers.length) {
                     tbody.html('<tr><td colspan="4" class="text-center">No archived drivers found.</td></tr>');
-                } else {
-                    res.drivers.forEach(function(driver) {
-                        tbody.append(`
+                    return;
+                }
+                res.drivers.forEach(driver => {
+                    tbody.append(`
                     <tr>
                         <td>${driver.license_id}</td>
                         <td>${driver.driver_name}</td>
                         <td>${driver.license_type ?? 'N/A'}</td>
                         <td>
-                        <form action="/admin/drivers/restore/${driver.license_id}" method="POST">
+                            <form action="/admin/drivers/restore/${driver.license_id}" method="POST">
                                 @csrf
-                                <button type="submit" class="btn btn-success btn-sm">
-                                    Restore
-                                </button>
+                                <button type="submit" class="btn btn-success btn-sm">Restore</button>
                             </form>
                         </td>
                     </tr>
                 `);
-                    });
-                }
+                });
             });
         });
 
 
-        // ✅ Archive instead of delete
-        $('.archive_data').click(function() {
+        // ✅ Archive Driver (works after search/filter)
+        $(document).on('click', '.archive_data', function() {
             const id = $(this).data('id');
-
             Swal.fire({
                 title: 'Archive Driver?',
-                text: 'Driver will be archived if fines are paid. Cannot archive if there are pending violations.',
+                text: 'Driver will be archived if fines are paid.',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#6c757d',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, proceed'
-            }).then((result) => {
+                confirmButtonText: 'Yes, archive'
+            }).then(result => {
                 if (result.isConfirmed) {
                     $.ajax({
                         url: '/admin/driver/archive',
@@ -397,23 +381,15 @@
                         data: {
                             did: id
                         },
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
                         success: function(res) {
-                            Swal.fire('Done!', res.success, 'success');
-                            let table = $('#dataTable').DataTable();
+                            Swal.fire('Archived!', res.success, 'success');
                             table.row($(`button[data-id="${id}"]`).parents('tr')).remove().draw();
                         },
                         error: function(xhr) {
                             if (xhr.status === 400 && xhr.responseJSON?.error) {
-                                Swal.fire({
-                                    icon: 'warning',
-                                    title: 'Cannot Archive',
-                                    text: xhr.responseJSON.error
-                                });
+                                Swal.fire('Cannot Archive', xhr.responseJSON.error, 'warning');
                             } else {
-                                Swal.fire('Error', 'Action failed due to server error.', 'error');
+                                Swal.fire('Error', 'Server error occurred.', 'error');
                             }
                         }
                     });

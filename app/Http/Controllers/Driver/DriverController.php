@@ -66,13 +66,13 @@ class DriverController extends Controller
                 $signature = str_replace(' ', '+', $signature);
 
                 // Ensure directory exists
-                $signatureDir = public_path('uploads/signatures');
+                $signatureDir = public_path('assets/uploads/driver_signatures');
                 if (!file_exists($signatureDir)) {
                     mkdir($signatureDir, 0777, true);
                 }
 
                 $fileName = 'signature_' . time() . '.png';
-                $signaturePath = 'uploads/signatures/' . $fileName;
+                $signaturePath = 'assets/uploads/driver_signatures/' . $fileName;
 
                 file_put_contents(public_path($signaturePath), base64_decode($signature));
             } catch (\Exception $e) {
@@ -91,7 +91,7 @@ class DriverController extends Controller
             'date_of_birth' => $request->dateofbirth,
             'license_type' => $request->licensetype,
             'registered_at' => now(),
-            'signature_path' => $signaturePath,
+            'driver_signature' => $signaturePath,
             'status' => 'verified'
         ]);
 
@@ -108,7 +108,7 @@ class DriverController extends Controller
                 'date_of_birth' => $request->dateofbirth,
                 'license_type' => $request->licensetype,
                 'registered_at' => now()->toDateTimeString(),
-                'signature_path' => url($signaturePath),
+                'driver_signature' => url($signaturePath),
                 'status' => 'verified'
             ]);
         } catch (\Exception $e) {

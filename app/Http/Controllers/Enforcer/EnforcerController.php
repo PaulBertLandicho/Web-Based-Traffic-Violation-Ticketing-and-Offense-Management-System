@@ -13,6 +13,9 @@ use App\Services\FirebaseService;
 use App\Models\TrafficEnforcer;
 use App\Models\Notification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use App\Helpers\LogHelper;
+
 
 class EnforcerController extends Controller
 {
@@ -30,6 +33,7 @@ class EnforcerController extends Controller
             'message' => 'required|string',
             'enforcer_id' => 'nullable|string' // if null → send to all
         ]);
+        LogHelper::record(session('admin_id') ?? 'ADMIN', 'SEND_NOTICE', "Notice sent to {$request->enforcer_id}");
 
         if ($request->enforcer_id === 'all') {
             // Save notice for all enforcers
@@ -85,6 +89,106 @@ class EnforcerController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    public function otpPage()
+    {
+        if (!Session::has('pending_enforcer_id')) {
+            return redirect()->route('enforcer.login')->with('error', 'Unauthorized access.');
+        }
+
+        return view('enforcer.enforcer-otp');
+    }
+
+    public function verifyOtp(Request $request)
+    {
+        $request->validate([
+            'otp' => 'required|digits:6',
+        ]);
+
+        $enforcerId = Session::get('pending_enforcer_id');
+
+        $enforcer = DB::table('traffic_enforcers')
+            ->where('enforcer_id', $enforcerId)
+            ->first();
+
+        if (!$enforcer) {
+            return back()->with('error', 'Enforcer not found.');
+        }
+
+        // Expired?
+        if (now()->greaterThan($enforcer->otp_expires_at)) {
+            return back()->with('error', 'Your OTP has expired. Please login again.');
+        }
+
+        // Wrong OTP
+        if ($request->otp != $enforcer->otp_code) {
+            return back()->with('error', 'Invalid OTP code.');
+        }
+
+        // SUCCESS — OTP Valid
+        DB::table('traffic_enforcers')
+            ->where('enforcer_id', $enforcerId)
+            ->update([
+                'otp_code' => null,
+                'otp_expires_at' => null
+            ]);
+
+        // FINAL LOGIN SESSION
+        Session::put('enforcer_id', $enforcer->enforcer_id);
+        Session::put('enforcer_name', $enforcer->enforcer_name);
+        Session::put('enforcer_email', $enforcer->enforcer_email);
+
+        // Role
+        $role = DB::table('roles')->where('role_id', $enforcer->role_id)->value('role_name');
+        Session::put('role', $role);
+
+        Session::forget('pending_enforcer_id');
+
+        return redirect()->route('enforcer.enforcer-dashboard')
+            ->with('success', 'Login successful!');
+    }
+
+    public function resendOtp(Request $request)
+    {
+        if (!Session::has('pending_enforcer_id')) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
+        $enforcerId = Session::get('pending_enforcer_id');
+
+        $enforcer = DB::table('traffic_enforcers')
+            ->where('enforcer_id', $enforcerId)
+            ->first();
+
+        if (!$enforcer) {
+            return response()->json(['success' => false, 'message' => 'Enforcer not found']);
+        }
+
+        // Generate new OTP
+        $otp = rand(100000, 999999);
+
+        DB::table('traffic_enforcers')
+            ->where('enforcer_id', $enforcerId)
+            ->update([
+                'otp_code' => $otp,
+                'otp_expires_at' => now()->addMinutes(5)
+            ]);
+
+        // Send email
+        Mail::raw(
+            "Your NEW OTP code is: $otp\nThis code expires in 5 minutes.",
+            function ($message) use ($enforcer) {
+                $message->to($enforcer->enforcer_email)
+                    ->subject('Your New OTP Code');
+            }
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'A new OTP has been sent to your email.'
+        ]);
+    }
+
     public function enforcer()
     {
         return view('enforcer.enforcer-login');
@@ -112,43 +216,50 @@ class EnforcerController extends Controller
 
         if ($enforcer && Hash::check($request->enforcer_password, $enforcer->enforcer_password)) {
 
-            // ✅ Prevent login if archived
             if ($enforcer->is_archived) {
-                return redirect()->route('enforcer.login')
-                    ->with('error', 'Your account has been archived. Please contact the administrator.');
+                LogHelper::record($enforcer->enforcer_id, 'LOGIN_FAILED', 'Account archived.');
+                return back()->with('error', 'Your account has been archived.');
             }
 
-            // If the account is locked, show reason
             if ($enforcer->is_locked) {
-                // Get latest violation complaint filed against this enforcer
-                $latestViolation = DB::table('enforcer_violations')
-                    ->where('enforcer_id', $enforcer->enforcer_id)
-                    ->orderBy('created_at', 'desc')
-                    ->first();
-
-                $reason = $latestViolation
-                    ? "Your account has been locked because of a violation filed: \"{$latestViolation->violation_type}\" - {$latestViolation->details}"
-                    : "Your account has been temporarily locked.";
-
-                Session::flush();
-                return redirect()->route('enforcer.login')
-                    ->with('error', $reason);
+                LogHelper::record($enforcer->enforcer_id, 'LOGIN_FAILED', 'Account locked.');
+                return back()->with('error', 'Your account is locked. Contact admin.');
             }
 
-            // Store session if not locked
-            Session::put('enforcer_id', $enforcer->enforcer_id);
-            Session::put('enforcer_name', $enforcer->enforcer_name);
-            Session::put('enforcer_email', $enforcer->enforcer_email);
+            // Generate OTP
+            $otp = rand(100000, 999999);
+            DB::table('traffic_enforcers')
+                ->where('enforcer_id', $enforcer->enforcer_id)
+                ->update([
+                    'otp_code' => $otp,
+                    'otp_expires_at' => now()->addMinutes(5)
+                ]);
 
-            // Get Role
-            $role = DB::table('roles')->where('role_id', $enforcer->role_id)->value('role_name');
-            Session::put('role', $role);
+            // Send email OTP
+            Mail::raw(
+                "Your OTP code is: $otp\nThis code will expire in 5 minutes.",
+                function ($message) use ($enforcer) {
+                    $message->to($enforcer->enforcer_email)
+                        ->subject('Your Login OTP Code');
+                }
+            );
 
-            return redirect()->route('enforcer.enforcer-dashboard');
+            // Store pending session
+            Session::put('pending_enforcer_id', $enforcer->enforcer_id);
+
+            // 🔵 LOGGING HERE
+            LogHelper::record($enforcer->enforcer_id, 'LOGIN_REQUEST', 'Password verified. OTP sent.');
+
+            return redirect()->route('enforcer.otp-page')
+                ->with('success', 'OTP has been sent to your email.');
         }
 
-        return redirect()->route('enforcer.login')->with('error', 'Invalid ID or Password!');
+        // ❌ WRONG PASSWORD LOG
+        LogHelper::record($request->enforcer_id, 'LOGIN_FAILED', 'Incorrect ID or password.');
+
+        return back()->with('error', 'Invalid ID or Password!');
     }
+
 
     public function checkLock(Request $request)
     {
@@ -168,6 +279,8 @@ class EnforcerController extends Controller
             return redirect()->route('enforcer.login')->with('error', 'Please login first.');
         }
 
+        $enforcerId = session('enforcer_id');
+
         $enforcer = DB::table('traffic_enforcers')
             ->where('enforcer_id', session('enforcer_id'))
             ->first();
@@ -176,6 +289,24 @@ class EnforcerController extends Controller
             session()->flush();
             return redirect()->route('enforcer.login')->with('error', 'Your account is locked.');
         }
+
+        // Count pending violations
+        $pendingViolationsCount = DB::table('enforcer_violations')
+            ->where('enforcer_id', $enforcerId)
+            ->where('status', 'pending')
+            ->count();
+
+        // Check if first violation exists (complaint_count = 1)
+        $firstViolation = DB::table('enforcer_violations')
+            ->where('enforcer_id', $enforcerId)
+            ->where('status', 'pending')
+            ->where('complaint_count', 1)
+            ->first();
+
+        $firstViolationWarning = $firstViolation ?
+            'This is your first violation filed against you in your role as an enforcer. Your account will remain unlocked.'
+            : null;
+
 
         // ✅ Auto logout if archived
         if ($enforcer->is_archived) {
@@ -221,6 +352,8 @@ class EnforcerController extends Controller
         // Prepare data to return
         return view('enforcer.enforcer-dashboard', array_merge([
             'fineCount' => $fineCount,
+            'pendingViolationsCount' => $pendingViolationsCount,
+            'firstViolationWarning' => $firstViolationWarning,
             'fineAmount' => $fineAmount,
             'janTotal' => $monthlyTotals[1],
             'febTotal' => $monthlyTotals[2],
@@ -404,6 +537,7 @@ class EnforcerController extends Controller
 
         if ($enforcer) {
             $newStatus = $enforcer->is_locked ? 0 : 1;
+            LogHelper::record($id, $newStatus ? 'ACCOUNT_LOCKED' : 'ACCOUNT_UNLOCKED');
 
             DB::table('traffic_enforcers')
                 ->where('enforcer_id', $id)
@@ -411,6 +545,7 @@ class EnforcerController extends Controller
 
             return response()->json(['success' => true, 'status' => $newStatus]);
         }
+
 
         return response()->json(['success' => false]);
     }
@@ -451,12 +586,15 @@ class EnforcerController extends Controller
 
     public function update(Request $request)
     {
+
         $validated = $request->validate([
             'enforcer_id' => 'required',
             'enforcer_email' => 'nullable|email',
             'enforcer_name' => 'required|string',
             'assigned_area' => 'required|string',
         ]);
+
+        LogHelper::record($validated['enforcer_id'], 'UPDATE_PROFILE', 'Enforcer profile updated');
 
         DB::table('traffic_enforcers')
             ->where('enforcer_id', $validated['enforcer_id'])
@@ -585,6 +723,10 @@ class EnforcerController extends Controller
     // Logout
     public function logout()
     {
+        if (session()->has('enforcer_id')) {
+            LogHelper::record(session('enforcer_id'), 'LOGOUT', 'User logged out.');
+        }
+
         Session::flush();
         return redirect('/enforcer-login')->with('success', 'Logged out successfully.');
     }
@@ -650,41 +792,64 @@ class EnforcerController extends Controller
             return redirect()->back()->with('error', 'Enforcer not found.');
         }
 
-        if ($request->hasFile('signature_image')) {
-            $file = $request->file('signature_image');
+        $changes = []; // collect what was updated
+
+        // -----------------------------
+        // ✅ Update Signature
+        // -----------------------------
+        if ($request->hasFile('enforcer_signature')) {
+            $file = $request->file('enforcer_signature');
             $filename = $enforcerId . '_signature_' . time() . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('assets/uploads/enforcer_signatures'), $filename);
+
             $signaturePath = 'assets/uploads/enforcer_signatures/' . $filename;
 
             DB::table('traffic_enforcers')->where('enforcer_id', $enforcerId)->update([
-                'signature_image' => $signaturePath,
+                'enforcer_signature' => $signaturePath
             ]);
 
             Session::put('enforcer_signature', $signaturePath);
+
+            $changes[] = "Updated Signature";
         }
 
+        // -----------------------------
+        // ✅ Update Profile Image
+        // -----------------------------
         $imagePath = $enforcer->profile_image;
 
-        // ✅ Handle image upload if new file provided
         if ($request->hasFile('profile_image')) {
             $file = $request->file('profile_image');
             $filename = $enforcerId . '_' . time() . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('assets/uploads/enforcer_profiles'), $filename);
+
             $imagePath = 'assets/uploads/enforcer_profiles/' . $filename;
+            $changes[] = "Updated Profile Image";
         }
 
-        // ✅ Update database
+        // -----------------------------
+        // ✅ Update Name
+        // -----------------------------
+        if ($request->enforcer_name !== $enforcer->enforcer_name) {
+            $changes[] = "Changed Name from '{$enforcer->enforcer_name}' to '{$request->enforcer_name}'";
+        }
+
+        // -----------------------------
+        // ✅ Save Profile Updates
+        // -----------------------------
         DB::table('traffic_enforcers')->where('enforcer_id', $enforcerId)->update([
             'enforcer_name' => $request->enforcer_name,
             'profile_image' => $imagePath,
             'updated_at' => now(),
         ]);
 
-        // ✅ Update session data
+        // Update session
         Session::put('enforcer_name', $request->enforcer_name);
         Session::put('enforcer_profile_image', $imagePath);
 
-        // ✅ Firebase optional sync
+        // -----------------------------
+        // ✅ Firebase Sync
+        // -----------------------------
         $this->firebase->getDatabase()
             ->getReference('traffic_enforcers/' . $enforcerId)
             ->update([
@@ -693,6 +858,29 @@ class EnforcerController extends Controller
                 'updated_at' => now()->toDateTimeString()
             ]);
 
+        // -----------------------------
+        // ✅ USER LOG ACTIVITY (IMPORTANT)
+        // -----------------------------
+        DB::table('user_logs')->insert([
+            'enforcer_id' => $enforcerId,
+            'action' => 'Update Profile',
+            'details' => implode(", ", $changes), // summary of changes
+            'ip_address' => $request->ip(),
+            'is_read' => false,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // -----------------------------
+        // OPTIONAL: Firebase Log (for notifications)
+        // -----------------------------
+        $this->firebase->getDatabase()->getReference("admin_user_logs")->push([
+            'title' => "Enforcer Updated Profile",
+            'message' => "{$request->enforcer_name} updated their profile.",
+            'status' => "unread",
+            'created_at' => now()->toDateTimeString()
+        ]);
+
         return redirect()->back()->with('success', 'Profile updated successfully!');
     }
 
@@ -700,28 +888,55 @@ class EnforcerController extends Controller
     {
         $enforcerId = $request->enforcer_id;
 
-        DB::table('enforcer_violations')->insert([
-            'enforcer_id'   => $enforcerId,
-            'violation_type' => $request->violation_type,
-            'details'       => $request->details,
-            'penalty_amount' => $request->penalty_amount,
-            'created_at'    => now(),
-            'updated_at'    => now(),
-        ]);
-
-        // 🛑 Auto-lock enforcer immediately
-        DB::table('traffic_enforcers')
+        // Count existing pending violations
+        $pendingCount = DB::table('enforcer_violations')
             ->where('enforcer_id', $enforcerId)
-            ->update(['is_locked' => 1]);
+            ->where('status', 'pending')
+            ->count();
 
-        return response()->json([
-            'success' => 'Violation issued and enforcer account locked automatically.',
-            'enforcer_id' => $enforcerId
+        // Insert the new violation
+        $violationId = DB::table('enforcer_violations')->insertGetId([
+            'enforcer_id'    => $enforcerId,
+            'violation_type' => $request->violation_type,
+            'details'        => $request->details,
+            'penalty_amount' => $request->penalty_amount,
+            'created_at'     => now(),
+            'updated_at'     => now(),
+            'complaint_count' => $pendingCount + 1, // Track number of complaints
         ]);
+
+        // Check if this is the first violation
+        if ($pendingCount == 0) {
+            // Store warning in session for automatic dashboard popup
+            session()->flash('first_violation_warning', 'This is the first violation filed against this enforcer. Account will remain unlocked.');
+
+            return response()->json([
+                'warning' => session('first_violation_warning'),
+                'violation_id' => $violationId,
+                'enforcer_id' => $enforcerId
+            ]);
+        } else {
+            // Second or subsequent violation: lock the account
+            DB::table('traffic_enforcers')
+                ->where('enforcer_id', $enforcerId)
+                ->update(['is_locked' => 1]);
+
+            return response()->json([
+                'success' => 'Violation issued. Enforcer account has been locked due to multiple violations.',
+                'violation_id' => $violationId,
+                'enforcer_id' => $enforcerId
+            ]);
+        }
     }
 
-    public function settleSingleViolation(Request $request)
+
+    public function settleViolation(Request $request)
     {
+        $request->validate([
+            'id' => 'required|exists:enforcer_violations,id',
+            'remarks' => 'nullable|string|max:500'
+        ]);
+
         $violationId = $request->id;
 
         // ✅ Mark violation as settled
@@ -729,12 +944,15 @@ class EnforcerController extends Controller
             ->where('id', $violationId)
             ->update([
                 'status' => 'settled',
-                'updated_at' => now()
+                'remarks' => $request->remarks,
+                'settled_at' => now()
             ]);
+
+        // ✅ Get updated violation
+        $violation = DB::table('enforcer_violations')->where('id', $violationId)->first();
+
         // ✅ Get enforcer ID of this violation
-        $enforcerId = DB::table('enforcer_violations')
-            ->where('id', $violationId)
-            ->value('enforcer_id');
+        $enforcerId = $violation->enforcer_id;
 
         // ✅ Count remaining pending violations
         $pending = DB::table('enforcer_violations')
@@ -761,8 +979,10 @@ class EnforcerController extends Controller
             $unlocked = true;
         }
 
+        // ✅ Return the updated violation for frontend
         return response()->json([
             'success' => true,
+            'violation' => $violation, // <--- this is used to append to history table
             'enforcer_id' => $enforcerId,
             'unlocked' => $unlocked
         ]);

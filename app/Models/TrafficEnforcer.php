@@ -23,7 +23,7 @@ class TrafficEnforcer extends Model
         'gender',
         'registered_at',
         'code',
-        'signature_image',
+        'enforcer_signature',
         'is_locked',
         'role_id'
     ];

@@ -39,6 +39,7 @@
                                     <option value="" disabled selected>Select Title</option>
                                     <option value="Notice">Notice</option>
                                     <option value="Reminder">Reminder</option>
+                                    <option value="Announcement">Announcement</option>
                                 </select>
                             </div>
 
@@ -99,15 +100,17 @@
         </div>
     </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<!-- ✅ jQuery, Bootstrap, and SweetAlert2 -->
+<!-- jQuery MUST be loaded first -->
 <script src="{{ asset('assets/vendors/jquery/jquery-3.5.1.js') }}"></script>
+
+<!-- Bootstrap -->
 <script src="{{ asset('assets/vendors/bootstrap/popper.min.js') }}"></script>
 <script src="{{ asset('assets/vendors/bootstrap/bootstrap.min.js') }}"></script>
+
+<!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<!-- ✅ DataTables & Export Buttons -->
+<!-- DataTables -->
 <script src="{{ asset('assets/vendors/DataTables/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('assets/vendors/DataTables/dataTables.bootstrap4.min.js') }}"></script>
 <script src="{{ asset('assets/vendors/DataTables/dataTables.buttons.min.js') }}"></script>
@@ -116,6 +119,10 @@
 <script src="{{ asset('assets/vendors/DataTables/vfs_fonts.js') }}"></script>
 <script src="{{ asset('assets/vendors/DataTables/buttons.html5.min.js') }}"></script>
 <script src="{{ asset('assets/vendors/DataTables/buttons.print.min.js') }}"></script>
+
+<!-- Select2 CSS + JS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <!-- ✅ Tooltip + DataTables Initialization -->
 <script>
@@ -284,5 +291,18 @@
         });
     });
 </script>
+<!-- Initialize Select2 for Enforcer Search -->
+<script>
+    $(document).ready(function() {
 
+        // 🔍 Add search bar to "Send To" dropdown
+        $('select[name="enforcer_id"]').select2({
+            dropdownParent: $('#sendNoticeModal'), // IMPORTANT for modals
+            placeholder: "Search Enforcer by Name or ID",
+            allowClear: true,
+            width: "100%"
+        });
+
+    });
+</script>
 @endsection

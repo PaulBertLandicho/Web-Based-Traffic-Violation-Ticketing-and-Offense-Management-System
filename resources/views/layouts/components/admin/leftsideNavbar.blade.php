@@ -66,6 +66,15 @@
         </li>
 
         <li class="leftsidebar-nav-item">
+            <a href="{{ route('admin.userLogs') }}"
+                class="leftsidebar-nav-link {{ request()->is('admin.userLogs') ? 'active' : '' }}">
+                <div><i class="fas fa-user-clock"></i></div>
+                <span>User Activity Logs</span>
+            </a>
+        </li>
+
+
+        <li class="leftsidebar-nav-item">
             <a href="{{ route('notifications.index') }}"
                 class="leftsidebar-nav-link {{ request()->is('notifications') ? 'active' : '' }}">
                 <div><i class="fas fa-bell"></i></div>

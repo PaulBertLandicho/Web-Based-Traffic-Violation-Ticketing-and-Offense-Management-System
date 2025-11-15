@@ -16,8 +16,11 @@ return new class extends Migration
             $table->string('enforcer_id'); // Foreign key to traffic_enforcers
             $table->string('violation_type');
             $table->text('details')->nullable();
+            $table->text('remarks')->nullable();
             $table->decimal('penalty_amount', 10, 2)->default(0);
             $table->enum('status', ['pending', 'settled'])->default('pending');
+            $table->datetime('settled_at')->nullable();
+            $table->integer('complaint_count')->default(0);
             $table->timestamp('date_issued')->useCurrent();
             $table->timestamps();
 

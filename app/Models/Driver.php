@@ -21,7 +21,7 @@ class Driver extends Model
         'license_type',
         'registered_at',
         'status',
-        'signature_path',
+        'driver_signature',
         'is_archived'
     ];
 }

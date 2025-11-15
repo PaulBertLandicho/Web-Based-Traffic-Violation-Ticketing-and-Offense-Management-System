@@ -66,23 +66,23 @@
         <!--Add fine tickets form includes goes here-->
         <div class="card mt-5 mb-4">
             <div class="card-header">
-                <i class="fas fa-receipt"></i> Add a Provision Details
+                <i class="fas fa-receipt"></i> Add Traffic Violation Details
             </div>
             <div class="card-body" style="margin:0 2rem 1rem 2rem;">
                 <form id="addViolationForm">
                     @csrf
                     <div class="form-row">
                         <div class="form-group col-md-6">
-                            <label for="fine_id">Provision ID</label>
-                            <input type="text" class="form-control" id="fine_id" name="violationid" placeholder="Provision ID">
-                        </div>
-                        <div class="form-group col-md-6">
-                            <label for="provision">Provision</label>
-                            <input type="text" class="form-control" id="provision" name="violationtype" placeholder="Provision">
+                            <label for="provision">Traffic Violation</label>
+                            <input type="text" class="form-control" id="provision" name="violationtype" placeholder="Violation">
                         </div>
                         <div class="form-group col-md-6">
                             <label for="fine_amount">Fine Amount</label>
                             <input type="number" class="form-control" id="fine_amount" name="violationamount" placeholder="Fine Amount">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="fine_id"></label>
+                            <input type="hidden" name="violationid" value="{{ $nextViolationId }}">
                         </div>
                     </div>
 
@@ -412,7 +412,7 @@
                     Swal.fire({
                         icon: 'success',
                         title: 'Added!',
-                        text: res.success,
+                        text: response.success,
                         toast: true,
                         position: 'top-end',
                         timer: 3000,
@@ -421,23 +421,24 @@
 
                     // Append new violation to table
                     $('#dataTable tbody').append(`
-                    <tr>
-                        <td>
-                            <button class="btn btn-success btn-xs edit_data" data-id="${response.violation.violation_id}">
-                                <i class="fas fa-pen"></i>
-                            </button>
-                            <button class="btn btn-danger btn-xs delete_data" data-id="${response.violation.violation_id}">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </td>
-                        <td>${response.violation.violation_id}</td>
-                        <td>${response.violation.violation_type}</td>
-                        <td>₱${response.violation.violation_amount}</td>
-                    </tr>
-                `);
+                <tr>
+                    <td>
+                        <button class="btn btn-success btn-sm edit_data" data-id="${response.violation.violation_id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-secondary btn-sm archive_data" data-id="${response.violation.violation_id}">
+                            <i class="fas fa-archive"></i>
+                        </button>
+                    </td>
+                    <td>${response.violation.violation_id}</td>
+                    <td>${response.violation.violation_type}</td>
+                    <td>₱${response.violation.violation_amount}</td>
+                </tr>
+            `);
 
-                    // Reset form
+                    // Reset form and update next auto ID
                     $('#addViolationForm')[0].reset();
+                    $('#fine_id').val(response.violation.violation_id + 1); // next ID
                 },
                 error: function(xhr) {
                     if (xhr.status === 422) {
@@ -446,7 +447,6 @@
                         $.each(errors, function(key, value) {
                             errorMessage += value[0] + '<br>';
                         });
-
                         Swal.fire({
                             title: 'Error!',
                             html: errorMessage,

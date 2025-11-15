@@ -345,6 +345,11 @@
                 let imgPath = res.enforcer.profile_image ?
                     `/${res.enforcer.profile_image}` :
                     '/assets/img/default-enforcer.png';
+                // ✅ Display enforcer signature (if available)
+                let signaturePath = res.enforcer.enforcer_signature ?
+                    `/${res.enforcer.enforcer_signature}` :
+                    '/assets/img/no-signature.png';
+                $('#detail_signature').attr('src', signaturePath);
 
                 $('#detail_image').attr('src', imgPath);
                 $('#detail_name').text(res.enforcer.enforcer_name);
@@ -394,6 +399,39 @@
                 if ($.fn.DataTable.isDataTable('#violationsTable')) {
                     $('#violationsTable').DataTable().clear().destroy();
                 }
+
+                // ENFORCER COMPLAINT HISTORY
+                let complaintTbody = $('#complaintHistoryTable tbody');
+                complaintTbody.empty();
+
+                if (res.violations && res.violations.length > 0) {
+                    // Only include settled violations
+                    let settledViolations = res.violations.filter(v => v.status === 'settled');
+
+                    if (settledViolations.length > 0) {
+                        settledViolations.forEach(v => {
+                            let statusBadge = '<span class="badge badge-success">Settled</span>';
+
+                            complaintTbody.append(`
+                <tr>
+                    <td>${v.violation_type ?? 'N/A'}</td>
+                    <td>${v.details ?? 'N/A'}</td>
+                    <td>₱${v.penalty_amount ? Number(v.penalty_amount).toFixed(2) : '0.00'}</td>
+                    <td>${new Date(v.created_at).toLocaleString()}</td>
+                    <td>${statusBadge}</td>
+                    <td>${v.remarks ?? 'N/A'}</td>
+                    <td>${v.settled_at ? new Date(v.settled_at).toLocaleString() : new Date().toLocaleString()}</td>
+                </tr>
+            `);
+                        });
+                    } else {
+                        complaintTbody.append(`<tr><td colspan="7" class="text-center">No settled violations.</td></tr>`);
+                    }
+                } else {
+                    complaintTbody.append(`<tr><td colspan="7" class="text-center">No violations filed.</td></tr>`);
+                }
+
+
 
                 // Reinitialize DataTable
                 let table = $('#violationsTable').DataTable({
@@ -446,30 +484,38 @@
 
                 // ENFORCER VIOLATIONS FILED (against this enforcer)
                 if (res.violations && res.violations.length > 0) {
+                    // Track if there are pending violations
+                    let hasPending = false;
+
                     res.violations.forEach(v => {
-                        let statusBadge = v.status === 'settled' ?
-                            '<span class="badge badge-success">Settled</span>' :
-                            '<span class="badge badge-danger">Pending</span>';
+                        if (v.status === 'pending') { // <-- only display pending violations
+                            hasPending = true;
 
-                        let actionBtn = v.status === 'pending' ?
-                            `<button class="btn btn-sm btn-success settleViolationBtn" data-id="${v.id}">
-                        <i class="fas fa-check"></i> Settle
-                    </button>` :
-                            '';
+                            let statusBadge = '<span class="badge badge-danger">Pending</span>';
+                            let actionBtn = `<button class="btn btn-sm btn-success settleViolationBtn" data-id="${v.id}">
+                                <i class="fas fa-check"></i> Settle
+                             </button>`;
 
-                        enforcerTbody.append(`
-                    <tr>
-                        <td>${v.violation_type}</td>
-                        <td>${v.details ?? 'N/A'}</td>
-                        <td>₱${parseFloat(v.penalty_amount).toFixed(2)}</td>
-                        <td>${new Date(v.date_issued).toLocaleString()}</td>
-                        <td>${statusBadge}</td>
-                        <td>${actionBtn}</td>
-                    </tr>
-                `);
+                            enforcerTbody.append(`
+                <tr>
+                    <td>${v.violation_type}</td>
+                    <td>${v.details ?? 'N/A'}</td>
+                    <td>₱${parseFloat(v.penalty_amount).toFixed(2)}</td>
+                    <td>${new Date(v.date_issued).toLocaleString()}</td>
+                    <td>${statusBadge}</td>
+                    <td>${v.remarks ?? 'N/A'}</td>
+                    <td>${actionBtn}</td>
+                </tr>
+            `);
+                        }
                     });
+
+                    // If no pending violations, show placeholder
+                    if (!hasPending) {
+                        enforcerTbody.append(`<tr><td colspan="7" class="text-center">No pending violations.</td></tr>`);
+                    }
                 } else {
-                    enforcerTbody.append(`<tr><td colspan="6" class="text-center">No violations filed.</td></tr>`);
+                    enforcerTbody.append(`<tr><td colspan="7" class="text-center">No violations filed.</td></tr>`);
                 }
 
                 // Show modal
@@ -487,55 +533,78 @@
         });
 
         $(document).on('click', '.settleViolationBtn', function() {
-            const id = $(this).data('id');
+            const violationId = $(this).data('id');
+            const $row = $(this).closest('tr');
+
+            // Disable interaction with modal while processing
+            $('#dataModal').attr('inert', true);
 
             Swal.fire({
-                title: 'Confirm Settlement',
-                text: "Are you sure you want to mark this violation as settled?",
-                icon: 'warning',
+                title: 'Add Remarks Before Settlement',
+                input: 'textarea',
+                inputLabel: 'Remarks (optional)',
+                inputPlaceholder: 'Enter any notes before settling...',
                 showCancelButton: true,
-                confirmButtonText: 'Yes, Settle'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.post("{{ route('enforcer.violation.settle') }}", {
-                        id: id
-                    }, function(res) {
-                        if (res.success) {
-                            Swal.fire('Settled!', 'Violation has been settled.', 'success');
-
-                            // 🔄 Update violation row instantly
-                            let btn = $(`.settleViolationBtn[data-id="${id}"]`);
-                            let row = btn.closest('tr');
-                            row.find('td:nth-child(5)').html('<span class="badge badge-success">Settled</span>');
-                            btn.remove(); // remove Settle button
-
-                            // 🔓 If all violations settled, unlock enforcer
-                            if (res.unlocked) {
-                                let tableRow = $(`.toggle-btn[data-id="${res.enforcer_id}"]`).closest('tr');
-
-                                // Update toggle button
-                                tableRow.find('.toggle-btn')
-                                    .removeClass('btn-danger').addClass('btn-warning')
-                                    .html('<i class="fas fa-lock-open"></i>')
-                                    .data('status', 'unlocked');
-
-                                // Update status badge (last column)
-                                tableRow.find('td:last span')
-                                    .removeClass('bg-danger').addClass('bg-success')
-                                    .text('Unlocked');
-
-                                // Update modal header badge too
-                                $('#detail_name .badge').remove();
-                                $('#detail_name').append(' <span class="badge badge-success">Unlocked</span>');
-                            }
-                        }
-                    }).fail(err => {
-                        Swal.fire('Error', 'Could not update violation.', 'error');
-                        console.error(err.responseText);
+                confirmButtonText: 'Settle Violation',
+                preConfirm: (remarks) => {
+                    return $.ajax({
+                        url: '/admin/enforcer/violation/settle',
+                        method: 'POST',
+                        data: {
+                            _token: $('meta[name="csrf-token"]').attr('content'),
+                            id: violationId,
+                            remarks: remarks
+                        },
+                        dataType: 'json'
+                    }).then(res => {
+                        if (!res.success) throw new Error(res.message || 'Failed to settle violation');
+                        return res; // return the settled violation info
+                    }).catch(jqXHR => {
+                        let message = 'Request failed';
+                        if (jqXHR.responseJSON && jqXHR.responseJSON.message) message = jqXHR.responseJSON.message;
+                        Swal.showValidationMessage(`Request failed: ${message}`);
                     });
+                }
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    const res = result.value;
+
+                    // 1️⃣ Remove the settled violation from the Violations Complaint Filed table
+                    $row.remove();
+
+                    // 2️⃣ Append it to the Complaint / Violation History table
+                    let historyTbody = $('#complaintHistoryTable tbody');
+
+                    // Remove placeholder row if present
+                    if (historyTbody.find('tr td').length === 1) historyTbody.empty();
+
+                    historyTbody.append(`
+                <tr>
+                    <td>${res.violation_type}</td>
+                    <td>${res.details ?? 'N/A'}</td>
+                    <td>₱${parseFloat(res.penalty_amount).toFixed(2)}</td>
+                    <td>${new Date(res.date_issued).toLocaleString()}</td>
+                    <td><span class="badge badge-success">Settled</span></td>
+                    <td>${res.remarks ?? 'N/A'}</td>
+                    <td>${new Date().toLocaleString()}</td>
+                </tr>
+            `);
+
+                    Swal.fire('Success', 'Violation settled successfully.', 'success');
+
+                    // 3️⃣ Optional: Unlock enforcer if no pending violations
+                    if (res.unlocked) {
+                        Swal.fire('Info', 'All pending violations cleared. Enforcer unlocked.', 'info');
+                    }
+
+                    // Remove modal inert state
+                    $('#dataModal').removeAttr('inert');
                 }
             });
         });
+
+
+
 
         // 🟢 Edit enforcer
         $('.edit_data').click(function() {
@@ -581,6 +650,7 @@
             });
 
         });
+
 
         // 🟢 Archive enforcer
         $(document).on('click', '.archive_data', function() {
@@ -791,20 +861,19 @@
     $('#issueViolationForm').submit(function(e) {
         e.preventDefault();
         $.post("{{ route('enforcer.issueViolation') }}", $(this).serialize(), function(res) {
-            if (res.success) {
-                $('#issueViolationModal').modal('hide');
+            $('#issueViolationModal').modal('hide');
+
+            if (res.warning) {
+                Swal.fire('Warning', res.warning, 'warning');
+            } else if (res.success) {
                 Swal.fire('Success', res.success, 'success');
 
-                // 🛑 Auto-update toggle button + status badge
                 let row = $(`.issue_violation[data-id="${res.enforcer_id}"]`).closest('tr');
-
-                // Update toggle button
                 let toggleBtn = row.find('.toggle-btn');
                 toggleBtn.removeClass('btn-warning').addClass('btn-danger')
                     .html('<i class="fas fa-lock"></i>')
                     .data('status', 'locked');
 
-                // Update badge
                 row.find('td:last span')
                     .removeClass('bg-success').addClass('bg-danger')
                     .text('Locked');
