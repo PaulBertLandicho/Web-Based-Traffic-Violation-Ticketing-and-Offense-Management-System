@@ -287,9 +287,22 @@ class FineTicketController extends Controller
         // Fetch updated data again
         $pendingTickets = DB::table('issued_fine_tickets')
             ->join('driver_list', 'issued_fine_tickets.license_id', '=', 'driver_list.license_id')
-            ->select('issued_fine_tickets.*', 'driver_list.driver_name')
+            ->leftJoin('traffic_enforcers', 'issued_fine_tickets.enforcer_id', '=', 'traffic_enforcers.enforcer_id')
+            ->select(
+                'issued_fine_tickets.*',
+                'driver_list.driver_name',
+                'traffic_enforcers.enforcer_name',
+                'traffic_enforcers.enforcer_signature'
+            )
             ->where('issued_fine_tickets.status', 'pending')
             ->get();
+
+        // Ensure default signature if null
+        foreach ($pendingTickets as $ticket) {
+            if (!$ticket->enforcer_signature) {
+                $ticket->enforcer_signature = 'assets/img/no-signature.png'; // path relative to public/
+            }
+        }
 
         return view('admin.pending_fine_tickets', compact('pendingTickets'));
     }

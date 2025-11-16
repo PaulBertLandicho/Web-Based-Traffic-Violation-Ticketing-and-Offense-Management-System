@@ -64,9 +64,12 @@
                                         data-violation="{{ $ticket->violation_type }}"
                                         data-issued="{{ $ticket->issued_date }}"
                                         data-expire="{{ $ticket->expire_date }}"
-                                        data-amount="{{ $ticket->total_amount }}">
+                                        data-amount="{{ $ticket->total_amount }}"
+                                        data-enforcer-signature="{{ $ticket->enforcer_signature }}"
+                                        data-enforcer-name="{{ $ticket->enforcer_name }}">
                                         <i class="fas fa-exclamation-triangle"></i> Due Date
                                     </span>
+
                                     @else
                                     <span class="badge badge-warning">Pending</span>
                                     @endif
@@ -548,62 +551,66 @@
                         const issued = this.dataset.issued;
                         const expire = this.dataset.expire;
                         const amount = this.dataset.amount;
+                        const enforcerSignature = this.dataset.enforcerSignature;
+                        const enforcerName = this.dataset.enforcerName;
 
                         const content = `
-                <div id="printableJudicialForm" class="p-4">
-                    <div class="text-center mb-4">
-                        <img src="/assets/img/ICTPMO-logo.png" alt="ICTPMO Logo" width="90" height="90" style="margin-bottom: 10px;">
-                        <h4 class="fw-bold text-uppercase">City Government of Iligan</h4>
-                        <h5 class="fw-bold">Traffic and Parking Management Office (ICTPMO)</h5>
-                        <p class="text-muted"><em>Judicial Traffic Violation Report Form</em></p>
-                    </div>
+<div id="printableJudicialForm" class="p-4">
+    <div class="text-center mb-4">
+        <img src="/assets/img/ICTPMO-logo.png" alt="ICTPMO Logo" width="90" height="90" style="margin-bottom: 10px;">
+        <h4 class="fw-bold text-uppercase">City Government of Iligan</h4>
+        <h5 class="fw-bold">Traffic and Parking Management Office (ICTPMO)</h5>
+        <p class="text-muted"><em>Judicial Traffic Violation Report Form</em></p>
+    </div>
 
-                    <hr>
+    <hr>
 
-                    <h6 class="fw-bold text-primary">Driver Information</h6>
-                    <table class="table table-bordered table-sm mt-2">
-                        <tr><th>Full Name</th><td>${driver}</td></tr>
-                        <tr><th>License ID</th><td>${license}</td></tr>
-                    </table>
+    <h6 class="fw-bold text-primary">Driver Information</h6>
+    <table class="table table-bordered table-sm mt-2">
+        <tr><th>Full Name</th><td>${driver}</td></tr>
+        <tr><th>License ID</th><td>${license}</td></tr>
+    </table>
 
-                    <h6 class="fw-bold text-primary mt-3">Violation Details</h6>
-                    <table class="table table-bordered table-sm mt-2">
-                        <tr><th>Reference No.</th><td>${refNo}</td></tr>
-                        <tr><th>Violation</th><td>${violation}</td></tr>
-                        <tr><th>Date Issued</th><td>${issued}</td></tr>
-                        <tr><th>Due Date</th><td>${expire}</td></tr>
-                        <tr><th>Total Fine</th><td>₱${parseFloat(amount).toFixed(2)}</td></tr>
-                        <tr><th>Status</th><td><span class="text-danger fw-bold">UNPAID / FOR JUDICIAL ACTION</span></td></tr>
-                    </table>
+    <h6 class="fw-bold text-primary mt-3">Violation Details</h6>
+    <table class="table table-bordered table-sm mt-2">
+        <tr><th>Reference No.</th><td>${refNo}</td></tr>
+        <tr><th>Violation</th><td>${violation}</td></tr>
+        <tr><th>Date Issued</th><td>${issued}</td></tr>
+        <tr><th>Due Date</th><td>${expire}</td></tr>
+        <tr><th>Total Fine</th><td>₱${parseFloat(amount).toFixed(2)}</td></tr>
+        <tr><th>Status</th><td><span class="text-danger fw-bold">UNPAID / FOR JUDICIAL ACTION</span></td></tr>
+    </table>
 
-                    <h6 class="fw-bold text-primary mt-3">Judicial Action Summary</h6>
-                    <p class="mt-2">
-                        This violation has reached its due date and remains unpaid. Under the City Traffic Enforcement Ordinance,
-                        this report is hereby endorsed by the <strong>ICTPMO - Iligan City Traffic and Parking Management Office</strong>
-                        for legal action to the <strong>Municipal Trial Court of Iligan City</strong>.
-                        The concerned driver is required to appear before the court and comply with judicial proceedings
-                        to resolve the violation and corresponding penalties.
-                    </p>
+    <h6 class="fw-bold text-primary mt-3">Judicial Action Summary</h6>
+    <p class="mt-2">
+        This violation has reached its due date and remains unpaid. Under the City Traffic Enforcement Ordinance,
+        this report is hereby endorsed by the <strong>ICTPMO - Iligan City Traffic and Parking Management Office</strong>
+        for legal action to the <strong>Municipal Trial Court of Iligan City</strong>.
+        The concerned driver is required to appear before the court and comply with judicial proceedings
+        to resolve the violation and corresponding penalties.
+    </p>
 
-                    <div class="row mt-5 text-center">
-                        <div class="col">
-                            <p>Traffic Enforcer Signature</p>
-                            <div style="height: 10px;"></div>
-                            <p>_________________________</p>
-                        </div>
-                        <div class="col">
-                            <p>Authorized ICTPMO Officer</p>
-                            <div style="height: 10px;"></div>
-                            <p>_________________________</p>
-                        </div>
-                    </div>
+    <div class="row mt-5 text-center">
+        <div class="col">
+            <p>Traffic Enforcer Signature</p>
+            <img src="/${enforcerSignature}" alt="Enforcer Signature" style="height: 80px; margin-top: 5px;">
+            <p>${enforcerName}</p>
+        </div>
 
-                    <p class="text-center mt-4">
-                        <em>Generated via ICTPMO Traffic Violation Management System</em><br>
-                        <small>Generated on: ${new Date().toLocaleString()}</small>
-                    </p>
-                </div>
-            `;
+        <div class="col">
+            <p>Authorized ICTPMO Officer</p>
+            <div style="height: 10px;"></div>
+            <p>_________________________</p>
+        </div>
+    </div>
+
+    <p class="text-center mt-4">
+        <em>Generated via ICTPMO Traffic Violation Management System</em><br>
+        <small>Generated on: ${new Date().toLocaleString()}</small>
+    </p>
+</div>
+`;
+
 
                         document.getElementById('judicialFormContent').innerHTML = content;
                         const modal = new bootstrap.Modal(document.getElementById('judicialFormModal'));
