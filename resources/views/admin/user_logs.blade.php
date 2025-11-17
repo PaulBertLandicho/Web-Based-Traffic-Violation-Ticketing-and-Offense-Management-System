@@ -13,45 +13,44 @@
             <li class="breadcrumb-item active">View All User Activity Logs</li>
         </ol>
 
-        <div class="card mt-5 mb-4">
+        <div class="card mt-3">
             <div class="card-header">
-                <i class="fas fa-table mr-1"></i> User Logs
+                <i class="fas fa-table"></i> User Logs for Auditing
             </div>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive" id="employee_table">
-                <table class="table table-striped table-bordered" id="dataTable">
-                    <thead>
-                        <tr>
-                            <th>Traffic Enforcer</th>
-                            <th>Action</th>
-                            <th>Details</th>
-                            <th>IP Address</th>
-                            <th>Date & Time</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($logs as $log)
-                        <tr>
-                            <td>{{ $log->enforcer->enforcer_id ?? 'Unknown Enforcer' }} - {{ $log->enforcer->enforcer_name ?? 'Unknown Enforcer' }}</td>
-                            <td>{{ $log->action }}</td>
-                            <td>{{ $log->details ?? '-' }}</td>
-                            <td>{{ $log->ip_address }}</td>
-                            <td>{{ $log->created_at->format('M d, Y h:i A') }}</td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="5" class="text-center text-muted py-3">
-                                No activity logs found.
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+            <div class="card-body">
+                <div class="table-responsive" id="employee_table">
+                    <table class="table table-striped table-bordered" id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>Traffic Enforcer</th>
+                                <th>Action</th>
+                                <th>Details</th>
+                                <th>IP Address</th>
+                                <th>Date & Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($logs as $log)
+                            <tr>
+                                <td>{{ $log->enforcer->enforcer_id ?? 'Unknown Enforcer' }} - {{ $log->enforcer->enforcer_name ?? 'Unknown Enforcer' }}</td>
+                                <td>{{ $log->action }}</td>
+                                <td>{{ $log->details ?? '-' }}</td>
+                                <td>{{ $log->ip_address }}</td>
+                                <td>{{ $log->created_at->format('M d, Y  -  h:i A') }}</td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-3">
+                                    No activity logs found.
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- ✅ jQuery, Bootstrap, and SweetAlert2 -->
     <script src="{{ asset('assets/vendors/jquery/jquery-3.5.1.js') }}"></script>

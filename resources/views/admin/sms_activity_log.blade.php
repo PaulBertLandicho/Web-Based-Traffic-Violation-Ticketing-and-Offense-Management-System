@@ -13,58 +13,57 @@
             <li class="breadcrumb-item active">View All SMS Logs</li>
         </ol>
 
-        <div class="card mt-5 mb-4">
+        <div class="card mt-5">
             <div class="card-header">
-                <i class="fas fa-table mr-1"></i> Recent SMS Notifications
+                <i class="fas fa-table"></i> Recent SMS Notifications
             </div>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive" id="employee_table">
-                <table class="table table-striped table-bordered" id="dataTable">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>License ID</th>
-                            <th>Contact No.</th>
-                            <th>Message</th>
-                            <th>Status</th>
-                            <th>Response</th>
-                            <th>Sent At</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($smsLogs as $index => $log)
-                        <tr>
-                            <td>{{ $index + 1 }}</td>
-                            <td>{{ $log->license_id }}</td>
-                            <td>{{ $log->contact_no }}</td>
-                            <td>{!! nl2br(e($log->message)) !!}</td>
-                            <td>
-                                <span class="badge badge-{{ $log->sent_status === 'success' ? 'success' : 'success' }}">
-                                    {{ $log->sent_status }}
-                                </span>
+            <div class="card-body">
+                <div class="table-responsive" id="employee_table">
+                    <table class="table table-striped table-bordered" id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>License ID</th>
+                                <th>Contact No.</th>
+                                <th>Message</th>
+                                <th>Status</th>
+                                <th>Response</th>
+                                <th>Sent At</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($smsLogs as $index => $log)
+                            <tr>
+                                <td>{{ $index + 1 }}</td>
+                                <td>{{ $log->license_id }}</td>
+                                <td>{{ $log->contact_no }}</td>
+                                <td>{!! nl2br(e($log->message)) !!}</td>
+                                <td>
+                                    <span class="badge badge-{{ $log->sent_status === 'success' ? 'success' : 'success' }}">
+                                        {{ $log->sent_status }}
+                                    </span>
 
-                                @if ($log->sent_status === 'failed')
-                                <form method="POST" action="{{ route('sms.resend') }}" class="d-inline ml-2">
-                                    @csrf
-                                    <input type="hidden" name="sms_id" value="{{ $log->id }}">
-                                    <button type="submit" class="btn btn-sm btn-warning"
-                                        onclick="return confirm('Resend this SMS?')">
-                                        Resend
-                                    </button>
-                                </form>
-                                @endif
-                            </td>
-                            <td>{{ $log->response }}</td>
-                            <td>{{ $log->created_at }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                                    @if ($log->sent_status === 'failed')
+                                    <form method="POST" action="{{ route('sms.resend') }}" class="d-inline ml-2">
+                                        @csrf
+                                        <input type="hidden" name="sms_id" value="{{ $log->id }}">
+                                        <button type="submit" class="btn btn-sm btn-warning"
+                                            onclick="return confirm('Resend this SMS?')">
+                                            Resend
+                                        </button>
+                                    </form>
+                                    @endif
+                                </td>
+                                <td>{{ $log->response }}</td>
+                                <td>{{ $log->created_at }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- ✅ jQuery, Bootstrap, and SweetAlert2 -->
     <script src="{{ asset('assets/vendors/jquery/jquery-3.5.1.js') }}"></script>

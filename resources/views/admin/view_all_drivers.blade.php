@@ -215,32 +215,76 @@
                 const driver = res.driver;
                 const violations = res.violations;
 
-                const violationsHTML = violations.length ? `
-                <div class="table-responsive mt-3">
-                    <table class="table table-hover align-middle rounded">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Violation Type</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${violations.map(v => `
-                                <tr>
-                                    <td>${v.violation_type}</td>
-                                    <td>₱${v.total_amount}</td>
-                                    <td>
-                                        <span class="badge ${v.status === 'Pending' ? 'bg-warning text-dark' : 'bg-success'}">
-                                            ${v.status}
-                                        </span>
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            ` : `<div class="text-center text-muted mt-2"><i class="fas fa-check-circle"></i> No Violations Recorded</div>`;
+                let violationsHTML = '';
+
+                if (violations.length) {
+
+                    violationsHTML +=
+                        '<div class="table-responsive mt-3">' +
+                        '<table class="table table-hover align-middle rounded">' +
+                        '<thead class="table-light">' +
+                        '<tr>' +
+                        '<th>Traffic Enforcer</th>' +
+                        '<th>Issued Date & Time</th>' +
+                        '<th>Violation Type</th>' +
+                        '<th>Amount</th>' +
+                        '<th>Status</th>' +
+                        '</tr>' +
+                        '</thead>' +
+                        '<tbody>';
+
+                    violations.forEach(v => {
+
+                        // Format the due date
+                        const due = new Date(v.expire_date);
+                        const now = new Date();
+
+                        const formattedDueDate = due.toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        });
+
+                        // Determine Status
+                        let statusBadge = '';
+
+                        if (v.status === 'paid') {
+                            statusBadge = '<span class="badge bg-success">Paid</span>';
+                        } else if (due < now) {
+                            statusBadge = '<span class="badge bg-danger">Overdue</span>';
+                        } else {
+                            statusBadge = '<span class="badge bg-warning text-dark">Pending</span>';
+                        }
+
+                        // Status + Due Date combined
+                        let statusWithDue =
+                            statusBadge +
+                            '<br><small class="text-muted">Due: ' + formattedDueDate + '</small>';
+
+                        // Build Row
+                        violationsHTML +=
+                            '<tr>' +
+                            '<td>[' + (v.enforcer_id || 'N/A') + '] ' + (v.enforcer_name || 'N/A') + '</td>' +
+                            '<td>' + v.issued_date + ' ' + v.issued_time + '</td>' +
+                            '<td>' + v.violation_type + '</td>' +
+                            '<td>₱' + v.total_amount + '</td>' +
+                            '<td>' + statusWithDue + '</td>' +
+                            '</tr>';
+                    });
+
+                    violationsHTML +=
+                        '</tbody>' +
+                        '</table>' +
+                        '</div>';
+
+                } else {
+
+                    violationsHTML =
+                        '<div class="text-center text-muted mt-2">' +
+                        '<i class="fas fa-check-circle"></i> No Violations Recorded' +
+                        '</div>';
+                }
+
 
                 const baseAsset = "{{ asset('') }}";
                 const signaturePath = driver.driver_signature ?
@@ -270,7 +314,7 @@
 
                 <div class="card border-0 shadow-sm rounded-4">
                     <div class="card-body">
-                        <h5 class="fw-semibold text-danger mb-3"><i class="fas fa-gavel me-2"></i> Violations Details</h5>
+                        <h5 class="fw-semibold text-danger mb-3"><i class="fas fa-gavel me-2"></i> Driver History Violations Details</h5>
                         ${violationsHTML}
                     </div>
                 </div>

@@ -149,8 +149,13 @@ class DriverController extends Controller
             ->first();
 
         $violations = DB::table('issued_fine_tickets')
-            ->where('license_id', $request->did)
-            ->orderByDesc('issued_date')
+            ->leftJoin('traffic_enforcers', 'issued_fine_tickets.enforcer_id', '=', 'traffic_enforcers.enforcer_id')
+            ->where('issued_fine_tickets.license_id', $request->did)
+            ->select(
+                'issued_fine_tickets.*',
+                'traffic_enforcers.enforcer_name'
+            )
+            ->orderByDesc('issued_fine_tickets.issued_date')
             ->get();
 
         return response()->json([
