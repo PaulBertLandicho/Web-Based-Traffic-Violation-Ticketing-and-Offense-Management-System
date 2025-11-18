@@ -24,6 +24,8 @@ class TrafficEnforcer extends Model
                 'registered_at',
                 'code',
                 'enforcer_signature',
+                'otp_code',
+                'otp_expires',
                 'is_locked',
                 'role_id'
         ];

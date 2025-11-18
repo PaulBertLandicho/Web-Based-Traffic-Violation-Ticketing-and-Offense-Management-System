@@ -22,7 +22,7 @@
                     <table class="table table-striped table-bordered" id="dataTable">
                         <thead>
                             <tr>
-                                <th>Traffic Enforcer</th>
+                                <th>User Name</th>
                                 <th>Action</th>
                                 <th>Details</th>
                                 <th>IP Address</th>
@@ -30,22 +30,44 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($logs as $log)
+                            {{-- Enforcer Logs --}}
+                            @forelse($userLogs as $log)
                             <tr>
-                                <td>{{ $log->enforcer->enforcer_id ?? 'Unknown Enforcer' }} - {{ $log->enforcer->enforcer_name ?? 'Unknown Enforcer' }}</td>
+                                <td>
+                                    <span class="badge badge-primary">Enforcer</span><br>
+                                    {{ $log->enforcer->enforcer_id ?? 'Unknown ID' }} -
+                                    {{ $log->enforcer->enforcer_name ?? 'Unknown Enforcer' }}
+                                </td>
                                 <td>{{ $log->action }}</td>
                                 <td>{{ $log->details ?? '-' }}</td>
                                 <td>{{ $log->ip_address }}</td>
-                                <td>{{ $log->created_at->format('M d, Y  -  h:i A') }}</td>
+                                <td>{{ $log->created_at->format('M d, Y - h:i A') }}</td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="5" class="text-center text-muted py-3">
-                                    No activity logs found.
+                                <td colspan="5" class="text-center text-muted py-3">No enforcer logs found.</td>
+                            </tr>
+                            @endforelse
+
+                            {{-- Admin Logs --}}
+                            @forelse($adminLogs as $log)
+                            <tr>
+                                <td>
+                                    <span class="badge badge-danger">Admin</span><br>
+                                    {{ $log->admin->admin_name ?? 'Admin ID: '.$log->admin_id }}
                                 </td>
+                                <td>{{ $log->action }}</td>
+                                <td>{{ $log->user_agent ?? '-' }}</td>
+                                <td>{{ $log->ip_address }}</td>
+                                <td>{{ \Carbon\Carbon::parse($log->created_at)->format('M d, Y - h:i A') }}</td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-3">No admin logs found.</td>
                             </tr>
                             @endforelse
                         </tbody>
+
                     </table>
                 </div>
             </div>

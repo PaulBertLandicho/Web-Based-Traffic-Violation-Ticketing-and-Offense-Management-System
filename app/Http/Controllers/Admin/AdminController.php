@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use App\Models\IssuedFineTicket;
@@ -11,6 +12,17 @@ use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
+    private function logAdminActivity($adminId, $action)
+    {
+        DB::table('admin_logs')->insert([
+            'admin_id'   => $adminId,
+            'action'     => $action,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->header('User-Agent'),
+            'created_at' => now(),
+        ]);
+    }
+
     // Show login form
     public function admin()
     {
@@ -29,20 +41,122 @@ class AdminController extends Controller
             ->where('admin_email', $request->admin_email)
             ->first();
 
-        if ($admin && Hash::check($request->admin_password, $admin->admin_password)) {
-            Session::put('admin_email', $admin->admin_email);
-            Session::put('admin_name', $admin->admin_name);
-            Session::put('admin_id', $admin->admin_id);
-
-            // Handle role gracefully
-            $role = DB::table('roles')->where('role_id', $admin->role_id)->value('role_name') ?? 'admin';
-            Session::put('role', $role);
-
-            return redirect()->route('admin.admin-dashboard');
+        if (!$admin || !Hash::check($request->admin_password, $admin->admin_password)) {
+            return back()->with('error', 'Incorrect Email or Password!');
         }
 
-        return back()->with('error', 'Incorrect Email or Password!');
+        $this->logAdminActivity($admin->admin_id, 'Admin login successful (Password OK)');
+
+        // Generate OTP
+        $otp = rand(100000, 999999);
+        $expires = now()->addMinutes(5);
+
+        DB::table('traffic_admins')->where('admin_id', $admin->admin_id)->update([
+            'otp_code'       => $otp,
+            'otp_expires_at' => $expires
+        ]);
+
+        // Save temporary session
+        Session::put('pending_admin_email', $admin->admin_email);
+
+        // Send OTP Email
+        Mail::raw("Your ICTPMO Admin Login OTP is: $otp\n\nThis code will expire in 5 minutes.", function ($message) use ($admin) {
+            $message->to($admin->admin_email)
+                ->subject('ICTPMO Admin Login OTP Verification');
+        });
+
+        return redirect('/admin-verify-otp')->with('success', 'A verification code has been sent to your email.');
     }
+
+
+    public function showOtpForm()
+    {
+        if (!Session::has('pending_admin_email')) {
+            return redirect('/admin-login')->with('error', 'Please login first.');
+        }
+
+        return view('admin.verify-otp');
+    }
+
+    public function verifyOtp(Request $request)
+    {
+        $request->validate([
+            'otp_code' => 'required|numeric|digits:6'
+        ]);
+
+        $email = Session::get('pending_admin_email');
+
+        $admin = DB::table('traffic_admins')->where('admin_email', $email)->first();
+
+        if (!$admin) {
+            return back()->with('error', 'Admin not found.');
+        }
+
+        if ($admin->otp_code != $request->otp_code) {
+            return back()->with('error', 'Incorrect OTP. Please try again.');
+        }
+
+        if (now()->greaterThan($admin->otp_expires_at)) {
+            return back()->with('error', 'OTP has expired. Please log in again.');
+        }
+
+        // OTP approved → Login
+        Session::put('admin_email', $admin->admin_email);
+        Session::put('admin_name', $admin->admin_name);
+        Session::put('admin_id', $admin->admin_id);
+
+        $this->logAdminActivity($admin->admin_id, 'Admin successfully logged in with OTP');
+
+        Session::forget('pending_admin_email');
+
+        DB::table('traffic_admins')->where('admin_id', $admin->admin_id)->update([
+            'otp_code'       => null,
+            'otp_expires_at' => null,
+        ]);
+
+        return redirect()->route('admin.admin-dashboard')->with('success', 'Login successful!');
+    }
+
+
+    public function resendOtp()
+    {
+        if (!Session::has('pending_admin_email')) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'No pending OTP session. Please login again.'
+            ], 400);
+        }
+
+        $email = Session::get('pending_admin_email');
+
+        $admin = DB::table('traffic_admins')->where('admin_email', $email)->first();
+
+        if (!$admin) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Admin not found.'
+            ], 404);
+        }
+
+        $otp = rand(100000, 999999);
+        $expires = now()->addMinutes(5);
+
+        DB::table('traffic_admins')->where('admin_id', $admin->admin_id)->update([
+            'otp_code' => $otp,
+            'otp_expires_at' => $expires
+        ]);
+
+        Mail::raw("Your new OTP is: $otp\n\nValid for 5 minutes.", function ($message) use ($admin) {
+            $message->to($admin->admin_email)
+                ->subject('New Admin Login OTP');
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'OTP resent successfully.'
+        ]);
+    }
+
 
     // Admin dashboard
     public function adminDashboard()
@@ -246,6 +360,10 @@ class AdminController extends Controller
     // Logout
     public function logout()
     {
+        if (Session::has('admin_id')) {
+            $this->logAdminActivity(Session::get('admin_id'), 'Admin logged out');
+        }
+
         Session::flush();
         return redirect('/admin-login')->with('success', 'Logged out successfully.');
     }

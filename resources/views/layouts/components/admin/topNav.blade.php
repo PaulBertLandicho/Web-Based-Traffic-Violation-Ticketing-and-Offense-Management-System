@@ -262,7 +262,7 @@
 
                 if (data.status === "unread") {
                     count++;
-                    const date = new Date(data.created_at).toLocaleString();
+                    const date = data.created_at ? new Date(data.created_at).toLocaleString() : "N/A";
                     const item = `
                 <a class="dropdown-item" href="{{ route('admin.userLogs') }}">
                     <strong>${data.title}</strong><br>
@@ -328,23 +328,23 @@
         const userBadge = document.getElementById("user-log-count");
         const userBell = document.getElementById("user-log-bell");
         const userList = document.getElementById("user-log-list");
+        let userLogsData = {};
 
-        let userLogsData = {}; // Store logs locally
-
-        // Listen for logs changes
         db.ref("admin_user_logs").on("value", snapshot => {
-            userLogsData = {}; // reset
+            userLogsData = {};
             let count = 0;
             userList.innerHTML = "";
 
             snapshot.forEach(child => {
                 const data = child.val();
                 if (!data) return;
+                const key = child.key;
+                userLogsData[key] = data;
 
-                userLogsData[child.key] = data; // store for later
-
-                const date = new Date(data.created_at).toLocaleString();
+                const date = data.created_at ? new Date(data.created_at).toLocaleString() : "N/A";
                 const isUnread = data.status === "unread";
+
+                if (isUnread) count++;
 
                 const item = `
             <a class="dropdown-item ${isUnread ? 'font-weight-bold text-primary' : ''}" href="{{ route('admin.userLogs') }}">
@@ -355,24 +355,15 @@
             <div class="dropdown-divider"></div>
         `;
                 userList.insertAdjacentHTML("afterbegin", item);
-
-                if (isUnread) count++;
             });
 
-            if (count > 0) {
-                userBadge.textContent = count;
-                userBadge.style.display = "inline-block";
-                userBell.classList.add("shake");
-                userBell.style.color = "blue";
+            userBadge.style.display = count > 0 ? "inline-block" : "none";
+            userBell.classList.toggle("shake", count > 0);
+            userBell.style.color = count > 0 ? "blue" : "";
 
-                if (audioEnabled) {
-                    audio.currentTime = 0;
-                    audio.play().catch(() => {});
-                }
-            } else {
-                userBadge.style.display = "none";
-                userBell.classList.remove("shake");
-                userBell.style.color = "";
+            if (count > 0 && audioEnabled) {
+                audio.currentTime = 0;
+                audio.play().catch(() => {});
             }
 
             if (!userList.innerHTML.trim()) {
@@ -382,9 +373,17 @@
 
         // When user bell clicked → show all logs and mark unread as read
         document.getElementById("userLogDropdown").addEventListener("click", () => {
+            for (const key in userLogsData) {
+                if (userLogsData[key].status === "unread") {
+                    db.ref("admin_user_logs/" + key).update({
+                        status: "read"
+                    });
+                }
+            }
             userBadge.style.display = "none";
             userBell.classList.remove("shake");
             userBell.style.color = "";
+
 
             // Render all logs (read + unread) dynamically
             userList.innerHTML = "";

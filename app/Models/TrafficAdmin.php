@@ -8,6 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class TrafficAdmin extends Model
 {
     protected $table = 'traffic_admins';
-    protected $fillable = ['admin_email', 'code'];
-    public $timestamps = false; // if your table doesn’t use created_at/updated_at
+    protected $primaryKey = 'admin_id'; // important for belongsTo
+    public $timestamps = false;
+
+    protected $fillable = [
+        'admin_email',
+        'admin_name', // make sure this exists
+        'code',
+        'otp_code',
+        'otp_expires_at',
+    ];
 }

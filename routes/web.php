@@ -20,8 +20,13 @@ Route::get('/', [IntroController::class, 'welcome']);
 Route::get('/gov', [IntroController::class, 'gov']);
 
 // Admin Login Page
-Route::get('/admin-login', [AdminController::class, 'admin']);
+Route::get('/admin-login', [AdminController::class, 'admin'])->name('admin.login');
 Route::post('/admin-login', [AdminController::class, 'login'])->name('admin.login.submit');
+
+// OTP verification
+Route::get('/admin-verify-otp', [AdminController::class, 'showOtpForm'])->name('admin.otp');
+Route::post('/admin-verify-otp', [AdminController::class, 'verifyOtp'])->name('admin.otp.submit');
+Route::post('/admin/resend-otp', [AdminController::class, 'resendOtp'])->name('admin.otp.resend');
 
 // Admin Dashboard (protected by session check)
 Route::get('/admin-dashboard', [AdminController::class, 'adminDashboard'])->name('admin.admin-dashboard');
