@@ -250,7 +250,7 @@
 
                         // ✅ Add dropdown filter beside search
                         $filter.append(`
-                <label class="ml-3 mb-0">
+                <label class="ml-2 mb-2">
                     <select id="statusFilter" class="form-control form-control-sm">
                         <option value="">Filter by Status</option>
                         <option value="Pending">Pending</option>

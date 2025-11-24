@@ -41,7 +41,7 @@
                                 <td>{{ $log->action }}</td>
                                 <td>{{ $log->details ?? '-' }}</td>
                                 <td>{{ $log->ip_address }}</td>
-                                <td>{{ $log->created_at->format('M d, Y - h:i A') }}</td>
+                                <td>{{ $log->created_at->timezone('Asia/Manila')->format('M d, Y - h:i A') }}</td>
                             </tr>
                             @empty
                             <tr>
@@ -59,7 +59,7 @@
                                 <td>{{ $log->action }}</td>
                                 <td>{{ $log->user_agent ?? '-' }}</td>
                                 <td>{{ $log->ip_address }}</td>
-                                <td>{{ \Carbon\Carbon::parse($log->created_at)->format('M d, Y - h:i A') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($log->created_at)->timezone('Asia/Manila')->format('M d, Y - h:i A') }}</td>
                             </tr>
                             @empty
                             <tr>
@@ -94,13 +94,13 @@
         $(document).ready(function() {
             $('[data-toggle="tooltip"]').tooltip();
 
-            $('#dataTable').DataTable({
+            var table = $('#dataTable').DataTable({
                 dom: 'Bfrtip',
                 buttons: [{
                         extend: 'csv',
                         className: 'btn btn-primary mb-3',
                         exportOptions: {
-                            columns: ':not(:first-child)' // skip "Action" column
+                            columns: ':not(:first-child)'
                         }
                     },
                     {
@@ -125,23 +125,17 @@
                         }
                     }
                 ],
-
                 language: {
                     sSearch: "",
-                    sSearchPlaceholder: "Search...",
-                    sEmptyTable: "No data available in table",
-                    sInfo: "Showing _START_ to _END_ of _TOTAL_ entries",
-                    sInfoEmpty: "Showing 0 to 0 of 0 entries",
-                    sInfoFiltered: "(filtered from _MAX_ total entries)",
-                    sLengthMenu: "Show _MENU_ entries",
-                    sLoadingRecords: "Loading...",
-                    sProcessing: "Processing...",
-                    sZeroRecords: "No matching records found"
+                    sSearchPlaceholder: "Search..."
                 },
-
                 initComplete: function() {
+
+                    // ----------------------------
+                    // 💡 STYLE SEARCH BAR
+                    // ----------------------------
                     const $filter = $('.dataTables_filter');
-                    $filter.addClass('position-relative');
+                    $filter.addClass('d-flex align-items-center gap-2');
 
                     const $input = $filter.find('input');
                     $input
@@ -152,9 +146,32 @@
                             'width': '200px'
                         });
 
-                    $filter.find('label').prepend('<i class="fas fa-search search-icon"></i>');
+                    $filter.find('label').prepend('<i class="fas fa-search search-icon mr-2"></i>');
+
+                    // ----------------------------
+                    // ⭐ ADD ROLE FILTER BESIDE SEARCH BAR
+                    // ----------------------------
+                    var roleDropdown = `
+                    <label class="ml-2 mb-2">
+                    <select id="roleFilter" class="form-control form-control-sm">
+                    <option value="">Filter by </option>
+                    <option value="Admin">Admin</option>
+                    <option value="Enforcer">Enforcer</option>
+                    </select>
+                </label>
+            `;
+
+                    $filter.append(roleDropdown);
                 }
             });
+
+            // ----------------------------
+            // 🔍 ROLE FILTER FUNCTION
+            // ----------------------------
+            $(document).on('change', '#roleFilter', function() {
+                table.column(0).search($(this).val()).draw();
+            });
+
         });
     </script>
     @endsection

@@ -292,7 +292,7 @@
 
                 // Add dropdown beside search bar
                 $("#dataTable_filter").append(`
-                <label class="ml-3">
+                <label class="ml-2">
                     <select id="barangayFilter" class="form-control form-control-sm">
                         <option value="">Filter by Barangay</option>
                     </select>

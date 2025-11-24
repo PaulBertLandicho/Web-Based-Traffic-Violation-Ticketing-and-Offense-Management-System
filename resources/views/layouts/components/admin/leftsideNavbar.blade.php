@@ -67,7 +67,7 @@
 
         <li class="leftsidebar-nav-item">
             <a href="{{ route('admin.userLogs') }}"
-                class="leftsidebar-nav-link {{ request()->is('admin.userLogs') ? 'active' : '' }}">
+                class="leftsidebar-nav-link {{ request()->is('user-logs') ? 'active' : '' }}">
                 <div><i class="fas fa-user-clock"></i></div>
                 <span>User Activity Logs</span>
             </a>
