@@ -24,7 +24,7 @@
 
 <!--Boostrap tooltip call script-->
 
-
+<!-- 
 <script>
     $(document).ready(function() {
         if ($('#dataTable').length) {
@@ -50,7 +50,7 @@
             });
         }
     });
-</script>
+</script> -->
 <script>
     setInterval(function() {
         fetch("{{ route('enforcer.check-lock') }}", {

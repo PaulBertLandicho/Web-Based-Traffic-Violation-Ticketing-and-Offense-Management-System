@@ -12,14 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('traffic_enforcers', function (Blueprint $table) {
-            $table->string('profile_image')->nullable()->default('assets/img/default-enforcer.png')->after('gender');
+            $table->string('enforcer_signature')->nullable()->after('contact_no');
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::table('traffic_enforcers', function (Blueprint $table) {
-            $table->dropColumn('profile_image');
+            $table->dropColumn('enforcer_signature');
         });
     }
 };

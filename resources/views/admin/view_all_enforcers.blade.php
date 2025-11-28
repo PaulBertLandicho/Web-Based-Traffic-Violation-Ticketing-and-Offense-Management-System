@@ -5,6 +5,7 @@
 @include('layouts.components.admin.topNav')
 @include('layouts.components.admin.leftsideNavbar')
 @include('layouts.components.admin.modals.enforcer_details_modal')
+@include('layouts.components.footer')
 
 <div class="dashwrapper">
     <div class="container-fluid">

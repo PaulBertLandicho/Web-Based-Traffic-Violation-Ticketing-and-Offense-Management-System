@@ -4,6 +4,7 @@
 @section('content')
 @include('layouts.components.admin.topNav')
 @include('layouts.components.admin.leftsideNavbar')
+@include('layouts.components.footer')
 
 <div class="dashwrapper">
     <div class="container-fluid">
