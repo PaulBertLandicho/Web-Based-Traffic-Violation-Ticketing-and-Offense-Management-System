@@ -30,7 +30,7 @@ return new class extends Migration
 
         // Insert default admin
         DB::table('traffic_admins')->insert([
-            'admin_email'    => 'ictpmo.admin@example.com',
+            'admin_email'    => 'ictpmo.admin@gmail.com',
             'admin_password' => Hash::make('ictpmo123'), // secure hash
             'admin_name'     => 'Traffic Administrative',
             // 'profile_image'  => 'assets/img/default-admin.png',
