@@ -22,27 +22,14 @@ return new class extends Migration
             $table->unsignedBigInteger('role_id');
             $table->mediumInteger('code');
             $table->timestamps();
+
             $table->foreign('role_id')
                 ->references('role_id')
                 ->on('roles')
                 ->onDelete('cascade');
         });
-
-        // Insert default admin
-        DB::table('traffic_admins')->insert([
-            'admin_email'    => 'ictpmo.admin@gmail.com',
-            'admin_password' => Hash::make('ictpmo123'), // secure hash
-            'admin_name'     => 'Traffic Administrative',
-            // 'profile_image'  => 'assets/img/default-admin.png',
-            'status'         => 'active',
-            'role_id'        => 1, // assumes role_id 1 exists
-            'code'           => 12345,
-        ]);
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('traffic_admins');
