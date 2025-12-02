@@ -62,155 +62,168 @@
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
                 <h4 class="modal-title" id="ticketDetailsLabel">
-                    <img src="/assets/img/ICTPMO-logo.png" style="width: 40px; height: 40px; margin-right: 10px;">
+                    <img src="../assets/img/ICTPMO-logo.png" style="width: 40px; height: 40px; margin-right: 10px;">
                     Paid Ticket Details
                 </h4>
                 <button class="close" data-dismiss="modal"><span>&times;</span></button>
             </div>
             <div class="modal-body" id="paidTicketContent">Loading...</div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" onclick="printFineDetails()">
-                    <i class="fas fa-print"></i> Print
+            <div class="modal-footer d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> Close
                 </button>
                 <div>
+                    <button type="button" class="btn btn-danger me-2" id="pdfTicketBtn">
+                        <i class="bi bi-file-earmark-pdf me-1"></i> Export PDF
+                    </button>
+                    <button type="button" class="btn btn-outline-success" onclick="printFineDetails()">
+                        <i class="bi bi-printer me-1"></i> Print
+                    </button>
                 </div>
             </div>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <!-- ✅ jQuery, Bootstrap, and SweetAlert2 -->
-        <script src="{{ asset('assets/vendors/jquery/jquery-3.5.1.js') }}"></script>
-        <script src="{{ asset('assets/vendors/bootstrap/popper.min.js') }}"></script>
-        <script src="{{ asset('assets/vendors/bootstrap/bootstrap.min.js') }}"></script>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- ✅ jQuery, Bootstrap, and SweetAlert2 -->
+    <script src="{{ asset('assets/vendors/jquery/jquery-3.5.1.js') }}"></script>
+    <script src="{{ asset('assets/vendors/bootstrap/popper.min.js') }}"></script>
+    <script src="{{ asset('assets/vendors/bootstrap/bootstrap.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-        <!-- ✅ DataTables & Export Buttons -->
-        <script src="{{ asset('assets/vendors/DataTables/jquery.dataTables.min.js') }}"></script>
-        <script src="{{ asset('assets/vendors/DataTables/dataTables.bootstrap4.min.js') }}"></script>
-        <script src="{{ asset('assets/vendors/DataTables/dataTables.buttons.min.js') }}"></script>
-        <script src="{{ asset('assets/vendors/DataTables/jszip.min.js') }}"></script>
-        <script src="{{ asset('assets/vendors/DataTables/pdfmake.min.js') }}"></script>
-        <script src="{{ asset('assets/vendors/DataTables/vfs_fonts.js') }}"></script>
-        <script src="{{ asset('assets/vendors/DataTables/buttons.html5.min.js') }}"></script>
-        <script src="{{ asset('assets/vendors/DataTables/buttons.print.min.js') }}"></script>
+    <!-- ✅ DataTables & Export Buttons -->
+    <script src="{{ asset('assets/vendors/DataTables/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/vendors/DataTables/dataTables.bootstrap4.min.js') }}"></script>
+    <script src="{{ asset('assets/vendors/DataTables/dataTables.buttons.min.js') }}"></script>
+    <script src="{{ asset('assets/vendors/DataTables/jszip.min.js') }}"></script>
+    <script src="{{ asset('assets/vendors/DataTables/pdfmake.min.js') }}"></script>
+    <script src="{{ asset('assets/vendors/DataTables/vfs_fonts.js') }}"></script>
+    <script src="{{ asset('assets/vendors/DataTables/buttons.html5.min.js') }}"></script>
+    <script src="{{ asset('assets/vendors/DataTables/buttons.print.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-        <!-- ✅ Tooltip & DataTable Initialization -->
-        <script>
-            $(document).ready(function() {
-                $('[data-toggle="tooltip"]').tooltip();
+    <!-- ✅ Tooltip & DataTable Initialization -->
+    <script>
+        $(document).ready(function() {
+            $('[data-toggle="tooltip"]').tooltip();
 
-                $('#dataTable').DataTable({
-                    dom: 'Bfrtip',
-                    buttons: [{
-                            extend: 'csv',
-                            className: 'btn btn-primary mb-3',
-                            exportOptions: {
-                                columns: ':not(:first-child)' // skip "Action" column
-                            }
-                        },
-                        {
-                            extend: 'excel',
-                            className: 'btn btn-success mb-3',
-                            exportOptions: {
-                                columns: ':not(:first-child)'
-                            }
-                        },
-                        {
-                            extend: 'pdf',
-                            className: 'btn btn-danger mb-3',
-                            exportOptions: {
-                                columns: ':not(:first-child)'
-                            }
-                        },
-                        {
-                            extend: 'print',
-                            className: 'btn btn-dark mb-3',
-                            exportOptions: {
-                                columns: ':not(:first-child)'
-                            }
+            $('#dataTable').DataTable({
+                dom: 'Bfrtip',
+                buttons: [{
+                        extend: 'csv',
+                        className: 'btn btn-primary mb-3',
+                        text: '<i class="fas fa-file-csv"></i> CSV', // CSV icon
+                        exportOptions: {
+                            columns: ':not(:first-child)'
                         }
-                    ],
-
-                    language: {
-                        sSearch: "",
-                        sSearchPlaceholder: "Search...",
-                        sEmptyTable: "No data available in table",
-                        sInfo: "Showing _START_ to _END_ of _TOTAL_ entries",
-                        sInfoEmpty: "Showing 0 to 0 of 0 entries",
-                        sInfoFiltered: "(filtered from _MAX_ total entries)",
-                        sLengthMenu: "Show _MENU_ entries",
-                        sLoadingRecords: "Loading...",
-                        sProcessing: "Processing...",
-                        sZeroRecords: "No matching records found"
                     },
-
-                    initComplete: function() {
-                        const $filter = $('.dataTables_filter');
-                        $filter.addClass('position-relative');
-
-                        const $input = $filter.find('input');
-                        $input
-                            .attr('placeholder', 'Search...')
-                            .addClass('form-control')
-                            .css({
-                                'padding-left': '30px',
-                                'width': '200px'
-                            });
-
-                        $filter.find('label').prepend('<i class="fas fa-search search-icon"></i>');
+                    {
+                        extend: 'excel',
+                        className: 'btn btn-success mb-3',
+                        text: '<i class="fas fa-file-excel"></i> Excel', // Excel icon
+                        exportOptions: {
+                            columns: ':not(:first-child)'
+                        }
+                    },
+                    {
+                        extend: 'pdf',
+                        className: 'btn btn-danger mb-3',
+                        text: '<i class="fas fa-file-pdf"></i> PDF', // PDF icon
+                        exportOptions: {
+                            columns: ':not(:first-child)'
+                        }
+                    },
+                    {
+                        extend: 'print',
+                        className: 'btn btn-dark mb-3',
+                        text: '<i class="fas fa-print"></i> Print', // Print icon
+                        exportOptions: {
+                            columns: ':not(:first-child)'
+                        }
                     }
+                ],
+
+                language: {
+                    sSearch: "",
+                    sSearchPlaceholder: "Search...",
+                    sEmptyTable: "No data available in table",
+                    sInfo: "Showing _START_ to _END_ of _TOTAL_ entries",
+                    sInfoEmpty: "Showing 0 to 0 of 0 entries",
+                    sInfoFiltered: "(filtered from _MAX_ total entries)",
+                    sLengthMenu: "Show _MENU_ entries",
+                    sLoadingRecords: "Loading...",
+                    sProcessing: "Processing...",
+                    sZeroRecords: "No matching records found"
+                },
+
+                initComplete: function() {
+                    const $filter = $('.dataTables_filter');
+                    $filter.addClass('position-relative');
+
+                    const $input = $filter.find('input');
+                    $input
+                        .attr('placeholder', 'Search...')
+                        .addClass('form-control')
+                        .css({
+                            'padding-left': '30px',
+                            'width': '200px'
+                        });
+
+                    $filter.find('label').prepend('<i class="fas fa-search search-icon"></i>');
+                }
+            });
+        });
+
+
+        // View ticket modal
+        $('.view-btn').on('click', function() {
+            const refNo = $(this).data('id');
+
+            fetch('{{ route("admin.paidTickets.details") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        ref_no: refNo
+                    })
+                })
+                .then(res => res.text())
+                .then(html => {
+                    $('#paidTicketContent').html(html);
+                    $('#paidTicketModal').modal('show');
+                })
+                .catch(err => {
+                    console.error(err);
+                    Swal.fire('Error', 'Failed to load ticket details.', 'error');
                 });
-            });
+        });
+    </script>
+    <script>
+        // Start Printable Citation Ticket
+        function printFineDetails() {
+            // Get the content of the fine details modal
+            var fineContent = document.getElementById("paidTicketContent").innerHTML;
 
+            // Correct logo URL
+            var logoUrl = window.location.origin + "/assets/img/ICTPMO-logo.png";
 
-            // View ticket modal
-            $('.view-btn').on('click', function() {
-                const refNo = $(this).data('id');
-
-                fetch('{{ route("admin.paidTickets.details") }}', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            ref_no: refNo
-                        })
-                    })
-                    .then(res => res.text())
-                    .then(html => {
-                        $('#paidTicketContent').html(html);
-                        $('#paidTicketModal').modal('show');
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        Swal.fire('Error', 'Failed to load ticket details.', 'error');
-                    });
-            });
-        </script>
-        <script>
-            // Start Printable Citation Ticket
-            function printFineDetails() {
-                // Get the content of the fine details modal
-                var fineContent = document.getElementById("paidTicketContent").innerHTML;
-
-                // Correct logo URL
-                var logoUrl = window.location.origin + "/assets/img/ICTPMO-logo.png";
-
-                // Header for print
-                var headerContent = `
+            // Header for print
+            var headerContent = `
         <div style="text-align: center; margin-bottom: 20px;">
             <img src="${logoUrl}" style="width: 70px; height: 70px; margin-bottom: 5px;">
             <h2 style="margin-top: 5px;">Fine Ticket Details</h2>
         </div>
     `;
 
-                // Open print window
-                var printWindow = window.open('', '', 'height=700,width=900');
-                printWindow.document.write('<html><head><title>Fine Ticket Details</title>');
-                printWindow.document.write('<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">');
+            // Open print window
+            var printWindow = window.open('', '', 'height=700,width=900');
+            printWindow.document.write('<html><head><title>Fine Ticket Details</title>');
+            printWindow.document.write('<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">');
 
-                // Add print-optimized CSS
-                printWindow.document.write(`
+            // Add print-optimized CSS
+            printWindow.document.write(`
         <style>
             @media print {
                 @page {
@@ -299,17 +312,54 @@
         </style>
     `);
 
-                printWindow.document.write('</head><body>');
-                printWindow.document.write(headerContent);
-                printWindow.document.write('<div class="print-container">' + fineContent + '</div>');
-                printWindow.document.write('</body></html>');
+            printWindow.document.write('</head><body>');
+            printWindow.document.write(headerContent);
+            printWindow.document.write('<div class="print-container">' + fineContent + '</div>');
+            printWindow.document.write('</body></html>');
 
-                printWindow.document.close();
-                printWindow.focus();
-                printWindow.print();
-                printWindow.close();
-            }
+            printWindow.document.close();
+            printWindow.focus();
+            printWindow.print();
+            printWindow.close();
+        }
+        $(document).on('click', '#pdfTicketBtn', function() {
+            const {
+                jsPDF
+            } = window.jspdf;
+            const doc = new jsPDF('p', 'pt', 'a4'); // Portrait, points, A4
 
-            // End Printable Citation Ticket
-        </script>
-        @endsection
+            // Ensure modal content is fully loaded
+            var content = document.getElementById('paidTicketContent');
+
+            // Convert relative image URLs to absolute
+            const imgs = content.querySelectorAll('img');
+            imgs.forEach(img => {
+                if (!img.src.startsWith('http')) {
+                    img.src = window.location.origin + img.getAttribute('src');
+                }
+            });
+
+            // Generate PDF
+            doc.html(content, {
+                callback: function(pdf) {
+                    // Get citation number for filename
+                    var citationNoElem = content.querySelector('p strong');
+                    var citationNo = citationNoElem ? citationNoElem.innerText.replace('#', '') : 'CitationTicket';
+
+                    pdf.save('Traffic_Citation_Ticket_' + citationNo + '.pdf');
+                },
+                x: 20,
+                y: 20,
+                width: 555, // Adjust width for A4
+                windowWidth: content.scrollWidth,
+                html2canvas: {
+                    scale: 0.8, // Fit content to page
+                    useCORS: true,
+                    allowTaint: true
+                }
+            });
+        });
+
+        // End Printable Citation Ticket
+    </script>
+    @endsection

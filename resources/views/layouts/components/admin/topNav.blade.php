@@ -262,7 +262,14 @@
 
                 if (data.status === "unread") {
                     count++;
-                    const date = data.created_at ? new Date(data.created_at).toLocaleString() : "N/A";
+                    const date = data.created_at ? new Date(data.created_at).toLocaleString("en-US", {
+                        month: "short", // Nov
+                        day: "numeric", // 17
+                        year: "numeric", // 2025
+                        hour: "numeric", // 2
+                        minute: "2-digit",
+                        hour12: true // AM/PM
+                    }) : "N/A";
                     const item = `
                 <a class="dropdown-item" href="{{ route('admin.userLogs') }}">
                     <strong>${data.title}</strong><br>
@@ -341,7 +348,14 @@
                 const key = child.key;
                 userLogsData[key] = data;
 
-                const date = data.created_at ? new Date(data.created_at).toLocaleString() : "N/A";
+                const date = data.created_at ? new Date(data.created_at).toLocaleString("en-US", {
+                    month: "short", // Nov
+                    day: "numeric", // 17
+                    year: "numeric", // 2025
+                    hour: "numeric", // 2
+                    minute: "2-digit",
+                    hour12: true // AM/PM
+                }) : "N/A";
                 const isUnread = data.status === "unread";
 
                 if (isUnread) count++;

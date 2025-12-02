@@ -43,7 +43,7 @@
                                         <i class="fas fa-ticket-alt text-warning"></i> Tickets
                                     </button>
                                     <button class="btn btn-warning pay-btn" data-id="{{ $ticket->ref_no }}">
-                                        Paid Now <i class="fas fa-coins"></i>
+                                        Mark as Paid <i class="fas fa-coins"></i>
                                     </button>
                                 </td>
                                 <td>
@@ -103,11 +103,16 @@
                     <i class="bi bi-x-circle me-1"></i> Close
                 </button>
                 <div>
-                    <button type="button" class="btn btn-outline-success me-2" id="printJudicialForm">
+                    <!-- PDF Button added -->
+                    <button type="button" class="btn btn-danger me-2" id="pdfJudicialFormBtn">
+                        <i class="bi bi-file-earmark-pdf me-1"></i> Export PDF
+                    </button>
+                    <button type="button" class="btn btn-outline-success" id="printJudicialForm">
                         <i class="bi bi-printer me-1"></i> Print
                     </button>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
@@ -167,90 +172,104 @@
             <div class="modal-body" id="ticketDetailContent">
                 Loading...
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" onclick="printFineDetails()">
-                    <i class="fas fa-print"></i> Print
+            <div class="modal-footer d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> Close
                 </button>
                 <div>
+                    <button type="button" class="btn btn-danger me-2" id="pdfTicketBtn">
+                        <i class="bi bi-file-earmark-pdf me-1"></i> Export PDF
+                    </button>
+                    <button type="button" class="btn btn-outline-success" onclick="printFineDetails()">
+                        <i class="bi bi-printer me-1"></i> Print
+                    </button>
                 </div>
             </div>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <!-- ✅ jQuery, Bootstrap, and SweetAlert2 -->
-        <script src="{{ asset('assets/vendors/jquery/jquery-3.5.1.js') }}"></script>
-        <script src="{{ asset('assets/vendors/bootstrap/popper.min.js') }}"></script>
-        <script src="{{ asset('assets/vendors/bootstrap/bootstrap.min.js') }}"></script>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- ✅ jQuery, Bootstrap, and SweetAlert2 -->
+    <script src="{{ asset('assets/vendors/jquery/jquery-3.5.1.js') }}"></script>
+    <script src="{{ asset('assets/vendors/bootstrap/popper.min.js') }}"></script>
+    <script src="{{ asset('assets/vendors/bootstrap/bootstrap.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-        <!-- ✅ DataTables & Export Buttons -->
-        <script src="{{ asset('assets/vendors/DataTables/jquery.dataTables.min.js') }}"></script>
-        <script src="{{ asset('assets/vendors/DataTables/dataTables.bootstrap4.min.js') }}"></script>
-        <script src="{{ asset('assets/vendors/DataTables/dataTables.buttons.min.js') }}"></script>
-        <script src="{{ asset('assets/vendors/DataTables/jszip.min.js') }}"></script>
-        <script src="{{ asset('assets/vendors/DataTables/pdfmake.min.js') }}"></script>
-        <script src="{{ asset('assets/vendors/DataTables/vfs_fonts.js') }}"></script>
-        <script src="{{ asset('assets/vendors/DataTables/buttons.html5.min.js') }}"></script>
-        <script src="{{ asset('assets/vendors/DataTables/buttons.print.min.js') }}"></script>
+    <!-- ✅ DataTables & Export Buttons -->
+    <script src="{{ asset('assets/vendors/DataTables/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/vendors/DataTables/dataTables.bootstrap4.min.js') }}"></script>
+    <script src="{{ asset('assets/vendors/DataTables/dataTables.buttons.min.js') }}"></script>
+    <script src="{{ asset('assets/vendors/DataTables/jszip.min.js') }}"></script>
+    <script src="{{ asset('assets/vendors/DataTables/pdfmake.min.js') }}"></script>
+    <script src="{{ asset('assets/vendors/DataTables/vfs_fonts.js') }}"></script>
+    <script src="{{ asset('assets/vendors/DataTables/buttons.html5.min.js') }}"></script>
+    <script src="{{ asset('assets/vendors/DataTables/buttons.print.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-        <!-- ✅ Tooltip + DataTables Initialization -->
-        <script>
-            $(document).ready(function() {
-                $('[data-toggle="tooltip"]').tooltip();
 
-                // ✅ Initialize DataTable and store reference
-                const table = $('#dataTable').DataTable({
-                    dom: 'Bfrtip',
-                    buttons: [{
-                            extend: 'csv',
-                            className: 'btn btn-primary mb-3',
-                            exportOptions: {
-                                columns: ':not(:first-child)'
-                            }
-                        },
-                        {
-                            extend: 'excel',
-                            className: 'btn btn-success mb-3',
-                            exportOptions: {
-                                columns: ':not(:first-child)'
-                            }
-                        },
-                        {
-                            extend: 'pdf',
-                            className: 'btn btn-danger mb-3',
-                            exportOptions: {
-                                columns: ':not(:first-child)'
-                            }
-                        },
-                        {
-                            extend: 'print',
-                            className: 'btn btn-dark mb-3',
-                            exportOptions: {
-                                columns: ':not(:first-child)'
-                            }
+    <!-- ✅ Tooltip + DataTables Initialization -->
+    <script>
+        $(document).ready(function() {
+            $('[data-toggle="tooltip"]').tooltip();
+
+            // ✅ Initialize DataTable and store reference
+            const table = $('#dataTable').DataTable({
+                dom: 'Bfrtip',
+                buttons: [{
+                        extend: 'csv',
+                        className: 'btn btn-primary mb-3',
+                        text: '<i class="fas fa-file-csv"></i> CSV', // CSV icon
+                        exportOptions: {
+                            columns: ':not(:first-child)'
                         }
-                    ],
-                    initComplete: function() {
-                        let api = this.api();
+                    },
+                    {
+                        extend: 'excel',
+                        className: 'btn btn-success mb-3',
+                        text: '<i class="fas fa-file-excel"></i> Excel', // Excel icon
+                        exportOptions: {
+                            columns: ':not(:first-child)'
+                        }
+                    },
+                    {
+                        extend: 'pdf',
+                        className: 'btn btn-danger mb-3',
+                        text: '<i class="fas fa-file-pdf"></i> PDF', // PDF icon
+                        exportOptions: {
+                            columns: ':not(:first-child)'
+                        }
+                    },
+                    {
+                        extend: 'print',
+                        className: 'btn btn-dark mb-3',
+                        text: '<i class="fas fa-print"></i> Print', // Print icon
+                        exportOptions: {
+                            columns: ':not(:first-child)'
+                        }
+                    }
+                ],
+                initComplete: function() {
+                    let api = this.api();
 
-                        // ✅ Style the search box and add search icon
-                        const $filter = $('.dataTables_filter');
-                        $filter.addClass('position-relative');
+                    // ✅ Style the search box and add search icon
+                    const $filter = $('.dataTables_filter');
+                    $filter.addClass('position-relative');
 
-                        const $input = $filter.find('input');
-                        $input
-                            .attr('placeholder', 'Search...')
-                            .addClass('form-control')
-                            .css({
-                                'padding-left': '30px',
-                                'width': '200px'
-                            });
+                    const $input = $filter.find('input');
+                    $input
+                        .attr('placeholder', 'Search...')
+                        .addClass('form-control')
+                        .css({
+                            'padding-left': '30px',
+                            'width': '200px'
+                        });
 
-                        // Add search icon inside label
-                        $filter.find('label').prepend('<i class="fas fa-search search-icon position-absolute"></i>');
+                    // Add search icon inside label
+                    $filter.find('label').prepend('<i class="fas fa-search search-icon position-absolute"></i>');
 
-                        // ✅ Add dropdown filter beside search
-                        $filter.append(`
+                    // ✅ Add dropdown filter beside search
+                    $filter.append(`
                 <label class="ml-2 mb-2">
                     <select id="statusFilter" class="form-control form-control-sm">
                         <option value="">Filter by Status</option>
@@ -260,107 +279,107 @@
                 </label>
             `);
 
-                        // ✅ Apply filter on change
-                        $('#statusFilter').on('change', function() {
-                            const selected = $(this).val();
-                            api.column(6) // 👉 change index if your "Status" column is different
-                                .search(selected ? '^' + selected + '$' : '', true, false)
-                                .draw();
-                        });
+                    // ✅ Apply filter on change
+                    $('#statusFilter').on('change', function() {
+                        const selected = $(this).val();
+                        api.column(6) // 👉 change index if your "Status" column is different
+                            .search(selected ? '^' + selected + '$' : '', true, false)
+                            .draw();
+                    });
+                }
+            });
+
+
+            // ✅ View Ticket (Dynamic Modal Load)
+            $(document).on('click', '.view-btn', function() {
+                const refNo = $(this).data('id');
+
+                fetch('{{ route("admin.pendingTickets.details") }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            did: refNo
+                        })
+                    })
+                    .then(res => res.text())
+                    .then(html => {
+                        $('#ticketDetailContent').html(html);
+                        $('#ticketModal').modal('show');
+                    })
+                    .catch(() => {
+                        Swal.fire('Error', 'Failed to load ticket details.', 'error');
+                    });
+            });
+
+            // ✅ Pay Ticket (No Reload, Remove Row from Table)
+            $(document).on('click', '.pay-btn', function() {
+                const refNo = $(this).data('id');
+                const row = $(this).closest('tr'); // store row for removal later
+
+                Swal.fire({
+                    title: 'Mark as Paid?',
+                    text: 'When the driver is already paid.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Paid it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch('{{ route("admin.pendingTickets.pay") }}', {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    ref_no: refNo
+                                })
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire('Paid!', data.message, 'success');
+
+                                    // ✅ Remove row from DataTable without reload
+                                    table.row(row).remove().draw();
+                                } else {
+                                    Swal.fire('Error', 'Could not update.', 'error');
+                                }
+                            })
+                            .catch(() => {
+                                Swal.fire('Error', 'Request failed.', 'error');
+                            });
                     }
                 });
-
-
-                // ✅ View Ticket (Dynamic Modal Load)
-                $(document).on('click', '.view-btn', function() {
-                    const refNo = $(this).data('id');
-
-                    fetch('{{ route("admin.pendingTickets.details") }}', {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                did: refNo
-                            })
-                        })
-                        .then(res => res.text())
-                        .then(html => {
-                            $('#ticketDetailContent').html(html);
-                            $('#ticketModal').modal('show');
-                        })
-                        .catch(() => {
-                            Swal.fire('Error', 'Failed to load ticket details.', 'error');
-                        });
-                });
-
-                // ✅ Pay Ticket (No Reload, Remove Row from Table)
-                $(document).on('click', '.pay-btn', function() {
-                    const refNo = $(this).data('id');
-                    const row = $(this).closest('tr'); // store row for removal later
-
-                    Swal.fire({
-                        title: 'Mark as Paid?',
-                        text: 'When the driver is already paid.',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Yes, Paid it!'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            fetch('{{ route("admin.pendingTickets.pay") }}', {
-                                    method: 'POST',
-                                    headers: {
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                        'Content-Type': 'application/json'
-                                    },
-                                    body: JSON.stringify({
-                                        ref_no: refNo
-                                    })
-                                })
-                                .then(res => res.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        Swal.fire('Paid!', data.message, 'success');
-
-                                        // ✅ Remove row from DataTable without reload
-                                        table.row(row).remove().draw();
-                                    } else {
-                                        Swal.fire('Error', 'Could not update.', 'error');
-                                    }
-                                })
-                                .catch(() => {
-                                    Swal.fire('Error', 'Request failed.', 'error');
-                                });
-                        }
-                    });
-                });
             });
-        </script>
-        <script>
-            // Start Printable Citation Ticket
-            function printFineDetails() {
-                // Get the content of the fine details modal
-                var fineContent = document.getElementById("ticketDetailContent").innerHTML;
+        });
+    </script>
+    <script>
+        // Start Printable Citation Ticket
+        function printFineDetails() {
+            // Get the content of the fine details modal
+            var fineContent = document.getElementById("ticketDetailContent").innerHTML;
 
-                // Correct logo URL
-                var logoUrl = window.location.origin + "/assets/img/ICTPMO-logo.png";
+            // Correct logo URL
+            var logoUrl = window.location.origin + "/assets/img/ICTPMO-logo.png";
 
-                // Header for print
-                var headerContent = `
+            // Header for print
+            var headerContent = `
         <div style="text-align: center; margin-bottom: 20px;">
             <img src="${logoUrl}" style="width: 70px; height: 70px; margin-bottom: 5px;">
             <h2 style="margin-top: 5px;">Fine Ticket Details</h2>
         </div>
     `;
 
-                // Open print window
-                var printWindow = window.open('', '', 'height=700,width=900');
-                printWindow.document.write('<html><head><title>Fine Ticket Details</title>');
-                printWindow.document.write('<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">');
+            // Open print window
+            var printWindow = window.open('', '', 'height=700,width=900');
+            printWindow.document.write('<html><head><title>Fine Ticket Details</title>');
+            printWindow.document.write('<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">');
 
-                // Add print-optimized CSS
-                printWindow.document.write(`
+            // Add print-optimized CSS
+            printWindow.document.write(`
         <style>
             @media print {
                 @page {
@@ -449,45 +468,75 @@
         </style>
     `);
 
-                printWindow.document.write('</head><body>');
-                printWindow.document.write(headerContent);
-                printWindow.document.write('<div class="print-container">' + fineContent + '</div>');
-                printWindow.document.write('</body></html>');
+            printWindow.document.write('</head><body>');
+            printWindow.document.write(headerContent);
+            printWindow.document.write('<div class="print-container">' + fineContent + '</div>');
+            printWindow.document.write('</body></html>');
 
-                printWindow.document.close();
-                printWindow.focus();
-                printWindow.print();
-                printWindow.close();
-            }
-            // End Printable Citation Ticket
+            printWindow.document.close();
+            printWindow.focus();
+            printWindow.print();
+            printWindow.close();
+        }
+        // End Printable Citation Ticket
 
-            function loadPendingTickets() {
-                $.ajax({
-                    url: "{{ route('admin.pendingTickets.fetch') }}",
-                    method: "GET",
-                    success: function(data) {
-                        let today = new Date().toISOString().slice(0, 10);
-                        let rows = ""; // initialize rows
+        // Generate properly formatted PDF for Traffic Citation Ticket
+        $(document).on('click', '#pdfTicketBtn', function() {
+            const {
+                jsPDF
+            } = window.jspdf;
+            const doc = new jsPDF('p', 'pt', 'a4');
 
-                        // Separate today's issued and older tickets
-                        let todaysTickets = [];
-                        let olderTickets = [];
+            // Get modal content
+            var content = document.getElementById('ticketDetailContent');
 
-                        data.forEach(ticket => {
-                            if (ticket.issued_date === today) {
-                                todaysTickets.push(ticket);
-                            } else {
-                                olderTickets.push(ticket);
-                            }
-                        });
+            doc.html(content, {
+                callback: function(doc) {
+                    // Extract citation number for filename
+                    var citationNoElem = content.querySelector('p strong');
+                    var citationNo = citationNoElem ? citationNoElem.innerText.replace('#', '') : 'CitationTicket';
 
-                        // Function to generate row HTML
-                        function generateRow(ticket) {
-                            let newIssuedBadge = (ticket.issued_date === today) ?
-                                '<span class="badge bg-success mr-1">New Issued</span>' :
-                                '';
+                    doc.save('Traffic_Citation_Ticket_' + citationNo + '.pdf');
+                },
+                x: 20,
+                y: 20,
+                width: 555, // Fit content width
+                windowWidth: content.scrollWidth,
+                html2canvas: {
+                    scale: 0.8, // Adjust to fit A4 page nicely
+                    useCORS: true // Include external images
+                }
+            });
+        });
 
-                            return `
+
+        function loadPendingTickets() {
+            $.ajax({
+                url: "{{ route('admin.pendingTickets.fetch') }}",
+                method: "GET",
+                success: function(data) {
+                    let today = new Date().toISOString().slice(0, 10);
+                    let rows = ""; // initialize rows
+
+                    // Separate today's issued and older tickets
+                    let todaysTickets = [];
+                    let olderTickets = [];
+
+                    data.forEach(ticket => {
+                        if (ticket.issued_date === today) {
+                            todaysTickets.push(ticket);
+                        } else {
+                            olderTickets.push(ticket);
+                        }
+                    });
+
+                    // Function to generate row HTML
+                    function generateRow(ticket) {
+                        let newIssuedBadge = (ticket.issued_date === today) ?
+                            '<span class="badge bg-success mr-1">New Issued</span>' :
+                            '';
+
+                        return `
         <tr>
             <td>
                 <button class="btn btn-secondary view-btn" data-id="${ticket.ref_no}">
@@ -509,53 +558,53 @@
                 }
             </td>
         </tr>`;
-                        }
-
-                        // Build rows with today's tickets first
-                        todaysTickets.forEach(ticket => {
-                            rows += generateRow(ticket);
-                        });
-
-                        olderTickets.forEach(ticket => {
-                            rows += generateRow(ticket);
-                        });
-
-                        // Render into table
-                        $("#dataTable tbody").html(rows);
-
-
-                        // 🔄 Reapply current filter
-                        let selected = $('#statusFilter').val();
-                        $('#dataTable').DataTable().column(6).search(selected, true, false).draw();
                     }
-                });
-            }
+
+                    // Build rows with today's tickets first
+                    todaysTickets.forEach(ticket => {
+                        rows += generateRow(ticket);
+                    });
+
+                    olderTickets.forEach(ticket => {
+                        rows += generateRow(ticket);
+                    });
+
+                    // Render into table
+                    $("#dataTable tbody").html(rows);
 
 
-            // Initial load
-            loadPendingTickets();
+                    // 🔄 Reapply current filter
+                    let selected = $('#statusFilter').val();
+                    $('#dataTable').DataTable().column(6).search(selected, true, false).draw();
+                }
+            });
+        }
 
-            // Refresh every 5 seconds
-            setInterval(loadPendingTickets, 5000);
-        </script>
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const badges = document.querySelectorAll('.judicial-badge');
+        // Initial load
+        loadPendingTickets();
 
-                badges.forEach(badge => {
-                    badge.addEventListener('click', function() {
-                        const refNo = this.dataset.refno;
-                        const driver = this.dataset.driver;
-                        const license = this.dataset.license;
-                        const violation = this.dataset.violation;
-                        const issued = this.dataset.issued;
-                        const expire = this.dataset.expire;
-                        const amount = this.dataset.amount;
-                        const enforcerSignature = this.dataset.enforcerSignature;
-                        const enforcerName = this.dataset.enforcerName;
+        // Refresh every 5 seconds
+        setInterval(loadPendingTickets, 5000);
+    </script>
 
-                        const content = `
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const badges = document.querySelectorAll('.judicial-badge');
+
+            badges.forEach(badge => {
+                badge.addEventListener('click', function() {
+                    const refNo = this.dataset.refno;
+                    const driver = this.dataset.driver;
+                    const license = this.dataset.license;
+                    const violation = this.dataset.violation;
+                    const issued = this.dataset.issued;
+                    const expire = this.dataset.expire;
+                    const amount = this.dataset.amount;
+                    const enforcerSignature = this.dataset.enforcerSignature;
+                    const enforcerName = this.dataset.enforcerName;
+
+                    const content = `
 <div id="printableJudicialForm" class="p-4">
     <div class="text-center mb-4">
         <img src="/assets/img/ICTPMO-logo.png" alt="ICTPMO Logo" width="90" height="90" style="margin-bottom: 10px;">
@@ -578,7 +627,7 @@
         <tr><th>Violation</th><td>${violation}</td></tr>
         <tr><th>Date Issued</th><td>${issued}</td></tr>
         <tr><th>Due Date</th><td>${expire}</td></tr>
-        <tr><th>Total Fine</th><td>₱${parseFloat(amount).toFixed(2)}</td></tr>
+        <tr><th>Total Fine</th><td>PHP${parseFloat(amount).toFixed(2)}</td></tr>
         <tr><th>Status</th><td><span class="text-danger fw-bold">UNPAID / FOR JUDICIAL ACTION</span></td></tr>
     </table>
 
@@ -613,17 +662,49 @@
 `;
 
 
-                        document.getElementById('judicialFormContent').innerHTML = content;
-                        const modal = new bootstrap.Modal(document.getElementById('judicialFormModal'));
-                        modal.show();
-                    });
+                    document.getElementById('judicialFormContent').innerHTML = content;
+                    const modal = new bootstrap.Modal(document.getElementById('judicialFormModal'));
+                    modal.show();
                 });
+            });
 
-                // 🖨️ Print Judicial Form
-                document.getElementById('printJudicialForm').addEventListener('click', function() {
-                    const printContents = document.getElementById('printableJudicialForm').innerHTML;
-                    const printWindow = window.open('', '_blank');
-                    printWindow.document.write(`
+
+            // Generate PDF for ICTPMO Judicial Violation Report
+            $(document).on('click', '#pdfJudicialFormBtn', function() {
+                const {
+                    jsPDF
+                } = window.jspdf;
+                const doc = new jsPDF('p', 'pt', 'a4');
+
+                // Get the modal content
+                var content = document.getElementById('judicialFormContent');
+
+                doc.html(content, {
+                    callback: function(doc) {
+                        // Generate a filename using Reference No
+                        var refNo = content.querySelector('table tr:first-child td') ?
+                            content.querySelector('table tr:first-child td').innerText :
+                            'judicialForm';
+
+                        doc.save('ICTPMO_Judicial_Report_' + refNo + '.pdf');
+                    },
+                    x: 20,
+                    y: 20,
+                    width: 555,
+                    windowWidth: content.scrollWidth,
+                    html2canvas: {
+                        scale: 0.57, // scale for full page
+                        useCORS: true
+                    }
+                });
+            });
+
+
+            // 🖨️ Print Judicial Form
+            document.getElementById('printJudicialForm').addEventListener('click', function() {
+                const printContents = document.getElementById('printableJudicialForm').innerHTML;
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`
             <html>
                 <head>
                     <title>ICTPMO Judicial Violation Report</title>
@@ -668,10 +749,10 @@
                 <body>${printContents}</body>
             </html>
         `);
-                    printWindow.document.close();
-                    printWindow.print();
-                });
+                printWindow.document.close();
+                printWindow.print();
             });
-        </script>
+        });
+    </script>
 
-        @endsection
+    @endsection

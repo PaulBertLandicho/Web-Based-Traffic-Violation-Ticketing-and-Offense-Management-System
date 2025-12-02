@@ -569,10 +569,23 @@ class EnforcerController extends Controller
 
         $drivers = DB::table('issued_fine_tickets as f')
             ->join('driver_list as d', 'f.license_id', '=', 'd.license_id')
-            ->select('d.license_id', 'd.driver_name', 'f.ref_no', 'f.violation_type', 'f.total_amount', 'f.created_at')
+            ->leftJoin('vehicles as v', 'f.vehicle_no', '=', 'v.vehicle_no')
+            ->select(
+                'd.license_id',
+                'd.driver_name',
+                'f.ref_no as offense_number',
+                'f.violation_type',
+                'f.total_amount as penalty_applied',
+                'f.vehicle_no',
+                'v.vehicle_type',
+                'f.place',
+                'f.status',
+                'f.created_at'
+            )
             ->where('f.enforcer_id', $id)
             ->orderBy('f.created_at', 'desc')
             ->get();
+
 
         // This function should only return details, not update status
 

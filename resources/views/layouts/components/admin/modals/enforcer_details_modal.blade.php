@@ -41,7 +41,7 @@
                         <img id="detail_image"
                             src="{{ $profilePath }}"
                             alt="Enforcer Profile"
-                            class="rounded-circle shadow-sm border border-3 border-primary mb-3"
+                            class="rounded-circle shadow-sm border-3 border-primary mb-3"
                             width="120" height="120"
                             style="object-fit: cover;">
                         <h6 class="fw-bold text-secondary mb-0">Traffic Enforcer</h6>
@@ -52,7 +52,7 @@
                         <img id="detail_signature"
                             src="{{ $signaturePath }}"
                             alt="Enforcer Signature"
-                            class="border border-2 rounded shadow-sm p-2 bg-white"
+                            class="border-2 rounded shadow-sm p-2 bg-white"
                             width="220" height="110"
                             style="object-fit: contain;">
                         <p class="mt-2 text-muted small">Enforcer Signature</p>
@@ -150,13 +150,13 @@
                         </h5>
 
                         <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
-                            <div id="customSearch" class="flex-grow-1 me-3"></div>
+                            <div id="customSearch" class="flex-1 me-3"></div>
                             <select id="violationFilter" class="form-select w-auto">
                                 <option value="">Filter by Violation</option>
                             </select>
                         </div>
 
-                        <div class="table-responsive">
+                        <div class="table-responsive" style="overflow-x:auto;">
                             <table class="table table-hover align-middle" id="violationsTable">
                                 <thead class="table-light">
                                     <tr>
@@ -164,11 +164,16 @@
                                         <th>Driver Name</th>
                                         <th>Violation</th>
                                         <th>Total Amount</th>
-                                        <th>Date</th>
+                                        <th>Issued Date</th>
+                                        <th>Vehicle Type</th>
+                                        <th>Plate Number</th>
+                                        <th>Status</th>
+                                        <th>Remarks</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
                             </table>
+
                         </div>
                     </div>
                 </div>
@@ -183,7 +188,6 @@
         </div>
     </div>
 </div>
-
 
 
 <!-- Edit Modal -->

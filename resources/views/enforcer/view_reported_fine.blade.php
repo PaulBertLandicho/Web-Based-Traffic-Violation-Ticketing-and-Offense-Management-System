@@ -40,7 +40,7 @@
                                     <td>{{ $fine->violation_type }}</td>
                                     <td>{{ $fine->vehicle_no }}</td>
                                     <td>₱{{ number_format($fine->total_amount, 2) }}</td>
-                                    <td>{{ $fine->issued_date }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($fine->issued_date)->format('M. d, Y') }}</td>
                                 </tr>
                                 @endforeach
                                 @if(count($fines) === 0)
@@ -76,19 +76,35 @@
             dom: 'Bfrtip',
             buttons: [{
                     extend: 'csv',
-                    className: 'btn btn-primary mb-3'
+                    className: 'btn btn-primary mb-3',
+                    text: '<i class="fas fa-file-csv"></i> CSV', // CSV icon
+                    exportOptions: {
+                        columns: ':not(:first-child)'
+                    }
                 },
                 {
                     extend: 'excel',
-                    className: 'btn btn-success mb-3'
+                    className: 'btn btn-success mb-3',
+                    text: '<i class="fas fa-file-excel"></i> Excel', // Excel icon
+                    exportOptions: {
+                        columns: ':not(:first-child)'
+                    }
                 },
                 {
                     extend: 'pdf',
-                    className: 'btn btn-danger mb-3'
+                    className: 'btn btn-danger mb-3',
+                    text: '<i class="fas fa-file-pdf"></i> PDF', // PDF icon
+                    exportOptions: {
+                        columns: ':not(:first-child)'
+                    }
                 },
                 {
                     extend: 'print',
-                    className: 'btn btn-dark mb-3'
+                    className: 'btn btn-dark mb-3',
+                    text: '<i class="fas fa-print"></i> Print', // Print icon
+                    exportOptions: {
+                        columns: ':not(:first-child)'
+                    }
                 }
             ],
 

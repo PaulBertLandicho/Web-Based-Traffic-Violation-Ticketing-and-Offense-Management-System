@@ -1,6 +1,8 @@
-<h5 class="text-center mb-3">TRAFFIC CITATION TICKET</h5>
-<p class="text-center">Citation No: <strong>#{{ $ticket->ref_no }}</strong></p>
-
+<div class="text-center mb-4">
+    <img src="/assets/img/ICTPMO-logo.png" alt="ICTPMO Logo" width="90" height="90" style="margin-bottom: 10px;">
+    <h5 class="text-center mb-3">TRAFFIC CITATION TICKET</h5>
+    <p class="text-center">Citation No: <strong>#{{ $ticket->ref_no }}</strong></p>
+</div>
 <h6 class="border-bottom pb-1"><strong>Driver Information</strong></h6>
 <table class="table table-sm table-borderless mb-2">
     <tr>
@@ -41,11 +43,11 @@
     </tr>
     <tr>
         <td>Issued Date & Time:</td>
-        <td>{{ $ticket->issued_date }} - {{ $ticket->issued_time }}</td>
+        <td>{{ \Carbon\Carbon::parse($ticket->issued_date)->format('M. d, Y') }} - {{ $ticket->issued_time }}</td>
     </tr>
     <tr>
         <td>Expiration Date:</td>
-        <td>{{ $ticket->expire_date }}</td>
+        <td>{{ \Carbon\Carbon::parse($ticket->expire_date)->format('M. d, Y') }}</td>
     </tr>
     <tr>
         <td>Provisions:</td>
@@ -61,7 +63,7 @@
     </tr>
     <tr>
         <td>Total Amount:</td>
-        <td><strong>₱{{ number_format($ticket->total_amount, 2) }}</strong></td>
+        <td><strong>PHP{{ number_format($ticket->total_amount, 2) }}</strong></td>
     </tr>
     <tr>
         <td>Status:</td>

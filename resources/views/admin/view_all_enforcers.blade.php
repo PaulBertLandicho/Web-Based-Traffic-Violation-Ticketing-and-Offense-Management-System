@@ -232,6 +232,7 @@
             buttons: [{
                     extend: 'csv',
                     className: 'btn btn-primary mb-3',
+                    text: '<i class="fas fa-file-csv"></i> CSV', // CSV icon
                     exportOptions: {
                         columns: ':not(:first-child)'
                     }
@@ -239,6 +240,7 @@
                 {
                     extend: 'excel',
                     className: 'btn btn-success mb-3',
+                    text: '<i class="fas fa-file-excel"></i> Excel', // Excel icon
                     exportOptions: {
                         columns: ':not(:first-child)'
                     }
@@ -246,6 +248,7 @@
                 {
                     extend: 'pdf',
                     className: 'btn btn-danger mb-3',
+                    text: '<i class="fas fa-file-pdf"></i> PDF', // PDF icon
                     exportOptions: {
                         columns: ':not(:first-child)'
                     }
@@ -253,6 +256,7 @@
                 {
                     extend: 'print',
                     className: 'btn btn-dark mb-3',
+                    text: '<i class="fas fa-print"></i> Print', // Print icon
                     exportOptions: {
                         columns: ':not(:first-child)'
                     }
@@ -378,6 +382,26 @@
                         .text('Locked');
                 }
 
+                // Destroy previous DataTable
+                if ($.fn.DataTable.isDataTable('#enforcerViolationsTable')) {
+                    $('#enforcerViolationsTable').DataTable().clear().destroy();
+                }
+
+                // Initialize with PDF Button
+                $('#enforcerViolationsTable').DataTable({
+                    dom: 'Bfrtip',
+                    buttons: [{
+                        extend: 'pdfHtml5',
+                        className: 'btn btn-danger mb-2',
+                        title: 'Violations Complaint Filed',
+                        text: '<i class="fas fa-file-pdf"></i> Export PDF',
+                        exportOptions: {
+                            columns: ':visible'
+                        }
+                    }],
+                    pageLength: 5
+                });
+
                 // =========================
                 // DRIVER VIOLATIONS (issued by this enforcer)
                 let violations = [];
@@ -385,13 +409,35 @@
 
                 if (res.drivers && res.drivers.length > 0) {
                     res.drivers.forEach(d => {
+                        let formattedDate = new Date(d.created_at).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                        });
+
+                        // Status badge color: green if paid, yellow if pending
+                        let statusBadge = '';
+                        if (d.status?.toLowerCase() === 'paid') {
+                            statusBadge = '<span class="badge bg-success">Paid</span>';
+                        } else if (d.status?.toLowerCase() === 'pending') {
+                            statusBadge = '<span class="badge bg-warning text-dark">Pending</span>';
+                        } else {
+                            statusBadge = '<span class="badge bg-secondary">N/A</span>';
+                        }
+
                         driverData.push([
                             d.license_id,
                             d.driver_name,
                             d.violation_type,
-                            `₱${parseFloat(d.total_amount).toFixed(2)}`,
-                            d.created_at
+                            d.vehicle_no ?? 'N/A',
+                            d.place ?? 'N/A',
+                            `₱${parseFloat(d.penalty_applied).toFixed(2)}`,
+                            d.vehicle_type ?? 'N/A',
+                            formattedDate,
+                            statusBadge
                         ]);
+
+
                         violations.push(d.violation_type);
                     });
                 }
@@ -413,17 +459,51 @@
                         settledViolations.forEach(v => {
                             let statusBadge = '<span class="badge badge-success">Settled</span>';
 
+                            // Format dates
+                            const formattedCreatedAt = v.created_at ?
+                                new Date(v.created_at).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric'
+                                }) :
+                                'N/A';
+
+                            const formattedSettledAt = v.settled_at ?
+                                new Date(v.settled_at).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric'
+                                }) :
+                                new Date().toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric'
+                                });
+
                             complaintTbody.append(`
                 <tr>
                     <td>${v.violation_type ?? 'N/A'}</td>
                     <td>${v.details ?? 'N/A'}</td>
                     <td>₱${v.penalty_amount ? Number(v.penalty_amount).toFixed(2) : '0.00'}</td>
-                    <td>${new Date(v.created_at).toLocaleString()}</td>
+                    <td>${formattedCreatedAt}</td>
                     <td>${statusBadge}</td>
                     <td>${v.remarks ?? 'N/A'}</td>
-                    <td>${v.settled_at ? new Date(v.settled_at).toLocaleString() : new Date().toLocaleString()}</td>
+                    <td>${formattedSettledAt}</td>
                 </tr>
             `);
+                            $('#complaintHistoryTable').DataTable({
+                                dom: 'Bfrtip',
+                                buttons: [{
+                                    extend: 'pdfHtml5',
+                                    className: 'btn btn-danger mb-2',
+                                    title: 'Complaint / Violation History Against This Enforcer',
+                                    text: '<i class="fas fa-file-pdf"></i> Export PDF',
+                                    exportOptions: {
+                                        columns: ':visible'
+                                    }
+                                }],
+                                pageLength: 5
+                            });
                         });
                     } else {
                         complaintTbody.append(`<tr><td colspan="7" class="text-center">No settled violations.</td></tr>`);
@@ -436,6 +516,17 @@
 
                 // Reinitialize DataTable
                 let table = $('#violationsTable').DataTable({
+                    dom: 'Bfrtip',
+                    buttons: [{
+                        extend: 'pdfHtml5',
+                        className: 'btn btn-danger mb-2',
+                        title: 'Drivers Issued Violations',
+                        text: '<i class="fas fa-file-pdf"></i> Export PDF',
+                        exportOptions: {
+                            columns: ':visible'
+                        }
+                    }],
+
                     data: driverData,
                     columns: [{
                             title: "License ID"
@@ -444,17 +535,33 @@
                             title: "Driver Name"
                         },
                         {
-                            title: "Violation"
+                            title: "Violation Type"
                         },
                         {
-                            title: "Total Amount"
+                            title: "Vehicle No"
                         },
                         {
-                            title: "Date"
+                            title: "Place"
+                        },
+                        {
+                            title: "Penalty Applied"
+                        },
+                        {
+                            title: "Vehicle Type"
+                        },
+                        {
+                            title: "Issued Date"
+                        },
+                        {
+                            title: "Status"
                         }
                     ],
+
                     pageLength: 5,
                     lengthChange: false,
+                    order: [
+                        [7, 'desc']
+                    ],
                     initComplete: function() {
                         // ✅ Clear old search bar first to prevent duplicates
                         $("#customSearch").empty();
@@ -485,11 +592,10 @@
 
                 // ENFORCER VIOLATIONS FILED (against this enforcer)
                 if (res.violations && res.violations.length > 0) {
-                    // Track if there are pending violations
                     let hasPending = false;
 
                     res.violations.forEach(v => {
-                        if (v.status === 'pending') { // <-- only display pending violations
+                        if (v.status === 'pending') {
                             hasPending = true;
 
                             let statusBadge = '<span class="badge badge-danger">Pending</span>';
@@ -497,16 +603,25 @@
                                 <i class="fas fa-check"></i> Settle
                              </button>`;
 
+                            const formattedDateIssued = v.date_issued ?
+                                new Date(v.date_issued).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric'
+                                }) :
+                                'N/A';
+
                             enforcerTbody.append(`
                 <tr>
                     <td>${v.violation_type}</td>
                     <td>${v.details ?? 'N/A'}</td>
                     <td>₱${parseFloat(v.penalty_amount).toFixed(2)}</td>
-                    <td>${new Date(v.date_issued).toLocaleString()}</td>
+                    <td>${formattedDateIssued}</td>
                     <td>${statusBadge}</td>
                     <td>${v.remarks ?? 'N/A'}</td>
                     <td>${actionBtn}</td>
                 </tr>
+
             `);
                         }
                     });
@@ -592,6 +707,12 @@
             `);
 
                     Swal.fire('Success', 'Violation settled successfully.', 'success');
+
+                    // Destroy previous DataTable
+                    if ($.fn.DataTable.isDataTable('#complaintHistoryTable')) {
+                        $('#complaintHistoryTable').DataTable().clear().destroy();
+                    }
+
 
                     // 3️⃣ Optional: Unlock enforcer if no pending violations
                     if (res.unlocked) {

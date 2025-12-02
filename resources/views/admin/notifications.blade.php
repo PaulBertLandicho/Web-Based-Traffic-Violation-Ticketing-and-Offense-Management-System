@@ -139,6 +139,7 @@
             buttons: [{
                     extend: 'csv',
                     className: 'btn btn-primary mb-3',
+                    text: '<i class="fas fa-file-csv"></i> CSV', // CSV icon
                     exportOptions: {
                         columns: ':not(:first-child)'
                     }
@@ -146,6 +147,7 @@
                 {
                     extend: 'excel',
                     className: 'btn btn-success mb-3',
+                    text: '<i class="fas fa-file-excel"></i> Excel', // Excel icon
                     exportOptions: {
                         columns: ':not(:first-child)'
                     }
@@ -153,6 +155,7 @@
                 {
                     extend: 'pdf',
                     className: 'btn btn-danger mb-3',
+                    text: '<i class="fas fa-file-pdf"></i> PDF', // PDF icon
                     exportOptions: {
                         columns: ':not(:first-child)'
                     }
@@ -160,6 +163,7 @@
                 {
                     extend: 'print',
                     className: 'btn btn-dark mb-3',
+                    text: '<i class="fas fa-print"></i> Print', // Print icon
                     exportOptions: {
                         columns: ':not(:first-child)'
                     }
@@ -193,7 +197,19 @@
                     }
                 },
                 {
-                    data: 'created_at'
+                    data: 'created_at',
+                    render: function(data) {
+                        if (!data) return 'N/A';
+                        const dateObj = new Date(data);
+                        return dateObj.toLocaleString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                            hour12: true
+                        });
+                    }
                 },
                 {
                     data: 'id',

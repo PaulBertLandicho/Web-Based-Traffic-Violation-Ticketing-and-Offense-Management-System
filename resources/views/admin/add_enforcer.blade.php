@@ -137,7 +137,8 @@
                             </div>
                             <div class="form-group col-md-6">
                                 <label for="registered_at">Enforcer Registered</label>
-                                <input type="date" class="form-control" id="registered_at" value="{{ now()->toDateString() }}" disabled>
+                                <input type="text" class="form-control" id="registered_at"
+                                    value="{{ \Carbon\Carbon::now()->format('M. d, Y') }}" disabled>
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary" name="add-tpo-submit">Add Traffic Enforcer</button>

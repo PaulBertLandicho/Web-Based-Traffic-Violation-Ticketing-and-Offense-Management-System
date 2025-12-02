@@ -141,21 +141,23 @@ class DriverController extends Controller
 
     public function getDriverDetails(Request $request)
     {
+        // Fetch driver info only
         $driver = DB::table('driver_list')
-            ->leftJoin('issued_fine_tickets', 'driver_list.license_id', '=', 'issued_fine_tickets.license_id')
-            ->leftJoin('vehicles', 'issued_fine_tickets.vehicle_no', '=', 'vehicles.vehicle_no')
-            ->where('driver_list.license_id', $request->did)
-            ->select('driver_list.*', 'vehicles.vehicle_type')
+            ->where('license_id', $request->did)
             ->first();
 
-        $violations = DB::table('issued_fine_tickets')
-            ->leftJoin('traffic_enforcers', 'issued_fine_tickets.enforcer_id', '=', 'traffic_enforcers.enforcer_id')
-            ->where('issued_fine_tickets.license_id', $request->did)
+
+        // Fetch violations with enforcer name and vehicle type
+        $violations = DB::table('issued_fine_tickets as t')
+            ->leftJoin('traffic_enforcers as e', 't.enforcer_id', '=', 'e.enforcer_id')
+            ->leftJoin('vehicles as v', 't.vehicle_no', '=', 'v.vehicle_no')
+            ->where('t.license_id', $request->did)
             ->select(
-                'issued_fine_tickets.*',
-                'traffic_enforcers.enforcer_name'
+                't.*',
+                'e.enforcer_name',
+                'v.vehicle_type'
             )
-            ->orderByDesc('issued_fine_tickets.issued_date')
+            ->orderByDesc('t.issued_date')
             ->get();
 
         return response()->json([

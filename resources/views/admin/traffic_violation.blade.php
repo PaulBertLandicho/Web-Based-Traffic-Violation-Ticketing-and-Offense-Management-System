@@ -113,6 +113,7 @@
                                 <th>Violation ID</th>
                                 <th>Violation Type</th>
                                 <th>Violation Amount</th>
+                                <th>Created At</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -126,6 +127,7 @@
                                 <td>{{ $violation->violation_id }}</td>
                                 <td>{{ $violation->violation_type }}</td>
                                 <td>₱{{ $violation->violation_amount }}</td>
+                                <td>{{ \Carbon\Carbon::parse($violation->created_at)->format('M. d, Y - h:i A') }}</td>
                             </tr>
                             @endforeach
                             @endisset
@@ -163,6 +165,7 @@
             buttons: [{
                     extend: 'csv',
                     className: 'btn btn-primary mb-3',
+                    text: '<i class="fas fa-file-csv"></i> CSV', // CSV icon
                     exportOptions: {
                         columns: ':not(:first-child)'
                     }
@@ -170,6 +173,7 @@
                 {
                     extend: 'excel',
                     className: 'btn btn-success mb-3',
+                    text: '<i class="fas fa-file-excel"></i> Excel', // Excel icon
                     exportOptions: {
                         columns: ':not(:first-child)'
                     }
@@ -177,6 +181,7 @@
                 {
                     extend: 'pdf',
                     className: 'btn btn-danger mb-3',
+                    text: '<i class="fas fa-file-pdf"></i> PDF', // PDF icon
                     exportOptions: {
                         columns: ':not(:first-child)'
                     }
@@ -184,6 +189,7 @@
                 {
                     extend: 'print',
                     className: 'btn btn-dark mb-3',
+                    text: '<i class="fas fa-print"></i> Print', // Print icon
                     exportOptions: {
                         columns: ':not(:first-child)'
                     }

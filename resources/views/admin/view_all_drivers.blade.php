@@ -102,8 +102,8 @@
                                 <td>{{ $driver->license_id }}</td>
                                 <td>{{ $driver->license_type }}</td>
                                 <td>{{ $driver->driver_name }}</td>
-                                <td>{{ $driver->license_issue_date }}</td>
-                                <td>{{ $driver->license_expire_date }}</td>
+                                <td>{{ \Carbon\Carbon::parse($driver->license_issue_date)->format('M. d, Y') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($driver->license_expire_date)->format('M. d, Y') }}</td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -140,13 +140,15 @@
             buttons: [{
                     extend: 'csv',
                     className: 'btn btn-primary mb-3',
+                    text: '<i class="fas fa-file-csv"></i> CSV', // CSV icon
                     exportOptions: {
-                        columns: ':not(:first-child)' // skip "Action" column
+                        columns: ':not(:first-child)'
                     }
                 },
                 {
                     extend: 'excel',
                     className: 'btn btn-success mb-3',
+                    text: '<i class="fas fa-file-excel"></i> Excel', // Excel icon
                     exportOptions: {
                         columns: ':not(:first-child)'
                     }
@@ -154,6 +156,7 @@
                 {
                     extend: 'pdf',
                     className: 'btn btn-danger mb-3',
+                    text: '<i class="fas fa-file-pdf"></i> PDF', // PDF icon
                     exportOptions: {
                         columns: ':not(:first-child)'
                     }
@@ -161,6 +164,7 @@
                 {
                     extend: 'print',
                     className: 'btn btn-dark mb-3',
+                    text: '<i class="fas fa-print"></i> Print', // Print icon
                     exportOptions: {
                         columns: ':not(:first-child)'
                     }
@@ -207,7 +211,6 @@
         });
 
 
-        // ✅ View Driver (works after search/filter)
         $(document).on('click', '.view_data', function() {
             const id = $(this).data('id');
             $.post('/admin/driver/details', {
@@ -221,34 +224,48 @@
                 if (violations.length) {
 
                     violationsHTML +=
-                        '<div class="table-responsive mt-3">' +
-                        '<table class="table table-hover align-middle rounded">' +
+                        '<div class="table-responsive" style="overflow-x:auto;">' +
+                        '<table id="driverViolationsTable" class="table table-hover align-middle rounded">' +
                         '<thead class="table-light">' +
                         '<tr>' +
                         '<th>Traffic Enforcer</th>' +
-                        '<th>Issued Date & Time</th>' +
+                        '<th>Issued Date</th>' +
                         '<th>Violation Type</th>' +
                         '<th>Amount</th>' +
+                        '<th>Vehicle No</th>' +
+                        '<th>Vehicle Type</th>' +
+                        '<th>Place</th>' +
+                        '<th>Penalty Applied</th>' +
+                        '<th>Offense #</th>' +
                         '<th>Status</th>' +
+
                         '</tr>' +
                         '</thead>' +
                         '<tbody>';
 
+
                     violations.forEach(v => {
 
-                        // Format the due date
+
+                        // Format issued date
+                        const issued = new Date(v.issued_date + ' ' + (v.issued_time || '00:00:00'));
+                        const formattedIssued = issued.toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                        }) + (v.issued_time ? ' ' + v.issued_time : '');
+
+                        // Format due/expire date
                         const due = new Date(v.expire_date);
                         const now = new Date();
-
                         const formattedDueDate = due.toLocaleDateString('en-US', {
                             year: 'numeric',
-                            month: 'long',
+                            month: 'short',
                             day: 'numeric'
                         });
 
                         // Determine Status
                         let statusBadge = '';
-
                         if (v.status === 'paid') {
                             statusBadge = '<span class="badge bg-success">Paid</span>';
                         } else if (due < now) {
@@ -258,20 +275,24 @@
                         }
 
                         // Status + Due Date combined
-                        let statusWithDue =
-                            statusBadge +
-                            '<br><small class="text-muted">Due: ' + formattedDueDate + '</small>';
+                        let statusWithDue = statusBadge + '<br><small class="text-muted">Due: ' + formattedDueDate + '</small>';
 
-                        // Build Row
+                        // Build Row with extra details
                         violationsHTML +=
                             '<tr>' +
                             '<td>[' + (v.enforcer_id || 'N/A') + '] ' + (v.enforcer_name || 'N/A') + '</td>' +
-                            '<td>' + v.issued_date + ' ' + v.issued_time + '</td>' +
+                            '<td>' + formattedIssued + '</td>' +
                             '<td>' + v.violation_type + '</td>' +
-                            '<td>₱' + v.total_amount + '</td>' +
+                            '<td>₱' + parseFloat(v.total_amount).toFixed(2) + '</td>' +
+                            '<td>' + (v.vehicle_no || 'N/A') + '</td>' +
+                            '<td>' + (v.vehicle_type || 'N/A') + '</td>' +
+                            '<td>' + (v.place || 'N/A') + '</td>' +
+                            '<td>' + (v.penalty_applied ? 'Yes' : 'No') + '</td>' +
+                            '<td>' + (v.offense_number || '1') + '</td>' +
                             '<td>' + statusWithDue + '</td>' +
                             '</tr>';
                     });
+
 
                     violationsHTML +=
                         '</tbody>' +
@@ -292,23 +313,32 @@
                     baseAsset + driver.driver_signature :
                     "{{ asset('assets/img/no-signature.png') }}";
 
+                // Format Date of Birth
+                let formattedDOB = driver.date_of_birth ?
+                    new Date(driver.date_of_birth).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short', // "Nov"
+                        day: 'numeric'
+                    }) :
+                    'N/A';
+
                 $('#driver_detail').html(`
-                <div class="card border-0 shadow-sm mb-4 rounded-4">
-                    <div class="card-body">
-                        <h5 class="fw-semibold text-info mb-3"><i class="fas fa-user me-2"></i> Personal Information</h5>
-                        <div class="row g-3">
-                            <div class="col-md-6"><p class="mb-1 text-muted fw-bold">Name</p><p>${driver.driver_name}</p></div>
-                            <div class="col-md-6"><p class="mb-1 text-muted fw-bold">License ID</p><p>${driver.license_id}</p></div>
-                            <div class="col-md-6"><p class="mb-1 text-muted fw-bold">Address</p><p>${driver.home_address || 'N/A'}</p></div>
-                            <div class="col-md-6"><p class="mb-1 text-muted fw-bold">Date of Birth</p><p>${driver.date_of_birth || 'N/A'}</p></div>
-                            <div class="col-md-6"><p class="mb-1 text-muted fw-bold">License Type</p><p>${driver.license_type || 'N/A'}</p></div>
-                            <div class="col-md-6"><p class="mb-1 text-muted fw-bold">Contact No</p><p>${driver.contact_no || 'N/A'}</p></div>
-                            <div class="col-md-12 text-center mt-4">
-                                <p class="mb-1 text-muted fw-bold">Driver Signature</p>
-                                <img src="${signaturePath}" alt="Driver Signature" 
-                                     class="img-fluid border rounded p-2 bg-light shadow-sm"
-                                     style="max-height: 120px; object-fit: contain;">
-                            </div>
+<div class="card border-0 shadow-sm mb-4 rounded-4">
+    <div class="card-body">
+        <h5 class="fw-semibold text-info mb-3"><i class="fas fa-user me-2"></i> Personal Information</h5>
+        <div class="row g-3">
+            <div class="col-md-6"><p class="mb-1 text-muted fw-bold">Name</p><p>${driver.driver_name}</p></div>
+            <div class="col-md-6"><p class="mb-1 text-muted fw-bold">License ID</p><p>${driver.license_id}</p></div>
+            <div class="col-md-6"><p class="mb-1 text-muted fw-bold">Address</p><p>${driver.home_address || 'N/A'}</p></div>
+            <div class="col-md-6"><p class="mb-1 text-muted fw-bold">Date of Birth</p><p>${formattedDOB}</p></div>
+            <div class="col-md-6"><p class="mb-1 text-muted fw-bold">License Type</p><p>${driver.license_type || 'N/A'}</p></div>
+            <div class="col-md-6"><p class="mb-1 text-muted fw-bold">Contact No</p><p>${driver.contact_no || 'N/A'}</p></div>
+            <div class="col-md-12 text-center mt-4">
+                <p class="mb-1 text-muted fw-bold">Driver Signature</p>
+                <img src="${signaturePath}" alt="Driver Signature" 
+                     class="img-fluid border rounded p-2 bg-light shadow-sm"
+                     style="max-height: 120px; object-fit: contain;">
+            </div>
                         </div>
                     </div>
                 </div>
@@ -320,6 +350,27 @@
                     </div>
                 </div>
             `);
+                // Destroy existing DataTable if exists
+                if ($.fn.DataTable.isDataTable('#driverViolationsTable')) {
+                    $('#driverViolationsTable').DataTable().destroy();
+                }
+
+                // Initialize DataTable with PDF button
+                $('#driverViolationsTable').DataTable({
+                    dom: 'Bfrtip',
+                    buttons: [{
+                        extend: 'pdfHtml5',
+                        className: 'btn btn-danger mb-2',
+                        title: 'Driver History Violations',
+                        text: '<i class="fas fa-file-pdf"></i> Export PDF',
+                        exportOptions: {
+                            columns: ':visible' // export all visible columns
+                        },
+                        orientation: 'landscape',
+                        pageSize: 'A4'
+                    }],
+                    pageLength: 5,
+                });
 
                 $('#dataModal').modal('show');
             });
