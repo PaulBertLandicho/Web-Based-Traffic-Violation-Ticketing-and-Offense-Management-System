@@ -4,6 +4,7 @@
 @section('content')
 @include('layouts.components.admin.topNav')
 @include('layouts.components.admin.leftsideNavbar')
+@include('layouts.components.footer')
 
 <!-- Dashboard main content start here -->
 <div class="dashwrapper animated fadeIn">

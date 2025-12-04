@@ -267,15 +267,15 @@
                         // Determine Status
                         let statusBadge = '';
                         if (v.status === 'paid') {
-                            statusBadge = '<span class="badge bg-success">Paid</span>';
+                            statusBadge = '<span class="badge bg-success">Paid </span>';
                         } else if (due < now) {
-                            statusBadge = '<span class="badge bg-danger">Overdue</span>';
+                            statusBadge = '<span class="badge bg-danger">Overdue </span>';
                         } else {
-                            statusBadge = '<span class="badge bg-warning text-dark">Pending</span>';
+                            statusBadge = '<span class="badge bg-warning text-dark">Pending </span>';
                         }
 
                         // Status + Due Date combined
-                        let statusWithDue = statusBadge + '<br><small class="text-muted">Due: ' + formattedDueDate + '</small>';
+                        let statusWithDue = statusBadge + '<br><small class="text-muted">- Due: ' + formattedDueDate + '</small>';
 
                         // Build Row with extra details
                         violationsHTML +=

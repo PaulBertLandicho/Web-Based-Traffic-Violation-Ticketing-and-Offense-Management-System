@@ -14,16 +14,17 @@
                         <h1 class="card-icon"><i class="fas fa-user-shield"></i></h1>
                         <h5 class="card-title text-center">Traffic Administrative Log In</h5>
                         @if (session('error'))
-                        <div class="alert alert-danger">
+                        <div class="alert alert-danger" id="success-alert">
                             <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
                         </div>
                         @endif
 
                         @if (session('success'))
-                        <div class="alert alert-success">
+                        <div class="alert alert-success" id="success-alert">
                             <i class="fas fa-check-circle"></i> {{ session('success') }}
                         </div>
                         @endif
+
 
                         <form class="form-signin" action="{{ route('admin.login.submit') }}" method="POST">
                             @csrf

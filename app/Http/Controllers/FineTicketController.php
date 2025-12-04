@@ -294,7 +294,7 @@ class FineTicketController extends Controller
                 'traffic_enforcers.enforcer_name',
                 'traffic_enforcers.enforcer_signature'
             )
-            ->where('issued_fine_tickets.status', 'pending')
+            ->orderBy('issued_fine_tickets.created_at', 'desc') //  newest tickets first
             ->get();
 
         // Ensure default signature if null
@@ -410,6 +410,7 @@ class FineTicketController extends Controller
             ->join('driver_list', 'issued_fine_tickets.license_id', '=', 'driver_list.license_id')
             ->select('issued_fine_tickets.*', 'driver_list.driver_name')
             ->where('issued_fine_tickets.status', 'paid')
+            ->orderBy('issued_fine_tickets.updated_at', 'desc') //  newest paid tickets first
             ->get();
 
         return view('admin.paid_fine_tickets', compact('paidTickets'));

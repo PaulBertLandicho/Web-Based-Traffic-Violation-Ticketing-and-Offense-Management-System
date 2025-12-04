@@ -16,7 +16,9 @@ class SmsLogController extends Controller
             return redirect('/admin-login')->with('error', 'Please login first.');
         }
 
-        $smsLogs = DB::table('sms_logs')->orderByDesc('created_at')->get();
+        $smsLogs = DB::table('sms_logs')
+            ->orderBy('created_at', 'desc') // newest SMS activity on top
+            ->get();
 
         return view('admin.sms_activity_log', compact('smsLogs'));
     }

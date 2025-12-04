@@ -76,9 +76,9 @@
                     <button type="button" class="btn btn-danger me-2" id="pdfTicketBtn">
                         <i class="bi bi-file-earmark-pdf me-1"></i> Export PDF
                     </button>
-                    <button type="button" class="btn btn-outline-success" onclick="printFineDetails()">
+                    <!-- <button type="button" class="btn btn-outline-success" onclick="printFineDetails()">
                         <i class="bi bi-printer me-1"></i> Print
-                    </button>
+                    </button> -->
                 </div>
             </div>
         </div>
@@ -212,7 +212,6 @@
             // Header for print
             var headerContent = `
         <div style="text-align: center; margin-bottom: 20px;">
-            <img src="${logoUrl}" style="width: 70px; height: 70px; margin-bottom: 5px;">
             <h2 style="margin-top: 5px;">Fine Ticket Details</h2>
         </div>
     `;

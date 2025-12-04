@@ -107,9 +107,9 @@
                     <button type="button" class="btn btn-danger me-2" id="pdfJudicialFormBtn">
                         <i class="bi bi-file-earmark-pdf me-1"></i> Export PDF
                     </button>
-                    <button type="button" class="btn btn-outline-success" id="printJudicialForm">
+                    <!-- <button type="button" class="btn btn-outline-success" id="printJudicialForm">
                         <i class="bi bi-printer me-1"></i> Print
-                    </button>
+                    </button> -->
                 </div>
             </div>
 
@@ -180,9 +180,9 @@
                     <button type="button" class="btn btn-danger me-2" id="pdfTicketBtn">
                         <i class="bi bi-file-earmark-pdf me-1"></i> Export PDF
                     </button>
-                    <button type="button" class="btn btn-outline-success" onclick="printFineDetails()">
+                    <!-- <button type="button" class="btn btn-outline-success" onclick="printFineDetails()">
                         <i class="bi bi-printer me-1"></i> Print
-                    </button>
+                    </button> -->
                 </div>
             </div>
         </div>
