@@ -20,7 +20,7 @@
             <form action="{{ route('enforcer.verify-otp') }}" method="POST" id="otpForm">
                 @csrf
 
-                <div class="d-flex justify-content-between mb-4">
+                <div class="d-flex justify-content-between mb-4" style="margin-left: -10px;">
                     <input type="text" maxlength="1" class="otp-input form-control text-center" />
                     <input type="text" maxlength="1" class="otp-input form-control text-center" />
                     <input type="text" maxlength="1" class="otp-input form-control text-center" />
